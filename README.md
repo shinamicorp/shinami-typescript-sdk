@@ -125,7 +125,7 @@ const txBytes = await txb.build({ provider: sui });
 // Sign tx with in-app wallet.
 const { signature } = await signer.signTransactionBlock(txBytes);
 
-// Executed the signed tx.
+// Execute the signed tx.
 const txResp = await sui.executeTransactionBlock({
   transactionBlock: txBytes,
   signature,
