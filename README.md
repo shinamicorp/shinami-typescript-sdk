@@ -179,3 +179,64 @@ const txResp = await signer.executeGaslessTransactionBlock(
   5_000_000
 );
 ```
+
+## Development
+
+### Build
+
+```console
+$ npm run build
+```
+
+### Lint
+
+```console
+$ npm run lint
+```
+
+### Unit test
+
+```console
+$ npm run test
+```
+
+### Integration test
+
+The integration tests make use of the [Move example](move_example/) package, which has been deployed to [Sui Testnet](https://suiexplorer.com/object/0xd8f042479dcb0028d868051bd53f0d3a41c600db7b14241674db1c2e60124975?network=testnet).
+Obtain `<your_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
+The key must be authorized for all of these services, targeting _Sui Testnet_:
+
+- Node service
+- Gas station - you must also have some available balance in your gas fund.
+- Wallet service
+
+```shell
+export NODE_ACCESS_KEY=<your_super_access_key>
+export GAS_ACCESS_KEY=<your_super_access_key>
+export WALLET_ACCESS_KEY=<your_super_access_key>
+
+npm run integration
+```
+
+The integration tests by default talk to Shinami's production endpoints.
+You can also make it talk to alternative endpoints by modifying [integration.env.ts](test/integration.env.ts).
+
+### Code coverage
+
+Similar to [integration test](#integration-test):
+
+```shell
+export NODE_ACCESS_KEY=<your_super_access_key>
+export GAS_ACCESS_KEY=<your_super_access_key>
+export WALLET_ACCESS_KEY=<your_super_access_key>
+
+npm run coverage
+```
+
+The HTML coverage report is available at `coverage/lcov-report/index.html`.
+
+### Clean
+
+```console
+$ npm run clean
+```
