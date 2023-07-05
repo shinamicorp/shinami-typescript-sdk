@@ -13,7 +13,7 @@ const key = createKeyClient();
 const wal = createWalletClient();
 const sui = createSuiClient();
 
-describe.skip("KeyClient", () => {
+describe("KeyClient", () => {
   it("discovers OpenRPC spec", async () => {
     expect(await key.rpcDiscover()).toMatchObject({
       openrpc: "1.2.6",
@@ -25,7 +25,7 @@ describe.skip("KeyClient", () => {
   });
 });
 
-describe.skip("WalletClient", () => {
+describe("WalletClient", () => {
   it("discovers OpenRPC spec", async () => {
     expect(await wal.rpcDiscover()).toMatchObject({
       openrpc: "1.2.6",
