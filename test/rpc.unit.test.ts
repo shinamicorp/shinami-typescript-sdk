@@ -1,7 +1,7 @@
 import { afterAll, afterEach, describe, expect, it, jest } from "@jest/globals";
 import { Client, JSONRPCError } from "@open-rpc/client-js";
 import { StructError, number, string } from "superstruct";
-import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../src/rpc";
+import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../src/rpc.js";
 
 describe("ShinamiRpcClient", () => {
   const mockRequest = jest

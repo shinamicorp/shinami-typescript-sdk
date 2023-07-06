@@ -6,7 +6,7 @@ import {
 } from "@mysten/sui.js";
 import { JSONRPCError } from "@open-rpc/client-js";
 import { Infer, object, string } from "superstruct";
-import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "./rpc";
+import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "./rpc.js";
 
 const KEY_RPC_URL = "https://api.shinami.com/key/v1";
 const WALLET_RPC_URL = "https://api.shinami.com/wallet/v1";

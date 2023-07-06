@@ -1,6 +1,6 @@
 import { JsonRpcProvider, TransactionBlock, toB64 } from "@mysten/sui.js";
 import { Infer, enums, number, object, optional, string } from "superstruct";
-import { ShinamiRpcClient } from "./rpc";
+import { ShinamiRpcClient } from "./rpc.js";
 
 const GAS_STATION_RPC_URL = "https://api.shinami.com/gas/v1";
 

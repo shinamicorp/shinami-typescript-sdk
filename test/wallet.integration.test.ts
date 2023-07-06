@@ -1,13 +1,16 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { IntentScope, verifyMessage } from "@mysten/sui.js";
 import { v4 as uuidv4 } from "uuid";
-import { ShinamiWalletSigner, buildGaslessTransactionBytes } from "../src";
+import {
+  ShinamiWalletSigner,
+  buildGaslessTransactionBytes,
+} from "../src/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
   createKeyClient,
   createSuiClient,
   createWalletClient,
-} from "./integration.env";
+} from "./integration.env.js";
 
 const key = createKeyClient();
 const wal = createWalletClient();
@@ -97,5 +100,5 @@ describe("ShinamiWallet", () => {
         },
       ],
     });
-  });
+  }, 10_000);
 });

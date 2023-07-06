@@ -3,7 +3,7 @@ import {
   KeyClient,
   WalletClient,
   createSuiProvider,
-} from "../src";
+} from "../src/index.js";
 
 // This is published to Testnet.
 export const EXAMPLE_PACKAGE_ID =

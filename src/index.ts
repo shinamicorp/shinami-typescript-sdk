@@ -1,3 +1,3 @@
-export * from "./gas";
-export * from "./sui";
-export * from "./wallet";
+export * from "./gas.js";
+export * from "./sui.js";
+export * from "./wallet.js";

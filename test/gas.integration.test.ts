@@ -1,11 +1,11 @@
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { Ed25519Keypair, RawSigner, fromB64 } from "@mysten/sui.js";
-import { buildGaslessTransactionBytes } from "../src";
+import { buildGaslessTransactionBytes } from "../src/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
   createGasClient,
   createSuiClient,
-} from "./integration.env";
+} from "./integration.env.js";
 
 const sui = createSuiClient();
 const gas = createGasClient();
@@ -79,7 +79,7 @@ describe("GasStationClient", () => {
         },
       ],
     });
-  });
+  }, 10_000);
 
   it("fails to get sponsorship for invalid transaction", async () => {
     await expect(

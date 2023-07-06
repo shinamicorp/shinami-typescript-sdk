@@ -4,6 +4,9 @@
     "./src"
   ],
   "compilerOptions": {
+    "target": "ES2015",
+    "module": "ES2015",
+    "moduleResolution": "Node",
     "outDir": "./dist",
     "declaration": true
   }

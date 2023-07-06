@@ -1,5 +1,5 @@
 import { expect, test } from "@jest/globals";
-import { createSuiClient } from "./integration.env";
+import { createSuiClient } from "./integration.env.js";
 
 const sui = createSuiClient();
 
