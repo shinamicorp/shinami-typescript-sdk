@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Shinami Corp.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { afterAll, afterEach, describe, expect, it, jest } from "@jest/globals";
 import { Client, JSONRPCError } from "@open-rpc/client-js";
 import { StructError, number, string } from "superstruct";

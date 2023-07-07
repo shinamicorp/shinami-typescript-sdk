@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Shinami Corp.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Connection, JsonRpcProvider } from "@mysten/sui.js";
 
 const NODE_RPC_URL = "https://api.shinami.com/node/v1";

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Shinami Corp.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "@jest/globals";
 import { IntentScope, verifyMessage } from "@mysten/sui.js";
 import { v4 as uuidv4 } from "uuid";

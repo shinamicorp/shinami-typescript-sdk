@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Shinami Corp.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { expect, test } from "@jest/globals";
 import { createSuiClient } from "./integration.env.js";
 

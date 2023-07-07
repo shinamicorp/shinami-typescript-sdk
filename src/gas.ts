@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Shinami Corp.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { JsonRpcProvider, TransactionBlock, toB64 } from "@mysten/sui.js";
 import { Infer, enums, number, object, optional, string } from "superstruct";
 import { ShinamiRpcClient } from "./rpc.js";

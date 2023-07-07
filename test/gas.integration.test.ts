@@ -1,3 +1,8 @@
+/**
+ * Copyright 2023 Shinami Corp.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { Ed25519Keypair, RawSigner, fromB64 } from "@mysten/sui.js";
 import { buildGaslessTransactionBytes } from "../src/index.js";
