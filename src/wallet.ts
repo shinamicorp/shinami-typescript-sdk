@@ -163,13 +163,13 @@ export class WalletClient extends ShinamiRpcClient {
  */
 export class ShinamiWalletSigner {
   readonly walletId: string;
-  readonly secret: string;
+  private readonly secret: string;
 
   readonly keyClient: KeyClient;
   readonly walletClient: WalletClient;
 
-  address?: string;
-  session?: string;
+  private address?: string;
+  private session?: string;
 
   constructor(
     walletId: string,
@@ -216,29 +216,44 @@ export class ShinamiWalletSigner {
   }
 
   /**
+   * Retrieves the wallet address.
+   * @param autoCreate Whether to automatically create the wallet if it doesn't exist yet.
+   *    If `false`, and the wallet doesn't exist, an error will be thrown.
    * @returns Wallet address.
    */
-  async getAddress(): Promise<string> {
-    if (!this.address)
-      this.address = await this.walletClient.getWallet(this.walletId);
+  async getAddress(autoCreate = false): Promise<string> {
+    if (!this.address) this.address = await this._getAddress(autoCreate);
     return this.address;
+  }
+
+  private async _getAddress(autoCreate: boolean): Promise<string> {
+    try {
+      return await this.walletClient.getWallet(this.walletId);
+    } catch (e: unknown) {
+      if (autoCreate && e instanceof JSONRPCError && e.code === -32602) {
+        const address = await this.tryCreate();
+        if (address) return address;
+        return await this.walletClient.getWallet(this.walletId);
+      }
+      throw e;
+    }
   }
 
   /**
    * Tries to create this wallet if not exists.
-   * @returns `true` if the wallet was just created. `false` if pre-existing.
+   * @returns The wallet address if it was just created. `undefined` if pre-existing, in which case
+   *    you can call `getAddress` to retrive the said info.
    */
-  async tryCreate(): Promise<boolean> {
+  async tryCreate(): Promise<string | undefined> {
     try {
-      await this.withSession((session) =>
+      return await this.withSession((session) =>
         this.walletClient.createWallet(this.walletId, session)
       );
-      return true;
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602) {
         const details = errorDetails(e);
         if (details && details.details.includes("Wallet ID already exists"))
-          return false;
+          return;
       }
       throw e;
     }
@@ -252,9 +267,9 @@ export class ShinamiWalletSigner {
   signTransactionBlock(
     txBytes: string | Uint8Array
   ): Promise<SignTransactionResult> {
-    const txBytes_ = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
+    const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
     return this.withSession((session) =>
-      this.walletClient.signTransactionBlock(this.walletId, session, txBytes_)
+      this.walletClient.signTransactionBlock(this.walletId, session, _txBytes)
     );
   }
 
@@ -264,9 +279,9 @@ export class ShinamiWalletSigner {
    * @returns Base64 encoded serialized signature.
    */
   signPersonalMessage(message: string | Uint8Array): Promise<string> {
-    const message_ = message instanceof Uint8Array ? toB64(message) : message;
+    const _message = message instanceof Uint8Array ? toB64(message) : message;
     return this.withSession((session) =>
-      this.walletClient.signPersonalMessage(this.walletId, session, message_)
+      this.walletClient.signPersonalMessage(this.walletId, session, _message)
     );
   }
 
@@ -291,12 +306,12 @@ export class ShinamiWalletSigner {
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType
   ): Promise<SuiTransactionBlockResponse> {
-    const txBytes_ = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
+    const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
     return this.withSession((session) =>
       this.walletClient.executeGaslessTransactionBlock(
         this.walletId,
         session,
-        txBytes_,
+        _txBytes,
         gasBudget,
         options,
         requestType

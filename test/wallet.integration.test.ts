@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 import { IntentScope, verifyMessage } from "@mysten/sui.js";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -45,12 +45,12 @@ describe("ShinamiWallet", () => {
   const signer = new ShinamiWalletSigner(walletId, "fake secret", key, wal);
   console.log("walletId", walletId);
 
-  beforeEach(async () => {
-    await signer.tryCreate();
+  it("creates and retrieves address", async () => {
+    expect(await signer.getAddress(true)).toMatch(/0x[0-9a-f]+/);
   });
 
-  it("retrieves address", async () => {
-    expect(await signer.getAddress()).toMatch(/0x[0-9a-f]+/);
+  it("is safe to call tryCreate again", async () => {
+    await signer.tryCreate();
   });
 
   it("signs a transaction block", async () => {

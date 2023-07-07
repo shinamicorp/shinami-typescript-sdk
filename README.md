@@ -108,16 +108,13 @@ const wal = new WalletClient(WALLET_ACCESS_KEY);
 // Shinami cannot recover it for you.
 const signer = new ShinamiWalletSigner("my_wallet_id", WALLET_SECRET, key, wal);
 
-// Safe to do if unsure about the wallet's existence.
-await signer.tryCreate();
-
 // Program your TransactionBlock.
 const txb = new TransactionBlock();
 txb.moveCall({
   target: `${EXAMPLE_PACKAGE_ID}::math::add`,
   arguments: [txb.pure(1), txb.pure(2)],
 });
-txb.setSender(await signer.getAddress());
+txb.setSender(await signer.getAddress(true /* autoCreate */));
 txb.setGasBudget(5_000_000);
 // Your in-app wallet MUST have sufficient gas for this to succeed.
 const txBytes = await txb.build({ provider: sui });
