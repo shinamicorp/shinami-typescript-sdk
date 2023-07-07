@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
   build_sdk:
@@ -35,4 +38,4 @@ jobs:
         with:
           go-version: stable
       - run: go install github.com/google/addlicense@v1.1.1
-      - run: addlicense -c "Shinami Corp." -s=only -ignore "coverage/**" -check .
+      - run: addlicense -c "Shinami Corp." -s=only -check .
