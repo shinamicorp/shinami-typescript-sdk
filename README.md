@@ -1,5 +1,7 @@
 # Shinami TypeScript SDK
 
+[![Continuous Integration](https://github.com/shinamicorp/shinami-typescript-sdk/actions/workflows/ci.yaml/badge.svg)](https://github.com/shinamicorp/shinami-typescript-sdk/actions/workflows/ci.yaml)
+
 TypeScript SDK for [Shinami](https://www.shinami.com/) services for the [Sui](https://sui.io/) blockchain.
 
 - [Node service](#node-service)
