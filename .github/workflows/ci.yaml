@@ -1,0 +1,41 @@
+# Copyright 2023 Shinami Corp.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build_sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run coverage
+        env:
+          NODE_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+          GAS_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+          WALLET_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+
+      # TODO - coverage report
+
+  check_copyright_header:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - run: go install github.com/google/addlicense@v1.1.1
+      - run: addlicense -c "Shinami Corp." -s=only -check .
