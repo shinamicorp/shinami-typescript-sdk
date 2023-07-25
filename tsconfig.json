@@ -8,7 +8,7 @@
     "module": "ES2015",
     "moduleResolution": "Node",
     "outDir": "./dist",
-    "declaration": true,
+    "declaration": true
   },
   "ts-node": {
     "transpileOnly": true,
