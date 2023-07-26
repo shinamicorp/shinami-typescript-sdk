@@ -9,5 +9,10 @@
     "moduleResolution": "Node",
     "outDir": "./dist",
     "declaration": true
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+    "esm": true
   }
 }
