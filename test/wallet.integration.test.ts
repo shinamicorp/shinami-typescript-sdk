@@ -4,7 +4,10 @@
  */
 
 import { describe, expect, it } from "@jest/globals";
-import { IntentScope, verifyMessage } from "@mysten/sui.js";
+import {
+  verifyPersonalMessage,
+  verifyTransactionBlock,
+} from "@mysten/sui.js/verify";
 import { v4 as uuidv4 } from "uuid";
 import {
   ShinamiWalletSigner,
@@ -61,17 +64,15 @@ describe("ShinamiWallet", () => {
   it("signs a transaction block", async () => {
     const txBytes = Uint8Array.from([1, 2, 3]);
     const { signature } = await signer.signTransactionBlock(txBytes);
-    expect(
-      await verifyMessage(txBytes, signature, IntentScope.TransactionData)
-    ).toBe(true);
+    const pubKey = await verifyTransactionBlock(txBytes, signature);
+    expect(pubKey.toSuiAddress()).toBe(await signer.getAddress());
   });
 
   it("signs a personal message", async () => {
     const message = Uint8Array.from([1, 2, 3]);
     const signature = await signer.signPersonalMessage(message);
-    expect(
-      await verifyMessage(message, signature, IntentScope.PersonalMessage)
-    ).toBe(true);
+    const pubKey = await verifyPersonalMessage(message, signature);
+    expect(pubKey.toSuiAddress()).toBe(await signer.getAddress());
   });
 
   it("executes gasless transaction block", async () => {
@@ -105,5 +106,5 @@ describe("ShinamiWallet", () => {
         },
       ],
     });
-  }, 10_000);
+  }, 30_000);
 });

@@ -7,8 +7,8 @@ import {
   ExecuteTransactionRequestType,
   SuiTransactionBlockResponse,
   SuiTransactionBlockResponseOptions,
-  toB64,
-} from "@mysten/sui.js";
+} from "@mysten/sui.js/client";
+import { toB64 } from "@mysten/sui.js/utils";
 import { JSONRPCError } from "@open-rpc/client-js";
 import { Infer, object, string } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "./rpc.js";
