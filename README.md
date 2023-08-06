@@ -21,13 +21,13 @@ $ npm install shinami
 To create a Sui RPC client:
 
 ```ts
-import { createSuiProvider } from "shinami";
+import { createSuiClient } from "shinami";
 
 // Obtain NODE_ACCESS_KEY from your Shinami web portal.
-const sui = createSuiProvider(NODE_ACCESS_KEY);
+const sui = createSuiClient(NODE_ACCESS_KEY);
 ```
 
-The returned `sui` object is a [JsonRpcProvider](https://github.com/MystenLabs/sui/blob/60802f7b414aaa1ff5b8c0f8c5fe4fe8198ff87a/sdk/typescript/src/providers/json-rpc-provider.ts#L110) configured to use Shinami's node service.
+The returned `sui` object is a [SuiClient](https://github.com/MystenLabs/sui/blob/3dacfa02ab67469f5d5a42aa6146b34bffbf7008/sdk/typescript/src/client/client.ts#L91) configured to use Shinami's node service.
 It supports both HTTP JSON RPC requests as well as WebSocket subscriptions.
 
 **Note that `NODE_ACCESS_KEY` determines which Sui network later operations are targeting.**
@@ -40,21 +40,21 @@ This is so you don't leak your `GAS_ACCESS_KEY` to your end users, and to allow 
 To use gas station with a local signer:
 
 ```ts
-import { Ed25519Keypair, RawSigner, fromB64 } from "@mysten/sui.js";
+import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
+import { fromB64 } from "@mysten/sui.js/utils";
 import {
   GasStationClient,
   buildGaslessTransactionBytes,
-  createSuiProvider,
+  createSuiClient,
 } from "shinami";
 
 // Obtain NODE_ACCESS_KEY and GAS_ACCESS_KEY from your Shinami web portal.
 // They MUST be associated with the same network.
-const sui = createSuiProvider(NODE_ACCESS_KEY);
+const sui = createSuiClient(NODE_ACCESS_KEY);
 const gas = new GasStationClient(GAS_ACCESS_KEY);
 
 // You'll want to persist the key pair instead of always creating new ones.
 const keypair = new Ed25519Keypair();
-const signer = new RawSigner(keypair, sui);
 
 const gaslessTx = await buildGaslessTransactionBytes({
   sui,
@@ -71,14 +71,12 @@ const gaslessTx = await buildGaslessTransactionBytes({
 // Request gas sponsorship.
 const { txBytes, signature: gasSignature } = await gas.sponsorTransactionBlock(
   gaslessTx,
-  await signer.getAddress(),
+  keypair.toSuiAddress(),
   5_000_000
 );
 
 // Sign the sponsored tx.
-const { signature } = await signer.signTransactionBlock({
-  transactionBlock: fromB64(txBytes),
-});
+const { signature } = await keypair.signTransactionBlock(fromB64(txBytes));
 
 // Execute the sponsored & signed tx.
 const txResp = await sui.executeTransactionBlock({
@@ -92,16 +90,16 @@ const txResp = await sui.executeTransactionBlock({
 To use the in-app wallet as a signer for a regular (non-sponsored) transaction block:
 
 ```ts
-import { TransactionBlock } from "@mysten/sui.js";
+import { TransactionBlock } from "@mysten/sui.js/transactions";
 import {
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
-  createSuiProvider,
+  createSuiClient,
 } from "shinami";
 
 // Obtain NODE_ACCESS_KEY and WALLET_ACCESS_KEY from your Shinami web portal.
-const sui = createSuiProvider(NODE_ACCESS_KEY);
+const sui = createSuiClient(NODE_ACCESS_KEY);
 const key = new KeyClient(WALLET_ACCESS_KEY);
 const wal = new WalletClient(WALLET_ACCESS_KEY);
 
@@ -119,7 +117,7 @@ txb.moveCall({
 txb.setSender(await signer.getAddress(true /* autoCreate */));
 txb.setGasBudget(5_000_000);
 // Your in-app wallet MUST have sufficient gas for this to succeed.
-const txBytes = await txb.build({ provider: sui });
+const txBytes = await txb.build({ client: sui });
 
 // Sign tx with in-app wallet.
 const { signature } = await signer.signTransactionBlock(txBytes);
@@ -140,7 +138,7 @@ import {
   ShinamiWalletSigner,
   WalletClient,
   buildGaslessTransactionBytes,
-  createSuiProvider,
+  createSuiClient,
 } from "shinami";
 
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
@@ -148,7 +146,7 @@ import {
 // - Node service
 // - Gas station
 // - Wallet service
-const sui = createSuiProvider(SUPER_ACCESS_KEY);
+const sui = createSuiClient(SUPER_ACCESS_KEY);
 const key = new KeyClient(SUPER_ACCESS_KEY);
 const wal = new WalletClient(SUPER_ACCESS_KEY);
 

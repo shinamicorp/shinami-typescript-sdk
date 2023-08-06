@@ -121,7 +121,7 @@ export async function buildGaslessTransactionBytes({
   if (build) await build(_txb);
   return toB64(
     await _txb.build({
-      provider: sui,
+      client: sui,
       onlyTransactionKind: true,
     })
   );
