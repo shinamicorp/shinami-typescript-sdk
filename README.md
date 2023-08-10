@@ -6,7 +6,7 @@ TypeScript SDK for [Shinami](https://www.shinami.com/) services for the [Sui](ht
 
 - [Node service](#node-service)
 - [Gas station](#gas-station)
-- [In-App wallet](#in-app-wallet)
+- [Invisible wallet](#invisible-wallet)
 
 ## Install
 
@@ -87,9 +87,9 @@ const txResp = await sui.executeTransactionBlock({
 });
 ```
 
-### In-App wallet
+### Invisible wallet
 
-To use the in-app wallet as a signer for a regular (non-sponsored) transaction block:
+To use the invisible wallet as a signer for a regular (non-sponsored) transaction block:
 
 ```ts
 import { TransactionBlock } from "@mysten/sui.js";
@@ -118,10 +118,10 @@ txb.moveCall({
 });
 txb.setSender(await signer.getAddress(true /* autoCreate */));
 txb.setGasBudget(5_000_000);
-// Your in-app wallet MUST have sufficient gas for this to succeed.
+// Your invisible wallet MUST have sufficient gas for this to succeed.
 const txBytes = await txb.build({ provider: sui });
 
-// Sign tx with in-app wallet.
+// Sign tx with invisible wallet.
 const { signature } = await signer.signTransactionBlock(txBytes);
 
 // Execute the signed tx.
@@ -131,7 +131,7 @@ const txResp = await sui.executeTransactionBlock({
 });
 ```
 
-To use the in-app wallet to execute a gasless transaction block, which seamlessly integrates with Shinami node service and gas station:
+To use the invisible wallet to execute a gasless transaction block, which seamlessly integrates with Shinami node service and gas station:
 
 ```ts
 import {
@@ -172,7 +172,7 @@ const gaslessTx = await buildGaslessTransactionBytes({
   },
 });
 
-// Execute the gasless tx using your in-app wallet.
+// Execute the gasless tx using your invisible wallet.
 const txResp = await signer.executeGaslessTransactionBlock(
   gaslessTx,
   5_000_000
