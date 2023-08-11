@@ -162,7 +162,7 @@ export class WalletClient extends ShinamiRpcClient {
 }
 
 /**
- * A signer based on Shinami's in-app wallet.
+ * A signer based on Shinami's invisible wallet.
  *
  * It transparently manages session token refreshes.
  */
