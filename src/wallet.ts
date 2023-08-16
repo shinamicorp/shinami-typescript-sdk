@@ -7,8 +7,8 @@ import {
   ExecuteTransactionRequestType,
   SuiTransactionBlockResponse,
   SuiTransactionBlockResponseOptions,
-  toB64,
-} from "@mysten/sui.js";
+} from "@mysten/sui.js/client";
+import { toB64 } from "@mysten/sui.js/utils";
 import { JSONRPCError } from "@open-rpc/client-js";
 import { Infer, object, string } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "./rpc.js";
@@ -107,16 +107,18 @@ export class WalletClient extends ShinamiRpcClient {
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param message Base64 encoded personal message.
+   * @param wrapBcs If true, wrap the message bytes in a BCS struct before signing.
    * @returns Base64 encoded serialized signature.
    */
   signPersonalMessage(
     walletId: string,
     sessionToken: string,
-    message: string
+    message: string,
+    wrapBcs = true
   ): Promise<string> {
     return this.request(
       "shinami_wal_signPersonalMessage",
-      [walletId, sessionToken, message],
+      [walletId, sessionToken, message, wrapBcs],
       string()
     );
   }
@@ -162,7 +164,7 @@ export class WalletClient extends ShinamiRpcClient {
 }
 
 /**
- * A signer based on Shinami's in-app wallet.
+ * A signer based on Shinami's invisible wallet.
  *
  * It transparently manages session token refreshes.
  */
@@ -281,12 +283,21 @@ export class ShinamiWalletSigner {
   /**
    * Signs a personal message with this wallet.
    * @param message Personal message bytes. If `string`, assumed to be Base64 encoded.
+   * @param wrapBcs If true, wrap the message bytes in a BCS struct before signing.
    * @returns Base64 encoded serialized signature.
    */
-  signPersonalMessage(message: string | Uint8Array): Promise<string> {
+  signPersonalMessage(
+    message: string | Uint8Array,
+    wrapBcs = true
+  ): Promise<string> {
     const _message = message instanceof Uint8Array ? toB64(message) : message;
     return this.withSession((session) =>
-      this.walletClient.signPersonalMessage(this.walletId, session, _message)
+      this.walletClient.signPersonalMessage(
+        this.walletId,
+        session,
+        _message,
+        wrapBcs
+      )
     );
   }
 

@@ -4,7 +4,8 @@
  */
 
 import { beforeAll, describe, expect, it } from "@jest/globals";
-import { Ed25519Keypair, RawSigner, fromB64 } from "@mysten/sui.js";
+import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
+import { fromB64 } from "@mysten/sui.js/utils";
 import { buildGaslessTransactionBytes } from "../src/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
@@ -16,11 +17,10 @@ const sui = createSuiClient();
 const gas = createGasClient();
 
 const keypair = new Ed25519Keypair();
-const signer = new RawSigner(keypair, sui);
 
 describe("GasStationClient", () => {
   beforeAll(async () => {
-    console.log("sui address", await signer.getAddress());
+    console.log("sui address", keypair.toSuiAddress());
     console.log("private key", keypair.export().privateKey);
   });
 
@@ -47,7 +47,7 @@ describe("GasStationClient", () => {
 
     const sponsoredTx = await gas.sponsorTransactionBlock(
       txBytes,
-      await signer.getAddress(),
+      keypair.toSuiAddress(),
       2_000_000
     );
     console.log("sponsoredTx", sponsoredTx);
@@ -55,13 +55,13 @@ describe("GasStationClient", () => {
       await gas.getSponsoredTransactionBlockStatus(sponsoredTx.txDigest)
     ).toBe("IN_FLIGHT");
 
-    const signedTx = await signer.signTransactionBlock({
-      transactionBlock: fromB64(sponsoredTx.txBytes),
-    });
-    expect(signedTx.transactionBlockBytes).toBe(sponsoredTx.txBytes);
+    const signedTx = await keypair.signTransactionBlock(
+      fromB64(sponsoredTx.txBytes)
+    );
+    expect(signedTx.bytes).toBe(sponsoredTx.txBytes);
 
     const txResp = await sui.executeTransactionBlock({
-      transactionBlock: signedTx.transactionBlockBytes,
+      transactionBlock: signedTx.bytes,
       signature: [signedTx.signature, sponsoredTx.signature],
       options: {
         showEffects: true,
