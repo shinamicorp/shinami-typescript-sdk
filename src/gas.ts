@@ -25,9 +25,19 @@ export const SponsoredTransaction = object({
    */
   txDigest: string(),
   /**
-   * Gas sponsor's signature.
+   * Gas owner's signature.
    */
   signature: string(),
+  /**
+   * Cost breakdown for the sponsor.
+   */
+  sponsorCost: optional(
+    object({
+      computationCost: string(),
+      storageCost: string(),
+      storageRebate: string(),
+    })
+  ),
   /**
    * Expiration time of this sponsored transaction, in Unix epoch seconds.
    */
@@ -35,7 +45,7 @@ export const SponsoredTransaction = object({
   /**
    * The last Sui epoch this sponsored transaction is valid for.
    */
-  expireAfterEpoch: optional(number()),
+  expireAfterEpoch: optional(string()),
 });
 export type SponsoredTransaction = Infer<typeof SponsoredTransaction>;
 
@@ -75,7 +85,7 @@ export class GasStationClient extends ShinamiRpcClient {
   sponsorTransactionBlock(
     txBytes: string,
     sender: string,
-    gasBudget: number
+    gasBudget: number | string
   ): Promise<SponsoredTransaction> {
     return this.request(
       "gas_sponsorTransactionBlock",

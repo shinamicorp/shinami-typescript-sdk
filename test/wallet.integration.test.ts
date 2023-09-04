@@ -50,7 +50,7 @@ describe("WalletClient", () => {
 
 describe("ShinamiWallet", () => {
   const walletId = `__wallet_sdk_test_${uuidv4()}`;
-  const signer = new ShinamiWalletSigner(walletId, "fake secret", key, wal);
+  const signer = new ShinamiWalletSigner(walletId, wal, "fake secret", key);
   console.log("walletId", walletId);
 
   it("creates and retrieves address", async () => {
