@@ -10,6 +10,7 @@ import {
 } from "@mysten/sui.js/verify";
 import { v4 as uuidv4 } from "uuid";
 import {
+  KeySession,
   ShinamiWalletSigner,
   buildGaslessTransactionBytes,
 } from "../src/index.js";
@@ -50,7 +51,10 @@ describe("WalletClient", () => {
 
 describe("ShinamiWallet", () => {
   const walletId = `__wallet_sdk_test_${uuidv4()}`;
+  const session = new KeySession("fake secret", key);
   const signer = new ShinamiWalletSigner(walletId, wal, "fake secret", key);
+  const signer2 = new ShinamiWalletSigner(walletId, wal, session);
+  const signer3 = new ShinamiWalletSigner(walletId, wal, session);
   console.log("walletId", walletId);
 
   it("creates and retrieves address", async () => {
@@ -70,9 +74,9 @@ describe("ShinamiWallet", () => {
 
   it("signs a personal message", async () => {
     const message = Uint8Array.from([1, 2, 3]);
-    const signature = await signer.signPersonalMessage(message);
+    const signature = await signer2.signPersonalMessage(message);
     const pubKey = await verifyPersonalMessage(message, signature);
-    expect(pubKey.toSuiAddress()).toBe(await signer.getAddress());
+    expect(pubKey.toSuiAddress()).toBe(await signer2.getAddress());
   });
 
   it("executes gasless transaction block", async () => {
@@ -85,7 +89,7 @@ describe("ShinamiWallet", () => {
         });
       },
     });
-    const txResp = await signer.executeGaslessTransactionBlock(
+    const txResp = await signer3.executeGaslessTransactionBlock(
       gaslessTx,
       5_000_000,
       { showEffects: true, showEvents: true }

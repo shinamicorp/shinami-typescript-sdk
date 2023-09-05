@@ -166,7 +166,7 @@ export class WalletClient extends ShinamiRpcClient {
 /**
  * A secret session with Shinami key service.
  */
-class KeySession {
+export class KeySession {
   private readonly secret: string;
   readonly keyClient: KeyClient;
 
