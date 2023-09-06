@@ -106,7 +106,7 @@ const wal = new WalletClient(WALLET_ACCESS_KEY);
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
 // Shinami cannot recover it for you.
-const signer = new ShinamiWalletSigner("my_wallet_id", WALLET_SECRET, key, wal);
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
 // Program your TransactionBlock.
 const txb = new TransactionBlock();
@@ -153,7 +153,7 @@ const wal = new WalletClient(SUPER_ACCESS_KEY);
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
 // Shinami cannot recover it for you.
-const signer = new ShinamiWalletSigner("my_wallet_id", WALLET_SECRET, key, wal);
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
 // Safe to do if unsure about the wallet's existence.
 await signer.tryCreate();

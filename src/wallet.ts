@@ -144,7 +144,7 @@ export class WalletClient extends ShinamiRpcClient {
     walletId: string,
     sessionToken: string,
     txBytes: string,
-    gasBudget: number,
+    gasBudget: number | string,
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType
   ): Promise<SuiTransactionBlockResponse> {
@@ -164,61 +164,89 @@ export class WalletClient extends ShinamiRpcClient {
 }
 
 /**
- * A signer based on Shinami's invisible wallet.
- *
- * It transparently manages session token refreshes.
+ * A secret session with Shinami key service.
  */
-export class ShinamiWalletSigner {
-  readonly walletId: string;
+export class KeySession {
   private readonly secret: string;
-
   readonly keyClient: KeyClient;
-  readonly walletClient: WalletClient;
 
-  private address?: string;
-  private session?: string;
+  private token?: string;
 
-  constructor(
-    walletId: string,
-    secret: string,
-    keyClient: KeyClient,
-    walletClient: WalletClient
-  ) {
-    this.walletId = walletId;
+  constructor(secret: string, keyClient: KeyClient) {
     this.secret = secret;
     this.keyClient = keyClient;
-    this.walletClient = walletClient;
   }
 
   /**
    * Refreshes the session token.
    * @returns The refreshed session token.
    */
-  async refreshSession(): Promise<string> {
-    this.session = await this.keyClient.createSession(this.secret);
-    return this.session;
+  async refreshToken(): Promise<string> {
+    this.token = await this.keyClient.createSession(this.secret);
+    return this.token;
   }
 
   /**
-   * Runs a code block with the session token. Handles session refreshes upon expiration.
+   * Runs a code block with the session token. Handles token refreshes upon expiration.
    * @param run The code to run.
    * @returns Result of `run`.
    */
-  async withSession<T>(run: (session: string) => Promise<T>): Promise<T> {
-    if (!this.session) {
-      return await run(await this.refreshSession());
+  async withToken<T>(run: (token: string) => Promise<T>): Promise<T> {
+    if (!this.token) {
+      return await run(await this.refreshToken());
     } else {
       try {
-        return await run(this.session);
+        return await run(this.token);
       } catch (e: unknown) {
         if (e instanceof JSONRPCError && e.code === -32602) {
           const details = errorDetails(e);
           if (details && details.details.includes("Bad session token")) {
-            return await run(await this.refreshSession());
+            return await run(await this.refreshToken());
           }
         }
         throw e;
       }
+    }
+  }
+}
+
+/**
+ * A signer based on Shinami's invisible wallet.
+ *
+ * It transparently manages session token refreshes.
+ */
+export class ShinamiWalletSigner {
+  readonly walletId: string;
+  readonly walletClient: WalletClient;
+  private readonly session: KeySession;
+
+  private address?: string;
+
+  constructor(
+    walletId: string,
+    walletClient: WalletClient,
+    session: KeySession
+  );
+  constructor(
+    walletId: string,
+    walletClient: WalletClient,
+    secret: string,
+    keyClient: KeyClient
+  );
+  constructor(
+    walletId: string,
+    walletClient: WalletClient,
+    secretOrSession: string | KeySession,
+    keyClient?: KeyClient
+  ) {
+    this.walletId = walletId;
+    this.walletClient = walletClient;
+
+    if (secretOrSession instanceof KeySession) {
+      this.session = secretOrSession;
+    } else {
+      if (!keyClient) throw new Error("Must provide keyClient with secret");
+      this.session = new KeySession(secretOrSession, keyClient);
     }
   }
 
@@ -253,8 +281,8 @@ export class ShinamiWalletSigner {
    */
   async tryCreate(): Promise<string | undefined> {
     try {
-      return await this.withSession((session) =>
-        this.walletClient.createWallet(this.walletId, session)
+      return await this.session.withToken((token) =>
+        this.walletClient.createWallet(this.walletId, token)
       );
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602) {
@@ -275,8 +303,8 @@ export class ShinamiWalletSigner {
     txBytes: string | Uint8Array
   ): Promise<SignTransactionResult> {
     const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
-    return this.withSession((session) =>
-      this.walletClient.signTransactionBlock(this.walletId, session, _txBytes)
+    return this.session.withToken((token) =>
+      this.walletClient.signTransactionBlock(this.walletId, token, _txBytes)
     );
   }
 
@@ -291,10 +319,10 @@ export class ShinamiWalletSigner {
     wrapBcs = true
   ): Promise<string> {
     const _message = message instanceof Uint8Array ? toB64(message) : message;
-    return this.withSession((session) =>
+    return this.session.withToken((token) =>
       this.walletClient.signPersonalMessage(
         this.walletId,
-        session,
+        token,
         _message,
         wrapBcs
       )
@@ -318,15 +346,15 @@ export class ShinamiWalletSigner {
    */
   executeGaslessTransactionBlock(
     txBytes: string | Uint8Array,
-    gasBudget: number,
+    gasBudget: number | string,
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType
   ): Promise<SuiTransactionBlockResponse> {
     const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
-    return this.withSession((session) =>
+    return this.session.withToken((token) =>
       this.walletClient.executeGaslessTransactionBlock(
         this.walletId,
-        session,
+        token,
         _txBytes,
         gasBudget,
         options,
