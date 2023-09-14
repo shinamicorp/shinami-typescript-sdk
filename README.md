@@ -133,7 +133,6 @@ To use the invisible wallet to execute a gasless transaction block, which seamle
 
 ```ts
 import {
-  GasStationClient,
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
@@ -175,6 +174,47 @@ const txResp = await signer.executeGaslessTransactionBlock(
   gaslessTx,
   5_000_000
 );
+```
+
+#### Beneficiary graph API
+
+Apps using Shinami invisible wallets can participate in [Bullshark Quests](https://quests.mystenlabs.com/) by allowing users to link their invisible wallets with self-custody wallets that own Bullshark NFTs, through the use of [beneficiary graph](https://github.com/shinamicorp/account-graph).
+
+```ts
+import {
+  EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
+  KeyClient,
+  ShinamiWalletSigner,
+  WalletClient,
+} from "shinami";
+
+// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
+// It MUST be authorized for all of these services:
+// - Node service
+// - Gas station
+// - Wallet service
+const key = new KeyClient(SUPER_ACCESS_KEY);
+const wal = new WalletClient(SUPER_ACCESS_KEY);
+
+// WALLET_SECRET MUST be used consistently with this wallet id.
+// You are responsible for safe-keeping the (walletId, secret) pair.
+// Shinami cannot recover it for you.
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
+
+// Safe to do if unsure about the wallet's existence.
+await signer.tryCreate();
+
+// Use BULLSHARK_QUEST_BENEFICIARY_GRAPH_ID_MAINNET for Mainnet.
+const graphId = EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET;
+
+const txDigest = await signer.setBeneficiary(
+  graphId,
+  // Replace with user's actual wallet address that owns the Bullshark.
+  "0x1234"
+);
+
+// This should return the address we just set.
+const beneficiary = await signer.getBeneficiary(graphId);
 ```
 
 ## Development

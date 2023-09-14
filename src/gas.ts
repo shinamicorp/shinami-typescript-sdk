@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { JsonRpcProvider } from "@mysten/sui.js";
 import { SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { toB64 } from "@mysten/sui.js/utils";
@@ -123,7 +122,7 @@ export async function buildGaslessTransactionBytes({
   txb,
   build,
 }: {
-  sui: SuiClient | JsonRpcProvider;
+  sui: SuiClient;
   txb?: TransactionBlock;
   build?: (txb: TransactionBlock) => Promise<void>;
 }): Promise<string> {
