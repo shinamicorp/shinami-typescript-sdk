@@ -1,6 +1,6 @@
 {
   "name": "shinami",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "TypeScript SDK for Shinami services",
   "engines": {
     "node": ">=14"
@@ -43,7 +43,7 @@
     "url": "https://github.com/shinamicorp/shinami-typescript-sdk.git"
   },
   "dependencies": {
-    "@mysten/sui.js": "^0.41.1",
+    "@mysten/sui.js": "^0.42.0",
     "@open-rpc/client-js": "^1.8.1",
     "superstruct": "^1.0.3",
     "typescript": "^5.1.6"

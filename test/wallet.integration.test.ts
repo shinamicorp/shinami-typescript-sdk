@@ -10,6 +10,7 @@ import {
 } from "@mysten/sui.js/verify";
 import { v4 as uuidv4 } from "uuid";
 import {
+  EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
   KeySession,
   ShinamiWalletSigner,
   buildGaslessTransactionBytes,
@@ -110,5 +111,41 @@ describe("ShinamiWallet", () => {
         },
       ],
     });
+  }, 30_000);
+
+  it("sets a beneficiary address and gets it back", async () => {
+    const beneficiary =
+      "0x0000000000000000000000000000000000000000000000000000000000001111";
+    const txDigest = await signer.setBeneficiary(
+      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
+      beneficiary
+    );
+    console.log("txDigest", txDigest);
+    expect(
+      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET)
+    ).resolves.toBe(beneficiary);
+  }, 30_000);
+
+  it("sets another beneficiary address and gets it back", async () => {
+    const beneficiary =
+      "0x0000000000000000000000000000000000000000000000000000000000002222";
+    const txDigest = await signer.setBeneficiary(
+      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
+      beneficiary
+    );
+    console.log("txDigest", txDigest);
+    expect(
+      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET)
+    ).resolves.toBe(beneficiary);
+  }, 30_000);
+
+  it("unsets beneficiary address", async () => {
+    const txDigest = await signer.unsetBeneficiary(
+      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET
+    );
+    console.log("txDigest", txDigest);
+    expect(
+      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET)
+    ).resolves.toBe(null);
   }, 30_000);
 });
