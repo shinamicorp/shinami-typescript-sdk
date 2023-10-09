@@ -1,6 +1,6 @@
 {
   "name": "shinami",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "TypeScript SDK for Shinami services",
   "engines": {
     "node": ">=14"
@@ -43,20 +43,20 @@
     "url": "https://github.com/shinamicorp/shinami-typescript-sdk.git"
   },
   "dependencies": {
-    "@mysten/sui.js": "^0.42.0",
+    "@mysten/sui.js": "^0.43.3",
     "@open-rpc/client-js": "^1.8.1",
-    "superstruct": "^1.0.3",
-    "typescript": "^5.1.6"
+    "superstruct": "^1.0.3"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.2",
     "@types/uuid": "^9.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.60.1",
-    "@typescript-eslint/parser": "^5.60.1",
-    "eslint": "^8.44.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.51.0",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
     "uuid": "^9.0.0"
   }
 }
