@@ -7,7 +7,20 @@ on:
   release:
     types:
       - published
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      package:
+        description: The package to publish
+        required: true
+        type: choice
+        options:
+          - clients
+          - nextjs-zklogin
+          - legacy
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   publish:
@@ -15,6 +28,15 @@ jobs:
     permissions:
       id-token: write
     steps:
+      - id: determine-package
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            package=$(echo "${{ github.event.tag_name }}" | sed -E 's/-v[0-9].*$//')
+          else
+            package="${{ inputs.package }}"
+          fi
+          [ -n "$package" ] || exit 1
+          echo "PACKAGE=$package" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
@@ -22,6 +44,6 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
-      - run: npm publish --provenance
+      - run: npm publish --workspace "packages/${{ steps.determine-package.outputs.PACKAGE }}" --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

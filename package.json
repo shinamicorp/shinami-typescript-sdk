@@ -1,62 +1,16 @@
 {
-  "name": "shinami",
-  "version": "0.5.0",
-  "description": "TypeScript SDK for Shinami services",
-  "engines": {
-    "node": ">=14"
-  },
-  "files": [
-    "dist"
+  "name": "shinami-typescript-sdk",
+  "description": "Workspace root. Not to be published",
+  "private": true,
+  "workspaces": [
+    "packages/clients",
+    "packages/legacy",
+    "packages/nextjs-zklogin"
   ],
-  "main": "dist/cjs/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    }
-  },
   "scripts": {
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc --build tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
-    "build:esm": "tsc --build tsconfig.esm.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
-    "lint": "eslint .",
-    "clean": "rm -fr ./dist ./coverage",
-    "test": "jest unit",
-    "integration": "jest integration",
-    "coverage": "jest --coverage"
-  },
-  "keywords": [
-    "Shinami",
-    "Sui",
-    "node",
-    "gas",
-    "wallet"
-  ],
-  "author": {
-    "name": "Shinami",
-    "url": "https://www.shinami.com/"
-  },
-  "license": "Apache-2.0",
-  "homepage": "https://www.shinami.com/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/shinamicorp/shinami-typescript-sdk.git"
-  },
-  "dependencies": {
-    "@mysten/sui.js": "^0.44.0",
-    "@open-rpc/client-js": "^1.8.1",
-    "superstruct": "^1.0.3"
-  },
-  "devDependencies": {
-    "@tsconfig/recommended": "^1.0.2",
-    "@types/uuid": "^9.0.2",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
-    "eslint": "^8.51.0",
-    "jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2",
-    "uuid": "^9.0.0"
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
   }
 }

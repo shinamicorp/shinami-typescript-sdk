@@ -4,11 +4,12 @@
     "./src"
   ],
   "compilerOptions": {
-    "target": "ES2015",
-    "module": "ES2015",
-    "moduleResolution": "Node",
-    "outDir": "./dist",
-    "declaration": true
+    "target": "es2015",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "outDir": "./dist/esm",
+    "declaration": true,
+    "jsx": "react"
   },
   "ts-node": {
     "transpileOnly": true,
