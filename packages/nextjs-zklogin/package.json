@@ -1,6 +1,6 @@
 {
   "name": "@shinami/nextjs-zklogin",
-  "version": "0.1.0-alpha.10",
+  "version": "0.1.0-alpha.11",
   "description": "Next.js SDK for integrating with Sui zkLogin",
   "sideEffects": false,
   "engines": {

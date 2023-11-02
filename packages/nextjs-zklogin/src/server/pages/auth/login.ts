@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Ed25519PublicKey } from "@mysten/sui.js/keypairs/ed25519";
 import {
   computeZkLoginAddress,
   genAddressSeed,
@@ -79,8 +78,8 @@ async function getZkLoginUser(
   if (
     jwtClaims.nonce !==
     generateNonce(
-      new Ed25519PublicKey(body.extendedEphemeralPublicKey),
-      Number(body.maxEpoch),
+      publicKeyFromBase64(body.extendedEphemeralPublicKey),
+      body.maxEpoch,
       body.jwtRandomness
     )
   )
