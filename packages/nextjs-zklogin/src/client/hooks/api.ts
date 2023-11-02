@@ -13,7 +13,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Struct, create } from "superstruct";
+import { Struct, mask } from "superstruct";
 import { AUTH_API_BASE } from "../../env.js";
 import { ApiErrorBody } from "../../error.js";
 import { ZkLoginRequest, ZkLoginUser } from "../../user.js";
@@ -42,7 +42,7 @@ function apiQueryFn<T = unknown>(schema?: Struct<T>): QueryFunction<T> {
     const data = await resp.json();
     if (!resp.ok) throw new ApiError(resp.status, data);
 
-    return schema ? create(data, schema) : data;
+    return schema ? mask(data, schema) : data;
   };
 }
 
@@ -71,7 +71,7 @@ export function apiMutationFn<T = unknown, P = unknown>({
     });
     const data = await resp.json();
     if (!resp.ok) throw new ApiError(resp.status, data);
-    return resultSchema ? create(data, resultSchema) : data;
+    return resultSchema ? mask(data, resultSchema) : data;
   };
 }
 

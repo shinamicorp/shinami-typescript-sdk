@@ -21,12 +21,16 @@ export function useNewZkLoginSession(): UseMutationResult<
     mutationFn: async ({ getMaxEpoch }) => {
       await logout(undefined);
 
-      const keyPair = new Ed25519Keypair();
-      const randomness = generateRandomness();
+      const ephemeralKeyPair = new Ed25519Keypair();
+      const jwtRandomness = generateRandomness();
       const maxEpoch = await getMaxEpoch();
-      const nonce = generateNonce(keyPair.getPublicKey(), maxEpoch, randomness);
+      const nonce = generateNonce(
+        ephemeralKeyPair.getPublicKey(),
+        maxEpoch,
+        jwtRandomness
+      );
 
-      const session = { keyPair, maxEpoch, randomness, nonce };
+      const session = { ephemeralKeyPair, maxEpoch, jwtRandomness, nonce };
       await save(session);
       return session;
     },

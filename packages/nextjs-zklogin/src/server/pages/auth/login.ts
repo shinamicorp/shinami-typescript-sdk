@@ -19,12 +19,14 @@ import {
   ZkLoginUser,
   ZkLoginUserId,
 } from "../../../user.js";
-import { first } from "../../../utils.js";
+import { first, publicKeyFromBase64 } from "../../../utils.js";
 import {
   CurrentEpochProvider,
   SaltProvider,
   ZkProofProvider,
   getCurrentEpoch,
+  getSalt,
+  getZkProof,
   oidProviders,
 } from "../../providers.js";
 import { sessionConfig } from "../session.js";
@@ -37,7 +39,7 @@ async function getExpires(
   epochProvider: CurrentEpochProvider,
   enableOidProvider: (provider: OidProvider) => Promise<boolean> | boolean
 ): Promise<Date> {
-  const [error, body] = validate(req.body, ZkLoginRequest);
+  const [error, body] = validate(req.body, ZkLoginRequest, { mask: true });
   if (error) throw new ZkLoginAuthError(error.message);
 
   if (!(await enableOidProvider(body.oidProvider)))
@@ -67,7 +69,7 @@ async function getZkLoginUser(
   try {
     jwtClaims = (
       await jwtVerify(body.jwt, oidConfig.getKey, {
-        requiredClaims: ["iss", "aud", "nonce", oidConfig.keyClaimName],
+        requiredClaims: ["iss", "aud", "nonce", body.keyClaimName],
       })
     ).payload;
   } catch (e) {
@@ -77,28 +79,32 @@ async function getZkLoginUser(
   if (
     jwtClaims.nonce !==
     generateNonce(
-      new Ed25519PublicKey(body.publicKey),
+      new Ed25519PublicKey(body.extendedEphemeralPublicKey),
       Number(body.maxEpoch),
-      body.randomness
+      body.jwtRandomness
     )
   )
     throw new ZkLoginAuthError("Invalid jwt nonce");
 
   const iss = jwtClaims.iss!;
   const aud = first(jwtClaims.aud)!;
-  const keyClaimValue = jwtClaims[oidConfig.keyClaimName] as string;
+  const keyClaimValue = jwtClaims[body.keyClaimName] as string;
   const id: ZkLoginUserId = {
     iss,
     aud,
-    claimName: oidConfig.keyClaimName,
-    claimValue: keyClaimValue,
+    keyClaimName: body.keyClaimName,
+    keyClaimValue,
   };
 
   if (!(await allowUser(id))) throw new ZkLoginAuthError("User not allowed");
 
-  const salt = await saltProvider(id);
+  const salt = await getSalt(saltProvider, {
+    jwt: body.jwt,
+    keyClaimName: body.keyClaimName,
+    subWallet: 0, // TODO - expose additional sub-wallets.
+  });
   const wallet = computeZkLoginAddress({
-    claimName: oidConfig.keyClaimName,
+    claimName: body.keyClaimName,
     claimValue: keyClaimValue,
     iss,
     aud,
@@ -106,24 +112,23 @@ async function getZkLoginUser(
   });
   const addressSeed = genAddressSeed(
     salt,
-    oidConfig.keyClaimName,
+    body.keyClaimName,
     keyClaimValue,
     aud
   ).toString();
-  const partialProof = await zkProofProvider({
+  const partialProof = await getZkProof(zkProofProvider, {
     jwt: body.jwt,
-    publicKey: body.publicKey,
+    ephemeralPublicKey: publicKeyFromBase64(body.extendedEphemeralPublicKey),
     maxEpoch: body.maxEpoch,
-    randomness: body.randomness,
+    jwtRandomness: BigInt(body.jwtRandomness),
     salt,
-    keyClaimName: oidConfig.keyClaimName,
+    keyClaimName: body.keyClaimName,
   });
 
   return {
     id,
     oidProvider: body.oidProvider,
-    jwtClaims,
-    publicKey: body.publicKey,
+    jwtClaims: jwtClaims as ZkLoginUser["jwtClaims"],
     maxEpoch: body.maxEpoch,
     wallet,
     zkProof: { ...partialProof, addressSeed },

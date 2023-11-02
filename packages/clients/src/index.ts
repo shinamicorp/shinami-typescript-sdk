@@ -4,5 +4,7 @@
  */
 
 export * from "./gas.js";
+export * from "./rpc.js";
 export * from "./sui.js";
 export * from "./wallet.js";
+export * from "./zkprover.js";

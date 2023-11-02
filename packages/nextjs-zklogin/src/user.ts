@@ -3,16 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Ed25519PublicKey } from "@mysten/sui.js/keypairs/ed25519";
 import { getZkLoginSignature } from "@mysten/sui.js/zklogin";
-import { Infer, enums, integer, object, refine, string } from "superstruct";
+import {
+  Infer,
+  array,
+  enums,
+  integer,
+  object,
+  refine,
+  string,
+  type,
+  union,
+} from "superstruct";
+import { publicKeyFromBase64 } from "./utils.js";
 
-export const Ed25519PublicKeyString = refine(
+export const ExtendedPublicKeyString = refine(
   string(),
-  "Ed25519PublicKey",
+  "ExtendedPublicKeyString",
   (value) => {
     try {
-      new Ed25519PublicKey(value);
+      publicKeyFromBase64(value);
       return true;
     } catch (e) {
       if (e instanceof Error) return e.message;
@@ -20,7 +30,18 @@ export const Ed25519PublicKeyString = refine(
     }
   }
 );
-export type Ed25519PublicKeyString = Infer<typeof Ed25519PublicKeyString>;
+export type ExtendedPublicKeyString = Infer<typeof ExtendedPublicKeyString>;
+
+export const BigIntString = refine(string(), "BigIntString", (value) => {
+  try {
+    BigInt(value);
+    return true;
+  } catch (e) {
+    if (e instanceof Error) return e.message;
+    throw e;
+  }
+});
+export type BigIntString = Infer<typeof BigIntString>;
 
 export const OidProvider = enums(["google", "facebook", "twitch"]);
 export type OidProvider = Infer<typeof OidProvider>;
@@ -28,28 +49,32 @@ export type OidProvider = Infer<typeof OidProvider>;
 export const ZkLoginRequest = object({
   oidProvider: OidProvider,
   jwt: string(),
-  publicKey: Ed25519PublicKeyString,
+  extendedEphemeralPublicKey: ExtendedPublicKeyString,
   maxEpoch: integer(),
-  randomness: string(),
+  jwtRandomness: BigIntString,
+  keyClaimName: string(),
 });
 export type ZkLoginRequest = Infer<typeof ZkLoginRequest>;
 
 export const ZkLoginUserId = object({
   iss: string(),
   aud: string(),
-  claimName: string(),
-  claimValue: string(),
+  keyClaimName: string(),
+  keyClaimValue: string(),
 });
 export type ZkLoginUserId = Infer<typeof ZkLoginUserId>;
 
 export const ZkLoginUser = object({
   id: ZkLoginUserId,
   oidProvider: OidProvider,
-  jwtClaims: object(),
-  publicKey: Ed25519PublicKeyString,
+  jwtClaims: type({
+    iss: string(),
+    aud: union([string(), array(string())]),
+    nonce: string(),
+  }),
   maxEpoch: integer(),
   wallet: string(),
-  zkProof: object(),
+  zkProof: type({}),
 });
 export type ZkLoginUser = Infer<typeof ZkLoginUser>;
 

@@ -14,17 +14,17 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
-import { ZkLoginUser } from "../../user.js";
+import { BigIntString, ZkLoginUser } from "../../user.js";
 
 const EPHEMERAL_SECRET_NAME = "zklEphemeralSecret";
 const MAX_EPOCH_NAME = "zklMaxEpoch";
-const RANDOMNESS_NAME = "zklRandomness";
+const JWT_RANDOMNESS_NAME = "zklJwtRandomness";
 const NONCE_NAME = "zklNonce";
 
 export interface ZkLoginLocalSession {
-  keyPair: Ed25519Keypair;
+  ephemeralKeyPair: Ed25519Keypair;
   maxEpoch: number;
-  randomness: string;
+  jwtRandomness: BigIntString;
   nonce: string;
 }
 
@@ -39,17 +39,17 @@ export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
       if (!secret) throw new Error(`${EPHEMERAL_SECRET_NAME} not found`);
       const keyPair = Ed25519Keypair.fromSecretKey(fromB64(secret));
 
-      const maxEpoch = localStorage.getItem(MAX_EPOCH_NAME);
-      if (!maxEpoch) throw new Error(`${MAX_EPOCH_NAME} not found`);
-      const maxEpochNum = Number(maxEpoch);
+      const _maxEpoch = localStorage.getItem(MAX_EPOCH_NAME);
+      if (!_maxEpoch) throw new Error(`${MAX_EPOCH_NAME} not found`);
+      const maxEpoch = Number(_maxEpoch);
 
-      const randomness = localStorage.getItem(RANDOMNESS_NAME);
-      if (!randomness) throw new Error(`${RANDOMNESS_NAME} not found`);
+      const jwtRandomness = localStorage.getItem(JWT_RANDOMNESS_NAME);
+      if (!jwtRandomness) throw new Error(`${JWT_RANDOMNESS_NAME} not found`);
 
       const nonce = localStorage.getItem(NONCE_NAME);
       if (!nonce) throw new Error(`${NONCE_NAME} not found`);
 
-      return { keyPair, maxEpoch: maxEpochNum, randomness, nonce };
+      return { keyPair, maxEpoch, jwtRandomness, nonce };
     },
     retry: false,
   });
@@ -65,10 +65,10 @@ export function useSaveZkLoginLocalSession(): UseMutationResult<
     mutationFn: async (session) => {
       localStorage.setItem(
         EPHEMERAL_SECRET_NAME,
-        session.keyPair.export().privateKey
+        session.ephemeralKeyPair.export().privateKey
       );
       localStorage.setItem(MAX_EPOCH_NAME, session.maxEpoch.toString());
-      localStorage.setItem(RANDOMNESS_NAME, session.randomness);
+      localStorage.setItem(JWT_RANDOMNESS_NAME, session.jwtRandomness);
       localStorage.setItem(NONCE_NAME, session.nonce);
     },
     onSuccess: () => {

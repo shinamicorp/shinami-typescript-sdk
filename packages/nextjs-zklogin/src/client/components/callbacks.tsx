@@ -51,9 +51,12 @@ function withOpenIdCallback<P>(
           await login({
             oidProvider,
             jwt,
-            publicKey: session.keyPair.getPublicKey().toBase64(),
+            extendedEphemeralPublicKey: session.ephemeralKeyPair
+              .getPublicKey()
+              .toSuiPublicKey(),
             maxEpoch: session.maxEpoch,
-            randomness: session.randomness,
+            jwtRandomness: session.jwtRandomness,
+            keyClaimName: "sub",
           });
 
           setStatus("redirecting");

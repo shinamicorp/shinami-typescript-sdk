@@ -92,7 +92,9 @@ function execHandler<T = unknown>(
 ): NextApiHandler<T | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
-      const [error, body] = validate(req.body, SignedTransactionBytes);
+      const [error, body] = validate(req.body, SignedTransactionBytes, {
+        mask: true,
+      });
       if (error) return res.status(400).json({ error: error.message });
 
       const user = req.session.user!;

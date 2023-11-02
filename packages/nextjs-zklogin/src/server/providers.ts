@@ -4,8 +4,10 @@
  */
 
 import { SuiClient } from "@mysten/sui.js/client";
+import { PublicKey } from "@mysten/sui.js/cryptography";
+import { ZkProverClient } from "@shinami/clients";
 import { JWTVerifyGetKey, createRemoteJWKSet } from "jose";
-import { OidProvider, PartialZkLoginProof, ZkLoginUserId } from "../user.js";
+import { OidProvider, PartialZkLoginProof } from "../user.js";
 
 export interface EpochInfo {
   epoch: number;
@@ -32,26 +34,56 @@ export async function getCurrentEpoch(
   return await provider();
 }
 
-// TODO - Support WalletClient
-export type SaltProvider = (user: ZkLoginUserId) => Promise<bigint> | bigint;
-
-export interface ZkLoginProofInputs {
+export interface SaltRequest {
   jwt: string;
-  publicKey: string;
+  keyClaimName: string;
+  subWallet: number;
+}
+
+// TODO - New Shinami zkWallet client
+export type SaltProvider = (req: SaltRequest) => Promise<bigint> | bigint;
+
+export async function getSalt(
+  provider: SaltProvider,
+  req: SaltRequest
+): Promise<bigint> {
+  return await provider(req);
+}
+
+export interface ZkProofRequest {
+  jwt: string;
+  ephemeralPublicKey: PublicKey;
   maxEpoch: number;
-  randomness: string;
+  jwtRandomness: bigint;
   salt: bigint;
   keyClaimName: string;
 }
 
-// TODO - New Shinami prover client
-export type ZkProofProvider = (
-  inputs: ZkLoginProofInputs
-) => Promise<PartialZkLoginProof>;
+export type ZkProofProvider =
+  | ((req: ZkProofRequest) => Promise<PartialZkLoginProof>)
+  | ZkProverClient;
+
+export async function getZkProof(
+  provider: ZkProofProvider,
+  req: ZkProofRequest
+): Promise<PartialZkLoginProof> {
+  if (provider instanceof ZkProverClient) {
+    const { zkProof } = await provider.createZkLoginProof(
+      req.jwt,
+      req.maxEpoch,
+      req.ephemeralPublicKey,
+      req.jwtRandomness,
+      req.salt,
+      req.keyClaimName
+    );
+    return zkProof as PartialZkLoginProof;
+  }
+
+  return await provider(req);
+}
 
 interface OidProviderConfig {
   getKey: JWTVerifyGetKey;
-  keyClaimName: string;
 }
 
 export const oidProviders: { [K in OidProvider]: OidProviderConfig } = {
@@ -59,16 +91,13 @@ export const oidProviders: { [K in OidProvider]: OidProviderConfig } = {
     getKey: createRemoteJWKSet(
       new URL("https://www.googleapis.com/oauth2/v3/certs")
     ),
-    keyClaimName: "sub",
   },
   facebook: {
     getKey: createRemoteJWKSet(
       new URL("https://www.facebook.com/.well-known/oauth/openid/jwks/")
     ),
-    keyClaimName: "sub",
   },
   twitch: {
     getKey: createRemoteJWKSet(new URL("https://id.twitch.tv/oauth2/keys")),
-    keyClaimName: "sub",
   },
 };

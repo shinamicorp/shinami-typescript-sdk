@@ -4,7 +4,7 @@
  */
 
 import { useRouter } from "next/router.js";
-import React, { FunctionComponent, PropsWithChildren, useMemo } from "react";
+import React, { FunctionComponent, PropsWithChildren } from "react";
 import { LOGIN_PAGE_PATH } from "../../env.js";
 import { useMe } from "../hooks/api.js";
 import {
@@ -20,15 +20,14 @@ export function ZkLoginSessionProvider({ children }: PropsWithChildren) {
     useZkLoginLocalSession();
   const { data: user, isLoading: isLoadingUser } = useMe();
 
-  const localPublicKey = useMemo(
-    () => localSession?.keyPair?.getPublicKey()?.toBase64(),
-    [localSession?.keyPair]
-  );
-
   function session(): ZkLoginSession {
     if (isLoadingLocalSession || isLoadingUser) {
       return { user: undefined, localSession: undefined, isLoading: true };
-    } else if (localSession && user && localPublicKey === user.publicKey) {
+    } else if (
+      localSession &&
+      user &&
+      localSession.nonce === user.jwtClaims.nonce
+    ) {
       return { user, localSession, isLoading: false };
     } else {
       return { user: undefined, localSession: undefined, isLoading: false };
