@@ -9,7 +9,6 @@ import {
   UseMutationResult,
   UseQueryResult,
   useMutation,
-  useQueries,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -31,13 +30,12 @@ export interface ZkLoginLocalSession {
 const zkLoginLocalQueryKey = ["local", "zkLogin"];
 
 export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
-  useQueries;
   return useQuery({
     queryKey: [...zkLoginLocalQueryKey, "localSession"],
     queryFn: () => {
       const secret = localStorage.getItem(EPHEMERAL_SECRET_NAME);
       if (!secret) throw new Error(`${EPHEMERAL_SECRET_NAME} not found`);
-      const keyPair = Ed25519Keypair.fromSecretKey(fromB64(secret));
+      const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(fromB64(secret));
 
       const _maxEpoch = localStorage.getItem(MAX_EPOCH_NAME);
       if (!_maxEpoch) throw new Error(`${MAX_EPOCH_NAME} not found`);
@@ -49,7 +47,13 @@ export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
       const nonce = localStorage.getItem(NONCE_NAME);
       if (!nonce) throw new Error(`${NONCE_NAME} not found`);
 
-      return { keyPair, maxEpoch, jwtRandomness, nonce };
+      const session: ZkLoginLocalSession = {
+        ephemeralKeyPair,
+        maxEpoch,
+        jwtRandomness,
+        nonce,
+      };
+      return session;
     },
     retry: false,
   });

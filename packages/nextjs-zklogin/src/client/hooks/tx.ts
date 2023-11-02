@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
+import { Keypair } from "@mysten/sui.js/cryptography";
 import { fromB64 } from "@mysten/sui.js/utils";
 import { MutationFunction } from "@tanstack/react-query";
 import { Struct } from "superstruct";
@@ -11,7 +11,7 @@ import { PreparedTransactionBytes, SignedTransactionBytes } from "../../tx.js";
 import { apiMutationFn } from "./api.js";
 
 export interface WithKeyPair {
-  keyPair: Ed25519Keypair;
+  keyPair: Keypair;
 }
 
 export function apiTxExecMutationFn<
