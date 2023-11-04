@@ -4,6 +4,7 @@
  */
 
 import { getZkLoginSignature } from "@mysten/sui.js/zklogin";
+import { ZkLoginUserId } from "@shinami/clients";
 import {
   Infer,
   array,
@@ -16,6 +17,7 @@ import {
   union,
 } from "superstruct";
 import { publicKeyFromBase64 } from "./utils.js";
+export { ZkLoginUserId } from "@shinami/clients";
 
 export const ExtendedPublicKeyString = refine(
   string(),
@@ -55,14 +57,6 @@ export const ZkLoginRequest = object({
   keyClaimName: string(),
 });
 export type ZkLoginRequest = Infer<typeof ZkLoginRequest>;
-
-export const ZkLoginUserId = object({
-  iss: string(),
-  aud: string(),
-  keyClaimName: string(),
-  keyClaimValue: string(),
-});
-export type ZkLoginUserId = Infer<typeof ZkLoginUserId>;
 
 export const ZkLoginUser = object({
   id: ZkLoginUserId,

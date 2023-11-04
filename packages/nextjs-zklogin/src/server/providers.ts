@@ -5,7 +5,7 @@
 
 import { SuiClient } from "@mysten/sui.js/client";
 import { PublicKey } from "@mysten/sui.js/cryptography";
-import { ZkProverClient } from "@shinami/clients";
+import { ZkProverClient, ZkWalletClient } from "@shinami/clients";
 import { JWTVerifyGetKey, createRemoteJWKSet } from "jose";
 import { OidProvider, PartialZkLoginProof } from "../user.js";
 
@@ -40,13 +40,23 @@ export interface SaltRequest {
   subWallet: number;
 }
 
-// TODO - New Shinami zkWallet client
-export type SaltProvider = (req: SaltRequest) => Promise<bigint> | bigint;
+export type SaltProvider =
+  | ((req: SaltRequest) => Promise<bigint> | bigint)
+  | ZkWalletClient;
 
 export async function getSalt(
   provider: SaltProvider,
   req: SaltRequest
 ): Promise<bigint> {
+  if (provider instanceof ZkWalletClient) {
+    const { salt } = await provider.getOrCreateZkLoginWallet(
+      req.jwt,
+      req.keyClaimName,
+      req.subWallet
+    );
+    return salt;
+  }
+
   return await provider(req);
 }
 
