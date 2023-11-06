@@ -7,7 +7,12 @@ import { SuiClient } from "@mysten/sui.js/client";
 import { PublicKey } from "@mysten/sui.js/cryptography";
 import { ZkProverClient, ZkWalletClient } from "@shinami/clients";
 import { JWTVerifyGetKey, createRemoteJWKSet } from "jose";
-import { OidProvider, PartialZkLoginProof } from "../user.js";
+import {
+  MinimalJwtClaims,
+  OidProvider,
+  PartialZkLoginProof,
+  ZkLoginUserId,
+} from "../user.js";
 
 export interface EpochInfo {
   epoch: number;
@@ -91,6 +96,16 @@ export async function getZkProof(
 
   return await provider(req);
 }
+
+export type OpenIdProviderFilter = (
+  provider: OidProvider
+) => Promise<boolean> | boolean;
+
+export type UserAuthorizer<T = unknown> = (
+  provider: OidProvider,
+  user: ZkLoginUserId,
+  jwtClaims: MinimalJwtClaims & { [otherClaim: string]: unknown }
+) => Promise<T | undefined> | T | undefined;
 
 interface OidProviderConfig {
   getKey: JWTVerifyGetKey;

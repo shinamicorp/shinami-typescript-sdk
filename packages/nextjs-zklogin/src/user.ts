@@ -58,19 +58,30 @@ export const ZkLoginRequest = object({
 });
 export type ZkLoginRequest = Infer<typeof ZkLoginRequest>;
 
+export const MinimalJwtClaims = object({
+  iss: string(),
+  aud: union([string(), array(string())]),
+  nonce: string(),
+});
+export type MinimalJwtClaims = Infer<typeof MinimalJwtClaims>;
+export type JwtClaims = MinimalJwtClaims & { [otherClaim: string]: unknown };
+
 export const ZkLoginUser = object({
   id: ZkLoginUserId,
   oidProvider: OidProvider,
-  jwtClaims: type({
-    iss: string(),
-    aud: union([string(), array(string())]),
-    nonce: string(),
-  }),
+  jwtClaims: type(MinimalJwtClaims.schema),
+  authContext: type({}),
   maxEpoch: integer(),
   wallet: string(),
   zkProof: type({}),
 });
-export type ZkLoginUser = Infer<typeof ZkLoginUser>;
+export type ZkLoginUser<T = unknown> = Omit<
+  Infer<typeof ZkLoginUser>,
+  "jwtClaims" | "authContext"
+> & {
+  jwtClaims: JwtClaims;
+  authContext: T;
+};
 
 export type ZkLoginProof = Parameters<
   typeof getZkLoginSignature

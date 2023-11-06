@@ -4,10 +4,11 @@
  */
 
 import { NextApiHandler } from "next";
-import { OidProvider, ZkLoginUserId } from "../../../user.js";
 import {
   CurrentEpochProvider,
+  OpenIdProviderFilter,
   SaltProvider,
+  UserAuthorizer,
   ZkProofProvider,
 } from "../../providers.js";
 import { catchAllDispatcher, withInternalErrorHandler } from "../utils.js";
@@ -19,10 +20,8 @@ export function authHandler(
   epochProvider: CurrentEpochProvider,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
-  enableOidProvider: (
-    provider: OidProvider
-  ) => Promise<boolean> | boolean = () => true,
-  allowUser: (user: ZkLoginUserId) => Promise<boolean> | boolean = () => true
+  enableOidProvider: OpenIdProviderFilter = () => true,
+  authorizeUser: UserAuthorizer = () => ({})
 ): NextApiHandler {
   return withInternalErrorHandler(
     catchAllDispatcher({
@@ -31,7 +30,7 @@ export function authHandler(
         saltProvider,
         zkProofProvider,
         enableOidProvider,
-        allowUser
+        authorizeUser
       ),
       logout,
       me: me(epochProvider),

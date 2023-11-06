@@ -13,7 +13,7 @@ import { jwtVerify } from "jose";
 import { NextApiHandler, NextApiRequest } from "next";
 import { validate } from "superstruct";
 import {
-  OidProvider,
+  JwtClaims,
   ZkLoginRequest,
   ZkLoginUser,
   ZkLoginUserId,
@@ -21,7 +21,9 @@ import {
 import { first, publicKeyFromBase64 } from "../../../utils.js";
 import {
   CurrentEpochProvider,
+  OpenIdProviderFilter,
   SaltProvider,
+  UserAuthorizer,
   ZkProofProvider,
   getCurrentEpoch,
   getSalt,
@@ -36,7 +38,7 @@ class ZkLoginAuthError extends Error {}
 async function getExpires(
   req: NextApiRequest,
   epochProvider: CurrentEpochProvider,
-  enableOidProvider: (provider: OidProvider) => Promise<boolean> | boolean
+  enableOidProvider: OpenIdProviderFilter
 ): Promise<Date> {
   const [error, body] = validate(req.body, ZkLoginRequest, { mask: true });
   if (error) throw new ZkLoginAuthError(error.message);
@@ -53,12 +55,12 @@ async function getExpires(
   return new Date(epochStartTimestampMs + epochDurationMs * validEpochs);
 }
 
-async function getZkLoginUser(
+async function getZkLoginUser<T>(
   req: NextApiRequest,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
-  allowUser: (user: ZkLoginUserId) => Promise<boolean> | boolean
-): Promise<ZkLoginUser> {
+  authorizeUser: UserAuthorizer<T>
+): Promise<ZkLoginUser<T>> {
   const [error, body] = validate(req.body, ZkLoginRequest);
   if (error) throw new ZkLoginAuthError(error.message);
 
@@ -95,7 +97,13 @@ async function getZkLoginUser(
     keyClaimValue,
   };
 
-  if (!(await allowUser(id))) throw new ZkLoginAuthError("User not allowed");
+  const authContext = await authorizeUser(
+    body.oidProvider,
+    id,
+    jwtClaims as JwtClaims
+  );
+  if (authContext === undefined)
+    throw new ZkLoginAuthError("User not authorized");
 
   const salt = await getSalt(saltProvider, {
     jwt: body.jwt,
@@ -127,7 +135,8 @@ async function getZkLoginUser(
   return {
     id,
     oidProvider: body.oidProvider,
-    jwtClaims: jwtClaims as ZkLoginUser["jwtClaims"],
+    jwtClaims: jwtClaims as JwtClaims,
+    authContext,
     maxEpoch: body.maxEpoch,
     wallet,
     zkProof: { ...partialProof, addressSeed },
@@ -138,8 +147,8 @@ function loginHandler(
   epochProvider: CurrentEpochProvider,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
-  enableOidProvider: (provider: OidProvider) => Promise<boolean> | boolean,
-  allowUser: (user: ZkLoginUserId) => Promise<boolean> | boolean
+  enableOidProvider: OpenIdProviderFilter,
+  authorizeUser: UserAuthorizer
 ): NextApiHandler {
   return withIronSessionApiRoute(
     async (req, res) => {
@@ -151,7 +160,7 @@ function loginHandler(
           req,
           saltProvider,
           zkProofProvider,
-          allowUser
+          authorizeUser
         );
       } catch (e) {
         if (!(e instanceof ZkLoginAuthError)) throw e;
@@ -187,8 +196,8 @@ export function login(
   epochProvider: CurrentEpochProvider,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
-  enableOidProvider: (provider: OidProvider) => Promise<boolean> | boolean,
-  allowUser: (user: ZkLoginUserId) => Promise<boolean> | boolean
+  enableOidProvider: OpenIdProviderFilter,
+  authorizeUser: UserAuthorizer
 ): NextApiHandler {
   return methodDispatcher({
     POST: loginHandler(
@@ -196,7 +205,7 @@ export function login(
       saltProvider,
       zkProofProvider,
       enableOidProvider,
-      allowUser
+      authorizeUser
     ),
   });
 }

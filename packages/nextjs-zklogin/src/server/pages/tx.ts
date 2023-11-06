@@ -22,32 +22,32 @@ export interface GaslessTransactionBytesWithBudget {
   gasBudget: number;
 }
 
-export type GaslessTransactionBytesBuilder = (
+export type GaslessTransactionBytesBuilder<TAuth = unknown> = (
   req: NextApiRequest,
-  user: ZkLoginUser
+  user: ZkLoginUser<TAuth>
 ) =>
   | Promise<GaslessTransactionBytesWithBudget>
   | GaslessTransactionBytesWithBudget;
 
-export type TransactionBytesBuilder = (
+export type TransactionBytesBuilder<TAuth = unknown> = (
   req: NextApiRequest,
-  user: ZkLoginUser
+  user: ZkLoginUser<TAuth>
 ) => Promise<string> | string;
 
-export type TransactionResponseParser<T = unknown> = (
+export type TransactionResponseParser<TAuth = unknown, TRes = unknown> = (
   req: NextApiRequest,
   txRes: SuiTransactionBlockResponse,
-  user: ZkLoginUser
-) => Promise<T> | T;
+  user: ZkLoginUser<TAuth>
+) => Promise<TRes> | TRes;
 
 export class InvalidRequest extends Error {}
 
-function txHandler(
-  buildTxBytes: TransactionBytesBuilder
+function txHandler<TAuth = unknown>(
+  buildTxBytes: TransactionBytesBuilder<TAuth>
 ): NextApiHandler<PreparedTransactionBytes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
-      const user = req.session.user!;
+      const user = req.session.user! as ZkLoginUser<TAuth>;
       let txBase64;
       try {
         txBase64 = await buildTxBytes(req, user);
@@ -60,13 +60,13 @@ function txHandler(
   });
 }
 
-function sponsoredTxHandler(
+function sponsoredTxHandler<TAuth = unknown>(
   gas: GasStationClient,
-  buildGaslessTxBytes: GaslessTransactionBytesBuilder
+  buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>
 ): NextApiHandler<PreparedTransactionBytes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
-      const user = req.session.user!;
+      const user = req.session.user! as ZkLoginUser<TAuth>;
       let tx;
       try {
         tx = await buildGaslessTxBytes(req, user);
@@ -85,11 +85,11 @@ function sponsoredTxHandler(
   });
 }
 
-function execHandler<T = unknown>(
+function execHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
-  parseTxRes: TransactionResponseParser<T>,
+  parseTxRes: TransactionResponseParser<TAuth, TRes>,
   txOptions: SuiTransactionBlockResponseOptions = {}
-): NextApiHandler<T | ApiErrorBody> {
+): NextApiHandler<TRes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
       const [error, body] = validate(req.body, SignedTransactionBytes, {
@@ -97,7 +97,7 @@ function execHandler<T = unknown>(
       });
       if (error) return res.status(400).json({ error: error.message });
 
-      const user = req.session.user!;
+      const user = req.session.user! as ZkLoginUser<TAuth>;
       const zkSignature = assembleZkLoginSignature(user, body.signature);
 
       const txRes = await sui.executeTransactionBlock({
@@ -120,10 +120,10 @@ function execHandler<T = unknown>(
   });
 }
 
-export function zkLoginTxExecHandler(
+export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
-  buildTxBytes: TransactionBytesBuilder,
-  parseTxRes: TransactionResponseParser,
+  buildTxBytes: TransactionBytesBuilder<TAuth>,
+  parseTxRes: TransactionResponseParser<TAuth, TRes>,
   txOptions: SuiTransactionBlockResponseOptions = {}
 ): NextApiHandler {
   return withZkLoginUserRequired(
@@ -135,11 +135,11 @@ export function zkLoginTxExecHandler(
   );
 }
 
-export function zkLoginSponsoredTxExecHandler(
+export function zkLoginSponsoredTxExecHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
   gas: GasStationClient,
-  buildGaslessTxBytes: GaslessTransactionBytesBuilder,
-  parseTxRes: TransactionResponseParser,
+  buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>,
+  parseTxRes: TransactionResponseParser<TAuth, TRes>,
   txOptions: SuiTransactionBlockResponseOptions = {}
 ): NextApiHandler {
   return withZkLoginUserRequired(

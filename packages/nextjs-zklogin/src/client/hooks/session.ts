@@ -87,8 +87,8 @@ export interface ZkLoginSessionLoading {
   isLoading: true;
 }
 
-export interface ZkLoginSessionActive {
-  user: ZkLoginUser;
+export interface ZkLoginSessionActive<T = unknown> {
+  user: ZkLoginUser<T>;
   localSession: ZkLoginLocalSession;
   isLoading: false;
 }
@@ -99,15 +99,15 @@ export interface ZkLoginSessionInactive {
   isLoading: false;
 }
 
-export type ZkLoginSession =
+export type ZkLoginSession<T = unknown> =
   | ZkLoginSessionLoading
-  | ZkLoginSessionActive
+  | ZkLoginSessionActive<T>
   | ZkLoginSessionInactive;
 
 export const ZkLoginSessionContext = createContext<ZkLoginSession | null>(null);
 
-export function useZkLoginSession(): ZkLoginSession {
-  const session = useContext(ZkLoginSessionContext);
+export function useZkLoginSession<T = unknown>(): ZkLoginSession<T> {
+  const session = useContext(ZkLoginSessionContext) as ZkLoginSession<T>;
   if (!session)
     throw new Error(
       "useZkLoginSession must be used inside ZkLoginSessionProvider"
