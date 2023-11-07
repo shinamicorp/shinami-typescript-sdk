@@ -1,15 +1,16 @@
-import { useAddMutation } from "@/lib/hooks/api";
+import { useAddMutation, useRecentTxsQuery } from "@/lib/hooks/api";
 import { getSuiExplorerTransactionUrl } from "@/lib/hooks/sui";
 import { AddResponse } from "@/lib/shared/interfaces";
 import { withZkLoginSessionRequired } from "@shinami/nextjs-zklogin/client";
 import Link from "next/link";
 import { useState } from "react";
 
-// This is a auth-protected page. Anonymous users will be auto-redirected to the login page.
+// This is an auth-protected page. Anonymous users will be auto-redirected to the login page.
 export default withZkLoginSessionRequired(({ session }) => {
   const { isLoading, user, localSession } = session;
   const [result, setResult] = useState<AddResponse>();
   const { mutateAsync: add, isPending: isAdding } = useAddMutation();
+  const { data: txs, isLoading: isLoadingTxs } = useRecentTxsQuery();
 
   if (isLoading) return <p>Loading zkLogin session...</p>;
 
@@ -66,6 +67,25 @@ export default withZkLoginSessionRequired(({ session }) => {
             <input type="submit" value="Calculate on Sui" disabled={isAdding} />
           </div>
         </form>
+      </div>
+      <div>
+        <p>Recent transactions:</p>
+        {isLoadingTxs ? (
+          <p>Loading...</p>
+        ) : (
+          <ul>
+            {txs.txDigests.map((txDigest) => (
+              <li key={txDigest}>
+                <Link
+                  href={getSuiExplorerTransactionUrl(txDigest, true)}
+                  target="_blank"
+                >
+                  {txDigest}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </>
   );

@@ -3,7 +3,7 @@ import { AUTH_API_BASE, LOGIN_PAGE_PATH } from "@shinami/nextjs-zklogin";
 import { useZkLoginSession } from "@shinami/nextjs-zklogin/client";
 import Link from "next/link";
 
-// This is a publically accessible page, showing optional contents for signed-in users.
+// This is a publically accessible page, displaying optional contents for signed-in users.
 export default function Index() {
   const { user, isLoading } = useZkLoginSession();
 

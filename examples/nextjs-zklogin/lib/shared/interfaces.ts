@@ -1,4 +1,4 @@
-import { Infer, coerce, integer, object, string } from "superstruct";
+import { Infer, array, coerce, integer, object, string } from "superstruct";
 
 export const AddRequest = object({
   x: integer(),
@@ -16,3 +16,8 @@ export const AddResponse = object({
   txDigest: string(),
 });
 export type AddResponse = Infer<typeof AddResponse>;
+
+export const RecentTxsResponse = object({
+  txDigests: array(string()),
+});
+export type RecentTxsResponse = Infer<typeof RecentTxsResponse>;

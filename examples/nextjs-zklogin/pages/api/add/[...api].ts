@@ -53,6 +53,9 @@ const parseTxRes: TransactionResponseParser<AddResponse> = async (_, txRes) => {
  *
  * You can also use "zkLoginTxExecHandler" to implement non-sponsored transactions, which would
  * require the user's zkLogin wallet to have enough gas.
+ *
+ * Both "zkLoginSponsoredTxExecHandler" and "zkLoginTxExecHandler" are auth-protected, requiring the
+ * user to have a live session.
  */
 export default zkLoginSponsoredTxExecHandler(sui, gas, buildTx, parseTxRes, {
   showEvents: true,

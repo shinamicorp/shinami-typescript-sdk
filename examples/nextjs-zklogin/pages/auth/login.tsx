@@ -17,6 +17,9 @@ import {
 } from "@shinami/nextjs-zklogin/client";
 import { useRouter } from "next/router";
 
+// This page should be installed at route "/auth/login".
+// If you need to use a different path, set env NEXT_PUBLIC_LOGIN_PAGE_PATH to override the default,
+// and update "callbackBaseUrl" accordingly.
 export default withNewZkLoginSession(
   () => relativeToCurrentEpoch(sui),
   ({ session }) => {
