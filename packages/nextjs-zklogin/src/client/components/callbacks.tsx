@@ -20,6 +20,7 @@ interface State {
 function withOpenIdCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
   oidProvider: OidProvider,
+  keyClaimName: string,
   getState: (params: URLSearchParams) => State,
   getJwt: (params: URLSearchParams) => string
 ) {
@@ -56,7 +57,7 @@ function withOpenIdCallback<P>(
               .toSuiPublicKey(),
             maxEpoch: session.maxEpoch,
             jwtRandomness: session.jwtRandomness,
-            keyClaimName: "sub",
+            keyClaimName,
           });
 
           setStatus("redirecting");
@@ -75,11 +76,13 @@ function withOpenIdCallback<P>(
 }
 
 export function withGoogleCallback<P>(
-  Component: FunctionComponent<P & { status: CallbackStatus }>
+  Component: FunctionComponent<P & { status: CallbackStatus }>,
+  keyClaimName: string = "sub"
 ) {
   return withOpenIdCallback(
     Component,
     "google",
+    keyClaimName,
     (params) => {
       const state = new URLSearchParams(
         params.get("state") ??
@@ -101,11 +104,13 @@ export function withGoogleCallback<P>(
 }
 
 export function withFacebookCallback<P>(
-  Component: FunctionComponent<P & { status: CallbackStatus }>
+  Component: FunctionComponent<P & { status: CallbackStatus }>,
+  keyClaimName: string = "sub"
 ) {
   return withOpenIdCallback(
     Component,
     "facebook",
+    keyClaimName,
     (params) => {
       const state = new URLSearchParams(
         params.get("state") ??
@@ -127,11 +132,13 @@ export function withFacebookCallback<P>(
 }
 
 export function withTwitchCallback<P>(
-  Component: FunctionComponent<P & { status: CallbackStatus }>
+  Component: FunctionComponent<P & { status: CallbackStatus }>,
+  keyClaimName: string = "sub"
 ) {
   return withOpenIdCallback(
     Component,
     "twitch",
+    keyClaimName,
     (params) => {
       const state = new URLSearchParams(
         // Twitch does a second URL encoding on state when calling back.
