@@ -40,6 +40,9 @@ You must set at least one of these env variables:
 - `NEXT_PUBLIC_FACEBOOK_CLIENT_ID`
 - `NEXT_PUBLIC_TWITCH_CLIENT_ID`
 
+Note that if you are using Twitch, you must add http://localhost:3000/auth/twitch to your application's OAuth Redirect URLs for the local dev server to work.
+Other providers allow `localhost` automatically during development.
+
 ### Generate session secret
 
 Set `IRON_SESSION_SECRET` to a randomly generated string.

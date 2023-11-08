@@ -1,6 +1,6 @@
 {
   "name": "shinami",
-  "version": "0.6.0-alpha.6",
+  "version": "0.6.0",
   "description": "[Deprecated] Transitional package for @shinami/clients",
   "sideEffects": false,
   "engines": {
@@ -46,6 +46,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@shinami/clients": "^0.6.0-alpha.5"
+    "@shinami/clients": "^0.6.0"
   }
 }

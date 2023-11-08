@@ -1,6 +1,6 @@
 {
   "name": "@shinami/clients",
-  "version": "0.6.0-alpha.6",
+  "version": "0.6.0",
   "description": "TypeScript clients for Shinami services",
   "sideEffects": false,
   "engines": {
