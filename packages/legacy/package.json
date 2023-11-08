@@ -1,0 +1,51 @@
+{
+  "name": "shinami",
+  "version": "0.6.0",
+  "description": "[Deprecated] Transitional package for @shinami/clients",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/cjs/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc --build tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "build:esm": "tsc --build",
+    "lint": "eslint .",
+    "clean": "rm -fr ./dist ./coverage"
+  },
+  "keywords": [
+    "Shinami",
+    "Sui",
+    "node",
+    "gas",
+    "wallet"
+  ],
+  "author": {
+    "name": "Shinami",
+    "url": "https://www.shinami.com/"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://www.shinami.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shinamicorp/shinami-typescript-sdk.git",
+    "directory": "packages/legacy"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@shinami/clients": "^0.6.0"
+  }
+}

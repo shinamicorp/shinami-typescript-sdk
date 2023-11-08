@@ -1,0 +1,88 @@
+{
+  "name": "@shinami/nextjs-zklogin",
+  "version": "0.1.0",
+  "description": "Next.js SDK for integrating with Sui zkLogin",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "dist",
+    "client",
+    "server"
+  ],
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./client": {
+      "import": "./dist/esm/client/index.js",
+      "require": "./dist/cjs/client/index.js"
+    },
+    "./server": {
+      "import": "./dist/esm/server/index.js",
+      "require": "./dist/cjs/server/index.js"
+    },
+    "./server/pages": {
+      "import": "./dist/esm/server/pages/index.js",
+      "require": "./dist/cjs/server/pages/index.js"
+    },
+    "./server/pages/utils": {
+      "import": "./dist/esm/server/pages/utils.js",
+      "require": "./dist/cjs/server/pages/utils.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc --build tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "build:esm": "tsc --build",
+    "lint": "eslint .",
+    "clean": "rm -fr ./dist ./coverage"
+  },
+  "keywords": [
+    "Next.js",
+    "Sui",
+    "zkLogin",
+    "auth",
+    "wallet"
+  ],
+  "author": {
+    "name": "Shinami",
+    "url": "https://www.shinami.com/"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://www.shinami.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shinamicorp/shinami-typescript-sdk.git",
+    "directory": "packages/nextjs-zklogin"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.45.1",
+    "@mysten/zklogin": "^0.3.4",
+    "@shinami/clients": "^0.6.0",
+    "@tanstack/react-query": "^5.0.5",
+    "iron-session": "^6.3.1",
+    "superstruct": "^1.0.3"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.3",
+    "@types/react": "^18.2.31",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.51.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "next": "13"
+  }
+}

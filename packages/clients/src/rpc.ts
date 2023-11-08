@@ -9,7 +9,7 @@ import {
   JSONRPCError,
   RequestManager,
 } from "@open-rpc/client-js";
-import { Infer, Struct, create, object, string, validate } from "superstruct";
+import { Infer, Struct, mask, object, string, validate } from "superstruct";
 
 /**
  * Base class for all Shinami JSON RPC clients.
@@ -47,7 +47,7 @@ export class ShinamiRpcClient {
   ): Promise<T> {
     const result = await this.client.request({ method, params });
     if (!schema) return result;
-    return create(result, schema);
+    return mask(result, schema);
   }
 
   /**
@@ -89,5 +89,5 @@ export type ErrorDetails = Infer<typeof ErrorDetails>;
  * @returns Error details if available.
  */
 export function errorDetails(error: JSONRPCError): ErrorDetails | undefined {
-  return validate(error.data, ErrorDetails)[1];
+  return validate(error.data, ErrorDetails, { mask: true })[1];
 }

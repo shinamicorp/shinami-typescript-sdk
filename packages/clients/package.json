@@ -1,0 +1,68 @@
+{
+  "name": "@shinami/clients",
+  "version": "0.6.0",
+  "description": "TypeScript clients for Shinami services",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/cjs/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc --build tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "build:esm": "tsc --build",
+    "lint": "eslint .",
+    "clean": "rm -fr ./dist ./coverage",
+    "test": "jest unit",
+    "integration": "jest integration",
+    "coverage": "jest --coverage"
+  },
+  "keywords": [
+    "Shinami",
+    "Sui",
+    "node",
+    "gas",
+    "wallet"
+  ],
+  "author": {
+    "name": "Shinami",
+    "url": "https://www.shinami.com/"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://www.shinami.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shinamicorp/shinami-typescript-sdk.git",
+    "directory": "packages/clients"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.45.1",
+    "@open-rpc/client-js": "^1.8.1",
+    "superstruct": "^1.0.3"
+  },
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.3",
+    "@types/uuid": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.51.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "uuid": "^9.0.0"
+  }
+}
