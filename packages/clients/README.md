@@ -5,6 +5,7 @@ TypeScript clients for [Shinami](https://www.shinami.com/) services for the [Sui
 - [Node service](#node-service)
 - [Gas station](#gas-station)
 - [Invisible wallet](#invisible-wallet)
+- [zkLogin wallet](#zklogin-wallet)
 
 ## Install
 
@@ -172,6 +173,36 @@ const txResp = await signer.executeGaslessTransactionBlock(
   gaslessTx,
   5_000_000
 );
+```
+
+### zkLogin wallet
+
+You can use Shinami's zkLogin wallet services as the salt provider and zkProver in your [zkLogin](https://docs.sui.io/concepts/cryptography/zklogin) implementation.
+
+```ts
+import { ZkProverClient, ZkWalletClient } from "@shinami/clients";
+
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
+const zkw = new ZkWalletClient(WALLET_ACCESS_KEY);
+const zkp = new ZkProverClient(WALLET_ACCESS_KEY);
+
+// Prepare a nonce according to the zkLogin requirements.
+// Obtain a valid jwt with that nonce from a supported OpenID provider.
+
+// Get zkLogin wallet salt.
+const { salt, address } = await zkw.getOrCreateZkLoginWallet(jwt);
+
+// Create a zkProof.
+const { zkProof } = await zkp.createZkLoginProof(
+  jwt,
+  maxEpoch,
+  ephemeralPublicKey,
+  jwtRandomness,
+  salt
+);
+
+// Now you can sign transaction blocks with ephemeralPrivateKey, and assemble the zkLogin signature
+// using zkProof.
 ```
 
 #### Beneficiary graph API
