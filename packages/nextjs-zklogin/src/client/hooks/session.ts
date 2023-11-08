@@ -29,6 +29,11 @@ export interface ZkLoginLocalSession {
 
 const zkLoginLocalQueryKey = ["local", "zkLogin"];
 
+/**
+ * React hook for fetching zkLogin local session state.
+ *
+ * Uses TanStack query.
+ */
 export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
   return useQuery({
     queryKey: [...zkLoginLocalQueryKey, "localSession"],
@@ -59,6 +64,11 @@ export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
   });
 }
 
+/**
+ * React hook for saving zkLogin local session state.
+ *
+ * Uses TanStack mutation.
+ */
 export function useSaveZkLoginLocalSession(): UseMutationResult<
   void,
   unknown,
@@ -106,6 +116,14 @@ export type ZkLoginSession<T = unknown> =
 
 export const ZkLoginSessionContext = createContext<ZkLoginSession | null>(null);
 
+/**
+ * React hook to use data from the user's current zkLogin session.
+ *
+ * The returned data could be one of these types:
+ * - `ZkLoginSessionLoading`
+ * - `ZkLoginSessionActive`
+ * - `ZkLoginSessionInactive`
+ */
 export function useZkLoginSession<T = unknown>(): ZkLoginSession<T> {
   const session = useContext(ZkLoginSessionContext) as ZkLoginSession<T>;
   if (!session)

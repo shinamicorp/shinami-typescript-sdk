@@ -97,9 +97,9 @@ export async function getZkProof(
   return await provider(req);
 }
 
-export type OpenIdProviderFilter = (
-  provider: OidProvider
-) => Promise<boolean> | boolean;
+export type OAuthApplications = {
+  [provider in OidProvider]?: string[];
+};
 
 export type UserAuthorizer<T = unknown> = (
   provider: OidProvider,

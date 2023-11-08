@@ -17,6 +17,26 @@ interface State {
   redirectTo: string;
 }
 
+/**
+ * React HOC for implementing the callback page for a supported OpenID provider.
+ *
+ * After a successful sign-in, the page will automatically issue a login request to your backend
+ * (default at `/api/auth/login`), and redirect the user to the original page they were trying to
+ * access.
+ *
+ * The URL to the OpenID provider auth page MUST be obtained from one of these functions because of
+ * special state encoding:
+ * - `getGoogleAuthUrl`
+ * - `getFacebookAuthUrl`
+ * - `getTwitchAuthUrl`
+ *
+ * @param Component You actual React component to be rendered.
+ * @param oidProvider The OpenID provider name.
+ * @param keyClaimName The claim name that identifies a user. When unsure, use "sub".
+ * @param getState Function to decode state param.
+ * @param getJwt Function to extract JWT from params.
+ * @returns Wrapped component.
+ */
 function withOpenIdCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
   oidProvider: OidProvider,
@@ -75,6 +95,9 @@ function withOpenIdCallback<P>(
   return WrappedComponent;
 }
 
+/**
+ * React HOC for implementing Google auth callback page.
+ */
 export function withGoogleCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
   keyClaimName: string = "sub"
@@ -103,6 +126,9 @@ export function withGoogleCallback<P>(
   );
 }
 
+/**
+ * React HOC for implementing Facebook auth callback page.
+ */
 export function withFacebookCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
   keyClaimName: string = "sub"
@@ -131,6 +157,9 @@ export function withFacebookCallback<P>(
   );
 }
 
+/**
+ * React HOC for implementing Twitch auth callback page.
+ */
 export function withTwitchCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
   keyClaimName: string = "sub"

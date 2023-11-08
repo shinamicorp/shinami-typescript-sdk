@@ -14,6 +14,13 @@ export interface WithKeyPair {
   keyPair: Keypair;
 }
 
+/**
+ * Helper function to generate TanStack mutation functions for end-to-end Sui transaction block
+ * execution.
+ *
+ * Must be used on API routes implemented with `zkLoginSponsoredTxExecHandler` or
+ * `zkLoginTxExecHandler` from `@shinami/nextjs-zklogin/server/pages`.
+ */
 export function apiTxExecMutationFn<
   T = unknown,
   P extends WithKeyPair = WithKeyPair

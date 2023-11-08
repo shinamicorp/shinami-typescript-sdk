@@ -120,6 +120,20 @@ function execHandler<TAuth = unknown, TRes = unknown>(
   });
 }
 
+/**
+ * Implements API routes for building and executing a Sui transaction block.
+ *
+ * Two routes are implemented under the hood:
+ * - [base_route]/tx for building the transaction block.
+ * - [base_route]/exec for executing the transaction block after signed by frontend, and parsing the
+ *   transaction response.
+ *
+ * @param sui `SuiClient` for transaction building and execution.
+ * @param buildTxBytes Function to build a transaction block (encoded in Base64).
+ * @param parseTxRes Function to parse the transaction response.
+ * @param txOptions Transaction response options.
+ * @returns A Next.js API route handler.
+ */
 export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
   buildTxBytes: TransactionBytesBuilder<TAuth>,
@@ -135,6 +149,21 @@ export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
   );
 }
 
+/**
+ * Implements API routes for building, sponsoring, and executing a Sui transaction block.
+ *
+ * Two routes are implemented under the hood:
+ * - [base_route]/tx for building and sponsoring the transaction block.
+ * - [base_route]/exec for executing the transaction block after signed by frontend, and parsing the
+ *   transaction response.
+ *
+ * @param sui `SuiClient` for transaction building and execution.
+ * @param gas `GasStationClient` for sponsoring transaction block.
+ * @param buildGaslessTxBytes Function to build a gasless transaction block (encoded in Base64).
+ * @param parseTxRes Function to parse the transaction response.
+ * @param txOptions Transaction response options.
+ * @returns A Next.js API route handler.
+ */
 export function zkLoginSponsoredTxExecHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
   gas: GasStationClient,

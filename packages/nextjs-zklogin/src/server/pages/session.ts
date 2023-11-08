@@ -30,10 +30,21 @@ export const sessionConfig: IronSessionOptions = {
   },
 };
 
+/**
+ * Higher-order handler for augmenting the wrapped handler with session state.
+ *
+ * The session state is managed using iron-session, and this is just a thin wrapper on top of
+ * `withIronSessionApiRoute`.
+ */
 export function withSession<T>(handler: NextApiHandler<T>): NextApiHandler<T> {
   return withIronSessionApiRoute(handler, sessionConfig);
 }
 
+/**
+ * Higher-order handler for implementing auth-protected API routes.
+ *
+ * Requests would result in HTTP 401 if the user doesn't have an active session.
+ */
 export function withZkLoginUserRequired<T>(
   epochProvider: CurrentEpochProvider,
   handler: (

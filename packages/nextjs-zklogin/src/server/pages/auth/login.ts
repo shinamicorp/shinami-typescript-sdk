@@ -21,7 +21,7 @@ import {
 import { first, publicKeyFromBase64 } from "../../../utils.js";
 import {
   CurrentEpochProvider,
-  OpenIdProviderFilter,
+  OAuthApplications,
   SaltProvider,
   UserAuthorizer,
   ZkProofProvider,
@@ -38,12 +38,13 @@ class ZkLoginAuthError extends Error {}
 async function getExpires(
   req: NextApiRequest,
   epochProvider: CurrentEpochProvider,
-  enableOidProvider: OpenIdProviderFilter
+  allowedApps: OAuthApplications
 ): Promise<Date> {
   const [error, body] = validate(req.body, ZkLoginRequest, { mask: true });
   if (error) throw new ZkLoginAuthError(error.message);
 
-  if (!(await enableOidProvider(body.oidProvider)))
+  const apps = allowedApps[body.oidProvider];
+  if (!apps || apps.length === 0)
     throw new ZkLoginAuthError(`OpenID provider disabled: ${body.oidProvider}`);
 
   const { epoch, epochStartTimestampMs, epochDurationMs } =
@@ -59,6 +60,7 @@ async function getZkLoginUser<T>(
   req: NextApiRequest,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
+  allowedApps: OAuthApplications,
   authorizeUser: UserAuthorizer<T>
 ): Promise<ZkLoginUser<T>> {
   const [error, body] = validate(req.body, ZkLoginRequest);
@@ -96,6 +98,9 @@ async function getZkLoginUser<T>(
     keyClaimName: body.keyClaimName,
     keyClaimValue,
   };
+
+  if (!(allowedApps[body.oidProvider] ?? []).includes(aud))
+    throw new ZkLoginAuthError("OAuth app not allowed");
 
   const authContext = await authorizeUser(
     body.oidProvider,
@@ -147,7 +152,7 @@ function loginHandler(
   epochProvider: CurrentEpochProvider,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
-  enableOidProvider: OpenIdProviderFilter,
+  allowedApps: OAuthApplications,
   authorizeUser: UserAuthorizer
 ): NextApiHandler {
   return withIronSessionApiRoute(
@@ -160,6 +165,7 @@ function loginHandler(
           req,
           saltProvider,
           zkProofProvider,
+          allowedApps,
           authorizeUser
         );
       } catch (e) {
@@ -173,7 +179,7 @@ function loginHandler(
     async (req, res) => {
       let expires;
       try {
-        expires = await getExpires(req, epochProvider, enableOidProvider);
+        expires = await getExpires(req, epochProvider, allowedApps);
       } catch (e) {
         if (!(e instanceof ZkLoginAuthError)) throw e;
         res.status(400).json({ error: e.message });
@@ -192,11 +198,14 @@ function loginHandler(
   );
 }
 
+/**
+ * Implements the login route.
+ */
 export function login(
   epochProvider: CurrentEpochProvider,
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
-  enableOidProvider: OpenIdProviderFilter,
+  allowedApps: OAuthApplications,
   authorizeUser: UserAuthorizer
 ): NextApiHandler {
   return methodDispatcher({
@@ -204,7 +213,7 @@ export function login(
       epochProvider,
       saltProvider,
       zkProofProvider,
-      enableOidProvider,
+      allowedApps,
       authorizeUser
     ),
   });

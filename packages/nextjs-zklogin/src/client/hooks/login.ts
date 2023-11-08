@@ -9,6 +9,11 @@ import { UseMutationResult, useMutation } from "@tanstack/react-query";
 import { useLogout } from "./api.js";
 import { ZkLoginLocalSession, useSaveZkLoginLocalSession } from "./session.js";
 
+/**
+ * React hook for initializing a new zkLogin session.
+ * 
+ * Uses TanStack mutation.
+ */
 export function useNewZkLoginSession(): UseMutationResult<
   ZkLoginLocalSession,
   unknown,

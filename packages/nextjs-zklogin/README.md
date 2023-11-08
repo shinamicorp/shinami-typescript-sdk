@@ -51,6 +51,10 @@ Please refer to inline documentations for more detailed information.
 
 ### From `@shinami/nextjs-zklogin/client`
 
+- `ZkLoginSessionProvider`
+  - Root React component to provide zkLogin session state.
+  - Must be used near the root of your component tree.
+  - This component itself must be wrapped in a [TanStack `QueryClientProvider`](https://tanstack.com/query/latest/docs/react/reference/QueryClientProvider).
 - `withNewZkLoginSession`
   - React HOC for implementing the login page.
   - Resets local session state and prepares a new one.
@@ -70,6 +74,9 @@ Please refer to inline documentations for more detailed information.
 - `apiTxExecMutationFn`
   - Helper function to generate [TanStack mutation](https://tanstack.com/query/latest/docs/react/guides/mutations) functions for end-to-end Sui transaction block execution.
   - Must be used on API routes implemented with `zkLoginSponsoredTxExecHandler` or `zkLoginTxExecHandler` from `@shinami/nextjs-zklogin/server/pages`.
+- `useLogout`
+  - React hook for issuing a logout request to the auth API.
+  - Alternatively, you can also redirect the user to the logout API route (default at `/api/auth/logout`).
 
 ### From `@shinami/nextjs-zklogin/server/pages`
 

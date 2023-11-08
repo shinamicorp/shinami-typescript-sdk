@@ -15,6 +15,12 @@ import {
   useZkLoginSession,
 } from "../hooks/session.js";
 
+/**
+ * Root React component to provide zkLogin session state.
+ *
+ * Must be used near the root of your component tree. This component itself must be wrapped in a
+ * TanStack `QueryClientProvider`.
+ */
 export function ZkLoginSessionProvider({ children }: PropsWithChildren) {
   const { data: localSession, isLoading: isLoadingLocalSession } =
     useZkLoginLocalSession();
@@ -41,6 +47,17 @@ export function ZkLoginSessionProvider({ children }: PropsWithChildren) {
   );
 }
 
+/**
+ * React HOC for implementing an auth-protected page.
+ *
+ * User will be redirected to the login page (default at `/auth/login`) if they don't have an active
+ * session.
+ *
+ * @param Component Your main React component to be rendered, with an active session.
+ * @param Loading A transient React component for when the session is being loaded.
+ * @param Redirecting A transient React component for when the user is being redirected.
+ * @returns Wrapped component.
+ */
 export function withZkLoginSessionRequired<P extends object, T = unknown>(
   Component: FunctionComponent<P & { session: ZkLoginSessionActive<T> }>,
   Loading: FunctionComponent<P> = () => <p>Loading zkLogin session...</p>,

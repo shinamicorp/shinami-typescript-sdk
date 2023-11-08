@@ -46,6 +46,9 @@ function apiQueryFn<T = unknown>(schema?: Struct<T>): QueryFunction<T> {
   };
 }
 
+/**
+ * Helper function to generate TanStack mutation functions for making HTTP API calls.
+ */
 export function apiMutationFn<T = unknown, P = unknown>({
   uri,
   body,
@@ -75,6 +78,11 @@ export function apiMutationFn<T = unknown, P = unknown>({
   };
 }
 
+/**
+ * React hook for fetching user info from the auth API.
+ *
+ * Uses TanStack query.
+ */
 export function useMe(): UseQueryResult<ZkLoginUser, ApiError> {
   return useQuery({
     queryKey: ["api", `${AUTH_API_BASE}/me`],
@@ -83,6 +91,11 @@ export function useMe(): UseQueryResult<ZkLoginUser, ApiError> {
   });
 }
 
+/**
+ * React hook for issuing a login request to the auth API.
+ *
+ * Uses TanStack mutation.
+ */
 export function useLogin(): UseMutationResult<
   ZkLoginUser,
   ApiError,
@@ -102,6 +115,12 @@ export function useLogin(): UseMutationResult<
   });
 }
 
+/**
+ * React hook for issuing a logout request to the auth API.
+ *
+ * Uses TanStack mutation. Alternatively, you can also redirect the user to the logout API route
+ * (default at `/api/auth/logout`).
+ */
 export function useLogout(): UseMutationResult<unknown, ApiError> {
   const queryClient = useQueryClient();
   return useMutation({
