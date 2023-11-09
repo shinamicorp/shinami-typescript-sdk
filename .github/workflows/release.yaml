@@ -31,7 +31,7 @@ jobs:
       - id: determine-package
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
-            package=$(echo "${{ github.event.tag_name }}" | sed -E 's/-v[0-9].*$//')
+            package=$(echo "${{ github.event.release.tag_name }}" | sed -E 's/-v[0-9].*$//')
           else
             package="${{ inputs.package }}"
           fi
