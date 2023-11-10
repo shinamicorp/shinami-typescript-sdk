@@ -2,9 +2,6 @@ import { sui, zkp, zkw } from "@/lib/api/shinami";
 import {
   FACEBOOK_CLIENT_ID,
   GOOGLE_CLIENT_ID,
-  IS_FACEBOOK_ENABLED,
-  IS_GOOGLE_ENABLED,
-  IS_TWITCH_ENABLED,
   TWITCH_CLIENT_ID,
 } from "@/lib/shared/openid";
 import { authHandler } from "@shinami/nextjs-zklogin/server/pages";
@@ -16,8 +13,8 @@ export default authHandler(
   zkw, // Alternatively, you can use mystenSaltProvider
   zkp, // Alternatively, you can use mystenProver
   {
-    google: IS_GOOGLE_ENABLED ? [GOOGLE_CLIENT_ID] : undefined,
-    facebook: IS_FACEBOOK_ENABLED ? [FACEBOOK_CLIENT_ID] : undefined,
-    twitch: IS_TWITCH_ENABLED ? [TWITCH_CLIENT_ID] : undefined,
+    google: GOOGLE_CLIENT_ID ? [GOOGLE_CLIENT_ID] : undefined,
+    facebook: FACEBOOK_CLIENT_ID ? [FACEBOOK_CLIENT_ID] : undefined,
+    twitch: TWITCH_CLIENT_ID ? [TWITCH_CLIENT_ID] : undefined,
   }
 );

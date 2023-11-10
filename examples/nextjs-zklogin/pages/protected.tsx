@@ -74,7 +74,7 @@ export default withZkLoginSessionRequired(({ session }) => {
           <p>Loading...</p>
         ) : (
           <ul>
-            {txs.txDigests.map((txDigest) => (
+            {txs!.txDigests.map((txDigest) => (
               <li key={txDigest}>
                 <Link
                   href={getSuiExplorerTransactionUrl(txDigest, true)}

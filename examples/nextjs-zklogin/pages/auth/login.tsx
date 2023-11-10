@@ -2,9 +2,6 @@ import { sui } from "@/lib/hooks/sui";
 import {
   FACEBOOK_CLIENT_ID,
   GOOGLE_CLIENT_ID,
-  IS_FACEBOOK_ENABLED,
-  IS_GOOGLE_ENABLED,
-  IS_TWITCH_ENABLED,
   TWITCH_CLIENT_ID,
 } from "@/lib/shared/openid";
 import { first } from "@/lib/shared/utils";
@@ -30,14 +27,14 @@ export default withNewZkLoginSession(
     // Render sign-in options based on what's configured.
     return (
       <>
-        {IS_GOOGLE_ENABLED && (
+        {GOOGLE_CLIENT_ID && (
           <div>
             <button
               onClick={() => {
                 router.replace(
                   getGoogleAuthUrl(
                     session,
-                    GOOGLE_CLIENT_ID,
+                    GOOGLE_CLIENT_ID!,
                     new URL("google", callbackBaseUrl),
                     redirectTo
                   )
@@ -48,14 +45,14 @@ export default withNewZkLoginSession(
             </button>
           </div>
         )}
-        {IS_FACEBOOK_ENABLED && (
+        {FACEBOOK_CLIENT_ID && (
           <div>
             <button
               onClick={() => {
                 router.replace(
                   getFacebookAuthUrl(
                     session,
-                    FACEBOOK_CLIENT_ID,
+                    FACEBOOK_CLIENT_ID!,
                     new URL("facebook", callbackBaseUrl),
                     redirectTo
                   )
@@ -66,14 +63,14 @@ export default withNewZkLoginSession(
             </button>
           </div>
         )}
-        {IS_TWITCH_ENABLED && (
+        {TWITCH_CLIENT_ID && (
           <div>
             <button
               onClick={() => {
                 router.replace(
                   getTwitchAuthUrl(
                     session,
-                    TWITCH_CLIENT_ID,
+                    TWITCH_CLIENT_ID!,
                     new URL("twitch", callbackBaseUrl),
                     redirectTo
                   )
