@@ -72,6 +72,8 @@ export default withZkLoginSessionRequired(({ session }) => {
         <p>Recent transactions:</p>
         {isLoadingTxs ? (
           <p>Loading...</p>
+        ) : !txs ? (
+          <p>Failed to load recent transactions</p>
         ) : (
           <ul>
             {txs.txDigests.map((txDigest) => (
