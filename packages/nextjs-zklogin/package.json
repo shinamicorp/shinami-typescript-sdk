@@ -1,6 +1,6 @@
 {
   "name": "@shinami/nextjs-zklogin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Next.js SDK for integrating with Sui zkLogin",
   "sideEffects": false,
   "engines": {
@@ -64,9 +64,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@mysten/sui.js": "^0.45.1",
-    "@mysten/zklogin": "^0.3.4",
-    "@shinami/clients": "^0.6.0",
+    "@mysten/sui.js": "^0.46.1",
+    "@mysten/zklogin": "^0.3.6",
+    "@shinami/clients": "^0.7.0",
     "@tanstack/react-query": "^5.0.5",
     "iron-session": "^6.3.1",
     "superstruct": "^1.0.3"
