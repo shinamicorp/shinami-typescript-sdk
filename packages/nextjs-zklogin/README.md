@@ -1,5 +1,7 @@
 # Next.js zkLogin SDK
 
+[![npm version](https://badge.fury.io/js/@shinami%2Fnextjs-zklogin.svg)](https://badge.fury.io/js/@shinami%2Fnextjs-zklogin)
+
 Next.js SDK for integrating with [Sui zkLogin](https://docs.sui.io/concepts/cryptography/zklogin).
 
 This SDK aims to provide full-stack support for building user authentication and Sui transaction execution into your Next.js application, using zkLogin primitives.

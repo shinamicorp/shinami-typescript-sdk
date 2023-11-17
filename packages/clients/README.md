@@ -1,5 +1,7 @@
 # Shinami Clients SDK
 
+[![npm version](https://badge.fury.io/js/@shinami%2Fclients.svg)](https://badge.fury.io/js/@shinami%2Fclients)
+
 TypeScript clients for [Shinami](https://www.shinami.com/) services for the [Sui](https://sui.io/) blockchain.
 
 - [Node service](#node-service)
