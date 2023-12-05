@@ -1,0 +1,28 @@
+# Copyright 2023 Shinami Corp.
+# SPDX-License-Identifier: Apache-2.0
+
+# Recurring workflow to test against latest dep versions
+name: Dependency Compatibility
+
+on:
+  schedule:
+    - cron: 30 17 * * * # Daily at 17:30 UTC
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm update # Update to latest dep versions
+      - run: npm ls --all # Print effective versions
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run coverage
+        env:
+          NODE_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+          GAS_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+          WALLET_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}

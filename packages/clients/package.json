@@ -1,6 +1,6 @@
 {
   "name": "@shinami/clients",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "TypeScript clients for Shinami services",
   "sideEffects": false,
   "engines": {
@@ -49,7 +49,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@mysten/sui.js": "^0.46.1",
     "@open-rpc/client-js": "^1.8.1",
     "superstruct": "^1.0.3"
   },
@@ -64,5 +63,8 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
     "uuid": "^9.0.0"
+  },
+  "peerDependencies": {
+    "@mysten/sui.js": ">=0.46.1"
   }
 }
