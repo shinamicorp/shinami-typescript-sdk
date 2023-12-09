@@ -135,7 +135,7 @@ export class WalletClient extends ShinamiRpcClient {
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param txBytes Base64 encoded gasless transaction bytes. These are the BCS bytes of a
    *    `TransactionKind` as opposed to `TransactionData`.
-   * @param gasBudget Gas budget.
+   * @param gasBudget Gas budget. If omitted, it will be estimated from the transaction.
    * @param options Transaction execution response options.
    * @param requestType Transaction execution request type.
    * @returns Transaction execution response.
@@ -144,7 +144,7 @@ export class WalletClient extends ShinamiRpcClient {
     walletId: string,
     sessionToken: string,
     txBytes: string,
-    gasBudget: number | string,
+    gasBudget?: number | string,
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType
   ): Promise<SuiTransactionBlockResponse> {
@@ -418,14 +418,14 @@ export class ShinamiWalletSigner {
    *
    * @param txBytes BCS serialized bytes of a `TransactionKind` as opposed to `TransactionData`.
    *    If `string`, assumed to be Base64 encoded.
-   * @param gasBudget Gas budget.
+   * @param gasBudget Gas budget. If omitted, it will be estimated from the transaction.
    * @param options Transaction execution response options.
    * @param requestType Transaction execution request type.
    * @returns Transaction execution response.
    */
   executeGaslessTransactionBlock(
     txBytes: string | Uint8Array,
-    gasBudget: number | string,
+    gasBudget?: number | string,
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType
   ): Promise<SuiTransactionBlockResponse> {

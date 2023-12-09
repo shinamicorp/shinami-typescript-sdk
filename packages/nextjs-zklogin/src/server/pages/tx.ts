@@ -19,7 +19,7 @@ import { catchAllDispatcher, methodDispatcher } from "./utils.js";
 
 export interface GaslessTransactionBytesWithBudget {
   gaslessTxBytes: string;
-  gasBudget: number;
+  gasBudget?: number; // Will use auto-budget if omitted.
 }
 
 export type GaslessTransactionBytesBuilder<TAuth = unknown> = (
