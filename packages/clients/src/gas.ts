@@ -78,13 +78,13 @@ export class GasStationClient extends ShinamiRpcClient {
    * @param txBytes Base64 encoded gasless transaction bytes. These are the BCS bytes of a
    *    `TransactionKind` as opposed to `TransactionData`.
    * @param sender Transaction sender address.
-   * @param gasBudget Gas budget.
+   * @param gasBudget Gas budget. If omitted, it will be estimated from the transaction.
    * @returns A fully sponsored transaction block.
    */
   sponsorTransactionBlock(
     txBytes: string,
     sender: string,
-    gasBudget: number | string
+    gasBudget?: number | string
   ): Promise<SponsoredTransaction> {
     return this.request(
       "gas_sponsorTransactionBlock",

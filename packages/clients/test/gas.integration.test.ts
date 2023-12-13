@@ -34,7 +34,7 @@ describe("GasStationClient", () => {
     });
   });
 
-  it("successfully requests gas sponsorship, gets inflight status, and executes tx", async () => {
+  const happyTest = (gasBudget?: number) => async () => {
     const txBytes = await buildGaslessTransactionBytes({
       sui,
       build: async (txb) => {
@@ -48,7 +48,7 @@ describe("GasStationClient", () => {
     const sponsoredTx = await gas.sponsorTransactionBlock(
       txBytes,
       keypair.toSuiAddress(),
-      2_000_000
+      gasBudget
     );
     console.log("sponsoredTx", sponsoredTx);
     expect(
@@ -84,7 +84,19 @@ describe("GasStationClient", () => {
         },
       ],
     });
-  }, 10_000);
+  };
+
+  it(
+    "successfully requests gas sponsorship, gets inflight status, and executes tx",
+    happyTest(2_000_000),
+    30_000
+  );
+
+  it(
+    "successfully requests gas sponsorship with auto budget, gets inflight status, and executes tx",
+    happyTest(),
+    30_000
+  );
 
   it("fails to get sponsorship for invalid transaction", async () => {
     await expect(

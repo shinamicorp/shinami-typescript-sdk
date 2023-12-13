@@ -80,38 +80,51 @@ describe("ShinamiWallet", () => {
     expect(pubKey.toSuiAddress()).toBe(await signer2.getAddress());
   });
 
-  it("executes gasless transaction block", async () => {
-    const gaslessTx = await buildGaslessTransactionBytes({
-      sui,
-      build: async (txb) => {
-        txb.moveCall({
-          target: `${EXAMPLE_PACKAGE_ID}::math::add`,
-          arguments: [txb.pure(1), txb.pure(2)],
-        });
-      },
-    });
-    const txResp = await signer3.executeGaslessTransactionBlock(
-      gaslessTx,
-      5_000_000,
-      { showEffects: true, showEvents: true }
-    );
-    console.log("txResp", txResp);
-    expect(txResp).toMatchObject({
-      effects: {
-        status: {
-          status: "success",
+  const executeAddTx =
+    (x: number, y: number, gasBudget?: number) => async () => {
+      const gaslessTx = await buildGaslessTransactionBytes({
+        sui,
+        build: async (txb) => {
+          txb.moveCall({
+            target: `${EXAMPLE_PACKAGE_ID}::math::add`,
+            arguments: [txb.pure(x), txb.pure(y)],
+          });
         },
-      },
-      events: [
-        {
-          type: `${EXAMPLE_PACKAGE_ID}::math::AddResult`,
-          parsedJson: {
-            result: "3",
+      });
+      const txResp = await signer3.executeGaslessTransactionBlock(
+        gaslessTx,
+        gasBudget,
+        { showEffects: true, showEvents: true }
+      );
+      console.log("txResp", txResp);
+      expect(txResp).toMatchObject({
+        effects: {
+          status: {
+            status: "success",
           },
         },
-      ],
-    });
-  }, 30_000);
+        events: [
+          {
+            type: `${EXAMPLE_PACKAGE_ID}::math::AddResult`,
+            parsedJson: {
+              result: (x + y).toString(),
+            },
+          },
+        ],
+      });
+    };
+
+  it(
+    "executes gasless transaction block",
+    executeAddTx(1, 2, 2_000_000),
+    30_000
+  );
+
+  it(
+    "executes gasless transaction block with auto budget",
+    executeAddTx(3, 4),
+    30_000
+  );
 
   it("sets a beneficiary address and gets it back", async () => {
     const beneficiary =
