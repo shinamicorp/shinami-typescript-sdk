@@ -36,7 +36,7 @@ defaults:
 jobs:
   publish:
     # Skip release drafts
-    if: "!(github.event_name == release && github.event.release.draft)"
+    if: "!(github.event_name == 'release' && github.event.release.draft)"
     runs-on: ubuntu-latest
     permissions:
       id-token: write
