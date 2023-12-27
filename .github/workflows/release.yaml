@@ -17,6 +17,17 @@ on:
           - clients
           - nextjs-zklogin
           - legacy
+      version:
+        description: The package version to publish. Must match the value in package.json
+        required: true
+        type: string
+      tag:
+        description: The npm tag to associate with the publication
+        required: true
+        type: choice
+        options:
+          - latest
+          - experimental
 
 defaults:
   run:
@@ -24,6 +35,8 @@ defaults:
 
 jobs:
   publish:
+    # Skip release drafts
+    if: "!(github.event_name == release && github.event.release.draft)"
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -32,18 +45,42 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             package=$(echo "${{ github.event.release.tag_name }}" | sed -E 's/-v[0-9].*$//')
+            version=$(echo "${{ github.event.release.tag_name }}" | sed -E 's/^.*-v([0-9].*)$/\1/')
+            if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+              tag=experimental
+            else
+              tag=latest
+            fi
           else
             package="${{ inputs.package }}"
+            version="${{ inputs.version }}"
+            tag="${{ inputs.tag }}"
           fi
-          [ -n "$package" ] || exit 1
+          [ -n "$package" -a -n "$version" -a -n "$tag" ] || exit 1
           echo "PACKAGE=$package" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
+          echo "TAG=$tag" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v3
+      - run: |
+          source_version="$(jq -r .version < "packages/$PACKAGE/package.json")"
+          if [ "$source_version" != "$VERSION" ]; then
+            echo "❌ Package version mismatch!"
+            echo "package: $PACKAGE"
+            echo "version: $VERSION"
+            echo "source_version: $source_version"
+            exit 1
+          fi
+        env:
+          PACKAGE: ${{ steps.determine-package.outputs.PACKAGE }}
+          VERSION: ${{ steps.determine-package.outputs.VERSION }}
       - uses: actions/setup-node@v3
         with:
           node-version: 18
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
-      - run: npm publish --workspace "packages/${{ steps.determine-package.outputs.PACKAGE }}" --provenance
+      - run: npm publish --workspace "packages/$PACKAGE" --tag "$TAG" --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGE: ${{ steps.determine-package.outputs.PACKAGE }}
+          TAG: ${{ steps.determine-package.outputs.TAG }}
