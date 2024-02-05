@@ -13,7 +13,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Struct, mask } from "superstruct";
+import { Struct, is, mask } from "superstruct";
 import { AUTH_API_BASE } from "../../env.js";
 import { ApiErrorBody } from "../../error.js";
 import { ZkLoginRequest, ZkLoginUser } from "../../user.js";
@@ -30,20 +30,44 @@ export class ApiError extends Error {
   }
 }
 
-function apiQueryFn<T = unknown>(schema?: Struct<T>): QueryFunction<T> {
-  return async ({ queryKey }: QueryFunctionContext) => {
-    const uri = queryKey.at(-1) as string;
-    const resp = await fetch(uri, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new ApiError(resp.status, data);
+/**
+ * Helper function to call a JSON API.
+ */
+export async function callJsonApi<T>({
+  uri,
+  body,
+  method,
+  resultSchema,
+}: {
+  uri: string | URL;
+  body?: unknown;
+  method?: HttpMethod;
+  resultSchema?: Struct<T>;
+}): Promise<T> {
+  const resp = await fetch(uri, {
+    method: method ?? (body ? "POST" : "GET"),
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    throw new ApiError(
+      resp.status,
+      is(data, ApiErrorBody) ? data : { error: JSON.stringify(data) }
+    );
+  }
+  return resultSchema ? mask(data, resultSchema) : data;
+}
 
-    return schema ? mask(data, schema) : data;
-  };
+function apiQueryFn<T = unknown>(schema?: Struct<T>): QueryFunction<T> {
+  return async ({ queryKey }: QueryFunctionContext) =>
+    callJsonApi({
+      uri: queryKey.at(-1) as string,
+      resultSchema: schema,
+    });
 }
 
 /**
@@ -60,22 +84,13 @@ export function apiMutationFn<T = unknown, P = unknown>({
   method?: HttpMethod;
   resultSchema?: Struct<T>;
 }): MutationFunction<T, P> {
-  const _body = body ?? ((params) => params);
-  const _method = method ?? "POST";
-
-  return async (params: P) => {
-    const resp = await fetch(uri(params), {
-      method: _method,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(_body(params)),
+  return async (params: P) =>
+    callJsonApi({
+      uri: uri(params),
+      body: body ? body(params) : params,
+      method: method ?? "POST",
+      resultSchema,
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new ApiError(resp.status, data);
-    return resultSchema ? mask(data, resultSchema) : data;
-  };
 }
 
 /**

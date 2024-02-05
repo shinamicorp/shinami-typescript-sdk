@@ -45,16 +45,16 @@ export function withSession<T>(handler: NextApiHandler<T>): NextApiHandler<T> {
  *
  * Requests would result in HTTP 401 if the user doesn't have an active session.
  */
-export function withZkLoginUserRequired<T>(
+export function withZkLoginUserRequired<TRes, TAuth = unknown>(
   epochProvider: CurrentEpochProvider,
   handler: (
     req: NextApiRequest,
-    res: NextApiResponse<T>,
-    user: ZkLoginUser
+    res: NextApiResponse<TRes>,
+    user: ZkLoginUser<TAuth>
   ) => unknown | Promise<unknown>
-): NextApiHandler<T | ApiErrorBody> {
+): NextApiHandler<TRes | ApiErrorBody> {
   return withInternalErrorHandler(
-    withSession<T | ApiErrorBody>(async (req, res) => {
+    withSession<TRes | ApiErrorBody>(async (req, res) => {
       if (!req.session.user)
         return res.status(401).json({ error: "Unauthorized" });
 
@@ -64,7 +64,7 @@ export function withZkLoginUserRequired<T>(
         return res.status(401).json({ error: "maxEpoch expired" });
       }
 
-      return handler(req, res, req.session.user);
+      return handler(req, res, req.session.user as ZkLoginUser<TAuth>);
     })
   );
 }
