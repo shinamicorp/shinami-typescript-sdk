@@ -87,7 +87,7 @@ export function getGoogleAuthUrl(
   callback: URL,
   redirectTo: string = "/",
   extraScopes: string[] = [],
-  prompt: string = ""
+  prompt: string[] = []
 ): URL {
   const params = new URLSearchParams({
     client_id: clientId,
@@ -96,7 +96,7 @@ export function getGoogleAuthUrl(
     scope: ["openid", ...extraScopes].join(" "),
     nonce: session.nonce,
     state: new URLSearchParams({ redirectTo, nonce: session.nonce }).toString(),
-    prompt,
+    prompt: prompt.join(" "),
   }).toString();
 
   return new URL(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
