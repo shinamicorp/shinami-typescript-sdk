@@ -76,6 +76,7 @@ export async function relativeToCurrentEpoch(
  * @param extraScopes The "openid" scope is included by default. You can optionally request extra
  *    scopes, e.g. "email", which will be included in the JWT claims that can be consumed by your
  *    app. Your OAuth application must have the permission to request these scopes.
+ * @param prompt The information to prompt for. See the Google developer link below for details.
  * @returns The Google auth URL.
  *
  * @see https://developers.google.com/identity/openid-connect/openid-connect#sendauthrequest
@@ -85,7 +86,8 @@ export function getGoogleAuthUrl(
   clientId: string,
   callback: URL,
   redirectTo: string = "/",
-  extraScopes: string[] = []
+  extraScopes: string[] = [],
+  prompt: string = ""
 ): URL {
   const params = new URLSearchParams({
     client_id: clientId,
@@ -94,6 +96,7 @@ export function getGoogleAuthUrl(
     scope: ["openid", ...extraScopes].join(" "),
     nonce: session.nonce,
     state: new URLSearchParams({ redirectTo, nonce: session.nonce }).toString(),
+    prompt,
   }).toString();
 
   return new URL(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
