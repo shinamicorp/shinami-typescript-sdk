@@ -103,4 +103,8 @@ describe("GasStationClient", () => {
       gas.sponsorTransactionBlock("fake tx bytes", "0x00", 1_000_000)
     ).rejects.toThrow("Invalid params");
   });
+
+  it("successfully query fund information", async () => {
+    expect(await gas.getFund()).toBeDefined()
+  })
 });

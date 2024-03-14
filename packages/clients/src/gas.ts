@@ -61,6 +61,20 @@ export type SponsoredTransactionStatus = Infer<
 >;
 
 /**
+ * The fund information
+ */
+export const Fund = object({
+  network: string(),
+  name: string(),
+  balance: number(),
+  inFlight: number(),
+  depositAddress: optional(string())
+});
+export type Fund = Infer<
+  typeof Fund
+>;
+
+/**
  * Gas station RPC client.
  */
 export class GasStationClient extends ShinamiRpcClient {
@@ -105,6 +119,16 @@ export class GasStationClient extends ShinamiRpcClient {
       "gas_getSponsoredTransactionBlockStatus",
       [txDigest],
       SponsoredTransactionStatus
+    );
+  }
+
+  /**
+   * Queries the fund associated with the access key.   
+   * @returns The fund information. 
+   */
+  getFund(): Promise<Fund> {
+    return this.request(
+      "gas_getFund",
     );
   }
 }

@@ -14,5 +14,8 @@
     "test": "npm run test --workspaces --if-present",
     "integration": "npm run integration --workspaces --if-present",
     "coverage": "npm run coverage --workspaces --if-present"
+  },
+  "dependencies": {
+    "typescript": "^5.4.2"
   }
 }
