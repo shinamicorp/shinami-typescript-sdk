@@ -129,6 +129,8 @@ export class GasStationClient extends ShinamiRpcClient {
   getFund(): Promise<Fund> {
     return this.request(
       "gas_getFund",
+      [],
+      Fund,
     );
   }
 }
