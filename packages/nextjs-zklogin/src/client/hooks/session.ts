@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { decodeSuiPrivateKey } from "@mysten/sui.js/cryptography";
 import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
-import { fromB64 } from "@mysten/sui.js/utils";
 import {
   UseMutationResult,
   UseQueryResult,
@@ -40,7 +40,9 @@ export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
     queryFn: () => {
       const secret = localStorage.getItem(EPHEMERAL_SECRET_NAME);
       if (!secret) throw new Error(`${EPHEMERAL_SECRET_NAME} not found`);
-      const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(fromB64(secret));
+      const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(
+        decodeSuiPrivateKey(secret).secretKey
+      );
 
       const _maxEpoch = localStorage.getItem(MAX_EPOCH_NAME);
       if (!_maxEpoch) throw new Error(`${MAX_EPOCH_NAME} not found`);
@@ -79,7 +81,7 @@ export function useSaveZkLoginLocalSession(): UseMutationResult<
     mutationFn: async (session) => {
       localStorage.setItem(
         EPHEMERAL_SECRET_NAME,
-        session.ephemeralKeyPair.export().privateKey
+        session.ephemeralKeyPair.getSecretKey()
       );
       localStorage.setItem(MAX_EPOCH_NAME, session.maxEpoch.toString());
       localStorage.setItem(JWT_RANDOMNESS_NAME, session.jwtRandomness);
