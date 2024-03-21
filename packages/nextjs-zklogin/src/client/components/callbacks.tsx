@@ -4,7 +4,8 @@
  */
 
 import { useRouter } from "next/router.js";
-import React, { FunctionComponent, useEffect, useState } from "react";
+import * as React from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { OidProvider } from "../../user.js";
 import { throwExpression } from "../../utils.js";
 import { useLogin } from "../hooks/api.js";
@@ -47,8 +48,11 @@ function withOpenIdCallback<P>(
   const WrappedComponent: FunctionComponent<P> = (props) => {
     const [status, setStatus] = useState<CallbackStatus>("loading");
     const { isReady, asPath, replace } = useRouter();
-    const { data: session, isLoading: isLoadingSession } =
-      useZkLoginLocalSession();
+    const {
+      data: session,
+      isLoading: isLoadingSession,
+      error: sessionError,
+    } = useZkLoginLocalSession();
     const { mutateAsync: login } = useLogin();
 
     useEffect(() => {
@@ -58,6 +62,7 @@ function withOpenIdCallback<P>(
         try {
           if (!isReady || isLoadingSession) return;
 
+          if (sessionError) throw sessionError;
           if (!session) throw new Error("Missing zkLogin session");
 
           const i = asPath.indexOf("#");
