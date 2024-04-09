@@ -1,4 +1,4 @@
-import { getSuiExplorerAccountUrl } from "@/lib/hooks/sui";
+import { getSuiVisionAccountUrl } from "@/lib/hooks/sui";
 import { AUTH_API_BASE, LOGIN_PAGE_PATH } from "@shinami/nextjs-zklogin";
 import { useZkLoginSession } from "@shinami/nextjs-zklogin/client";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default function Index() {
         <h1>Hello, {user.oidProvider} user!</h1>
         <div>
           <Link
-            href={getSuiExplorerAccountUrl(user.wallet, true)}
+            href={getSuiVisionAccountUrl(user.wallet)}
             target="_blank"
           >
             My zkLogin wallet address

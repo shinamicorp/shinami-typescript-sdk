@@ -1,5 +1,5 @@
 import { useAddMutation, useRecentTxsQuery } from "@/lib/hooks/api";
-import { getSuiExplorerTransactionUrl } from "@/lib/hooks/sui";
+import { getSuiVisionTransactionUrl } from "@/lib/hooks/sui";
 import { AddResponse } from "@/lib/shared/interfaces";
 import { withZkLoginSessionRequired } from "@shinami/nextjs-zklogin/client";
 import Link from "next/link";
@@ -54,7 +54,7 @@ export default withZkLoginSessionRequired(({ session }) => {
             ={" "}
             {result ? (
               <Link
-                href={getSuiExplorerTransactionUrl(result.txDigest, true)}
+                href={getSuiVisionTransactionUrl(result.txDigest)}
                 target="_blank"
               >
                 {result.result}
@@ -79,7 +79,7 @@ export default withZkLoginSessionRequired(({ session }) => {
             {txs.txDigests.map((txDigest) => (
               <li key={txDigest}>
                 <Link
-                  href={getSuiExplorerTransactionUrl(txDigest, true)}
+                  href={getSuiVisionTransactionUrl(txDigest)}
                   target="_blank"
                 >
                   {txDigest}
