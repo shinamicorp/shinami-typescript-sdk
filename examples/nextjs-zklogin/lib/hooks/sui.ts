@@ -2,36 +2,20 @@ import { createSuiClient } from "@shinami/clients";
 import { SUI_NETWORK } from "../shared/sui";
 import { throwExpression } from "../shared/utils";
 
-const SUI_EXPLORER_BASE_URL = "https://suiexplorer.com";
 const SUI_VISION_BASE_URL = `https://${
   SUI_NETWORK === "mainnet" ? "" : `${SUI_NETWORK}.`
 }suivision.xyz`;
 
-export function getSuiExplorerAccountUrl(
-  address: string,
-  suiVision: boolean = false
-) {
-  return suiVision
-    ? `${SUI_VISION_BASE_URL}/account/${address}`
-    : `${SUI_EXPLORER_BASE_URL}/address/${address}?network=${SUI_NETWORK}`;
+export function getSuiVisionAccountUrl(address: string) {
+  return `${SUI_VISION_BASE_URL}/account/${address}`;
 }
 
-export function getSuiExplorerObjectUrl(
-  address: string,
-  suiVision: boolean = false
-) {
-  return suiVision
-    ? `${SUI_VISION_BASE_URL}/object/${address}`
-    : `${SUI_EXPLORER_BASE_URL}/object/${address}?network=${SUI_NETWORK}`;
+export function getSuiVisionObjectUrl(address: string) {
+  return `${SUI_VISION_BASE_URL}/object/${address}`;
 }
 
-export function getSuiExplorerTransactionUrl(
-  digest: string,
-  suiVision: boolean = false
-) {
-  return suiVision
-    ? `${SUI_VISION_BASE_URL}/txblock/${digest}`
-    : `${SUI_EXPLORER_BASE_URL}/txblock/${digest}?network=${SUI_NETWORK}`;
+export function getSuiVisionTransactionUrl(digest: string) {
+  return `${SUI_VISION_BASE_URL}/txblock/${digest}`;
 }
 
 /**
