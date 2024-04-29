@@ -21,6 +21,10 @@
     "./sui": {
       "import": "./dist/esm/sui/index.js",
       "require": "./dist/cjs/sui/index.js"
+    },
+    "./aptos": {
+      "import": "./dist/esm/aptos/index.js",
+      "require": "./dist/cjs/aptos/index.js"
     }
   },
   "scripts": {
