@@ -20,6 +20,11 @@ jobs:
       - run: npm update # Update to latest dep versions
       - run: npm ls --all # Print effective versions
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY: fake_key
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: fake_id
+          NEXT_PUBLIC_FACEBOOK_CLIENT_ID: fake_id
+          NEXT_PUBLIC_TWITCH_CLIENT_ID: fake_id
       - run: npm run lint
       - run: npm run coverage
         env:
