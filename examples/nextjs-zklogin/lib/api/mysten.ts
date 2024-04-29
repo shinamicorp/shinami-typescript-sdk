@@ -40,7 +40,7 @@ export const mystenSaltProvider: SaltProvider = async ({
   if (resp.status !== 200) {
     console.error("Mysten salt server response", await resp.text());
     throw new Error(
-      `Unexpected status from Mysten salt server: ${resp.status}`
+      `Unexpected status from Mysten salt server: ${resp.status}`,
     );
   }
 

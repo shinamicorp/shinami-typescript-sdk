@@ -7,7 +7,7 @@ import { SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { toB64 } from "@mysten/sui.js/utils";
 import { Infer, enums, number, object, optional, string } from "superstruct";
-import { ShinamiRpcClient } from "./rpc.js";
+import { ShinamiRpcClient } from "../rpc.js";
 
 const GAS_STATION_RPC_URL = "https://api.shinami.com/gas/v1";
 
@@ -35,7 +35,7 @@ export const SponsoredTransaction = object({
       computationCost: string(),
       storageCost: string(),
       storageRebate: string(),
-    })
+    }),
   ),
   /**
    * Expiration time of this sponsored transaction, in Unix epoch seconds.
@@ -68,11 +68,9 @@ export const Fund = object({
   name: string(),
   balance: number(),
   inFlight: number(),
-  depositAddress: optional(string())
+  depositAddress: optional(string()),
 });
-export type Fund = Infer<
-  typeof Fund
->;
+export type Fund = Infer<typeof Fund>;
 
 /**
  * Gas station RPC client.
@@ -98,12 +96,12 @@ export class GasStationClient extends ShinamiRpcClient {
   sponsorTransactionBlock(
     txBytes: string,
     sender: string,
-    gasBudget?: number | string
+    gasBudget?: number | string,
   ): Promise<SponsoredTransaction> {
     return this.request(
       "gas_sponsorTransactionBlock",
       [txBytes, sender, gasBudget],
-      SponsoredTransaction
+      SponsoredTransaction,
     );
   }
 
@@ -113,25 +111,21 @@ export class GasStationClient extends ShinamiRpcClient {
    * @returns Sponsored transaction status.
    */
   getSponsoredTransactionBlockStatus(
-    txDigest: string
+    txDigest: string,
   ): Promise<SponsoredTransactionStatus> {
     return this.request(
       "gas_getSponsoredTransactionBlockStatus",
       [txDigest],
-      SponsoredTransactionStatus
+      SponsoredTransactionStatus,
     );
   }
 
   /**
-   * Queries the fund associated with the access key.   
-   * @returns The fund information. 
+   * Queries the fund associated with the access key.
+   * @returns The fund information.
    */
   getFund(): Promise<Fund> {
-    return this.request(
-      "gas_getFund",
-      [],
-      Fund,
-    );
+    return this.request("gas_getFund", [], Fund);
   }
 }
 
@@ -158,6 +152,6 @@ export async function buildGaslessTransactionBytes({
     await _txb.build({
       client: sui,
       onlyTransactionKind: true,
-    })
+    }),
   );
 }

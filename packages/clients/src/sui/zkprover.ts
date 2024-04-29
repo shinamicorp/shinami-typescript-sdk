@@ -5,7 +5,7 @@
 
 import { PublicKey } from "@mysten/sui.js/cryptography";
 import { Infer, object, type } from "superstruct";
-import { ShinamiRpcClient, trimTrailingParams } from "./rpc.js";
+import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { bigIntToBase64 } from "./utils.js";
 
 const ZKPROVER_RPC_URL = "https://api.shinami.com/zkprover/v1";
@@ -49,7 +49,7 @@ export class ZkProverClient extends ShinamiRpcClient {
     ephemeralPublicKey: PublicKey,
     jwtRandomness: bigint,
     salt: bigint,
-    keyClaimName?: string
+    keyClaimName?: string,
   ): Promise<CreateZkLoginProofResult> {
     return this.request(
       "shinami_zkp_createZkLoginProof",
@@ -61,7 +61,7 @@ export class ZkProverClient extends ShinamiRpcClient {
         bigIntToBase64(salt),
         keyClaimName,
       ]),
-      CreateZkLoginProofResult
+      CreateZkLoginProofResult,
     );
   }
 }

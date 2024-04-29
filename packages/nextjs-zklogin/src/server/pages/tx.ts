@@ -8,7 +8,7 @@ import {
   SuiTransactionBlockResponse,
   SuiTransactionBlockResponseOptions,
 } from "@mysten/sui.js/client";
-import { GasStationClient } from "@shinami/clients";
+import { GasStationClient } from "@shinami/clients/sui";
 import { NextApiHandler, NextApiRequest } from "next";
 import { validate } from "superstruct";
 import { ApiErrorBody } from "../../error.js";
@@ -24,26 +24,26 @@ export interface GaslessTransactionBytesWithBudget {
 
 export type GaslessTransactionBytesBuilder<TAuth = unknown> = (
   req: NextApiRequest,
-  user: ZkLoginUser<TAuth>
+  user: ZkLoginUser<TAuth>,
 ) =>
   | Promise<GaslessTransactionBytesWithBudget>
   | GaslessTransactionBytesWithBudget;
 
 export type TransactionBytesBuilder<TAuth = unknown> = (
   req: NextApiRequest,
-  user: ZkLoginUser<TAuth>
+  user: ZkLoginUser<TAuth>,
 ) => Promise<string> | string;
 
 export type TransactionResponseParser<TAuth = unknown, TRes = unknown> = (
   req: NextApiRequest,
   txRes: SuiTransactionBlockResponse,
-  user: ZkLoginUser<TAuth>
+  user: ZkLoginUser<TAuth>,
 ) => Promise<TRes> | TRes;
 
 export class InvalidRequest extends Error {}
 
 function txHandler<TAuth = unknown>(
-  buildTxBytes: TransactionBytesBuilder<TAuth>
+  buildTxBytes: TransactionBytesBuilder<TAuth>,
 ): NextApiHandler<PreparedTransactionBytes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
@@ -62,7 +62,7 @@ function txHandler<TAuth = unknown>(
 
 function sponsoredTxHandler<TAuth = unknown>(
   gas: GasStationClient,
-  buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>
+  buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>,
 ): NextApiHandler<PreparedTransactionBytes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
@@ -78,7 +78,7 @@ function sponsoredTxHandler<TAuth = unknown>(
       const { txBytes, signature } = await gas.sponsorTransactionBlock(
         tx.gaslessTxBytes,
         user.wallet,
-        tx.gasBudget
+        tx.gasBudget,
       );
       res.json({ txBytes, gasSignature: signature });
     },
@@ -88,7 +88,7 @@ function sponsoredTxHandler<TAuth = unknown>(
 function execHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
   parseTxRes: TransactionResponseParser<TAuth, TRes>,
-  txOptions: SuiTransactionBlockResponseOptions = {}
+  txOptions: SuiTransactionBlockResponseOptions = {},
 ): NextApiHandler<TRes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
@@ -138,14 +138,14 @@ export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
   buildTxBytes: TransactionBytesBuilder<TAuth>,
   parseTxRes: TransactionResponseParser<TAuth, TRes>,
-  txOptions: SuiTransactionBlockResponseOptions = {}
+  txOptions: SuiTransactionBlockResponseOptions = {},
 ): NextApiHandler {
   return withZkLoginUserRequired(
     sui,
     catchAllDispatcher({
       tx: txHandler(buildTxBytes),
       exec: execHandler(sui, parseTxRes, txOptions),
-    })
+    }),
   );
 }
 
@@ -169,13 +169,13 @@ export function zkLoginSponsoredTxExecHandler<TAuth = unknown, TRes = unknown>(
   gas: GasStationClient,
   buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>,
   parseTxRes: TransactionResponseParser<TAuth, TRes>,
-  txOptions: SuiTransactionBlockResponseOptions = {}
+  txOptions: SuiTransactionBlockResponseOptions = {},
 ): NextApiHandler {
   return withZkLoginUserRequired(
     sui,
     catchAllDispatcher({
       tx: sponsoredTxHandler(gas, buildGaslessTxBytes),
       exec: execHandler(sui, parseTxRes, txOptions),
-    })
+    }),
   );
 }

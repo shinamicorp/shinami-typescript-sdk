@@ -2,7 +2,7 @@ import { EXAMPLE_MOVE_PACKAGE_ID } from "@/lib/api/move";
 import { gas, sui } from "@/lib/api/shinami";
 import { AddRequest, AddResponse, AddResult } from "@/lib/shared/interfaces";
 import { first } from "@/lib/shared/utils";
-import { buildGaslessTransactionBytes } from "@shinami/clients";
+import { buildGaslessTransactionBytes } from "@shinami/clients/sui";
 import {
   GaslessTransactionBytesBuilder,
   InvalidRequest,

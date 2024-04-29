@@ -19,7 +19,7 @@ const NODE_WS_URL = "wss://api.shinami.com/node/v1";
 export function createSuiClient(
   accessKey: string,
   url: string = NODE_RPC_URL,
-  wsUrl: string = NODE_WS_URL
+  wsUrl: string = NODE_WS_URL,
 ): SuiClient {
   return new SuiClient({
     transport: new SuiHTTPTransport({

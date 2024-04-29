@@ -4,7 +4,7 @@
  */
 
 import { Infer, integer, object, string } from "superstruct";
-import { ShinamiRpcClient } from "./rpc.js";
+import { ShinamiRpcClient } from "../rpc.js";
 import { base64ToBigInt } from "./utils.js";
 
 const ZKWALLET_RPC_URL = "https://api.shinami.com/zkwallet/v1";
@@ -63,7 +63,7 @@ export class ZkWalletClient extends ShinamiRpcClient {
   async getOrCreateZkLoginWallet(
     jwt: string,
     keyClaimName?: string,
-    subWallet?: number
+    subWallet?: number,
   ): Promise<ZkLoginWallet> {
     const resp = await this.request(
       "shinami_zkw_getOrCreateZkLoginWallet",
@@ -72,7 +72,7 @@ export class ZkWalletClient extends ShinamiRpcClient {
         keyClaimName,
         subWallet,
       },
-      ZkLoginWalletResponse
+      ZkLoginWalletResponse,
     );
     return {
       userId: resp.userId,

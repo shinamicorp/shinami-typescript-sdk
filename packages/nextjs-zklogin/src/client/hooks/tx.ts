@@ -23,7 +23,7 @@ export interface WithKeyPair {
  */
 export function apiTxExecMutationFn<
   T = unknown,
-  P extends WithKeyPair = WithKeyPair
+  P extends WithKeyPair = WithKeyPair,
 >({
   baseUri,
   body,
@@ -43,7 +43,7 @@ export function apiTxExecMutationFn<
       resultSchema: PreparedTransactionBytes,
     })(params);
     const { signature } = await params.keyPair.signTransactionBlock(
-      fromB64(tx.txBytes)
+      fromB64(tx.txBytes),
     );
     return await apiMutationFn<T, SignedTransactionBytes>({
       uri: () => `${uri}/exec`,

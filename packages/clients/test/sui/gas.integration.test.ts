@@ -6,7 +6,7 @@
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
 import { fromB64 } from "@mysten/sui.js/utils";
-import { buildGaslessTransactionBytes } from "../src/index.js";
+import { buildGaslessTransactionBytes } from "../../src/sui/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
   createGasClient,
@@ -48,15 +48,15 @@ describe("GasStationClient", () => {
     const sponsoredTx = await gas.sponsorTransactionBlock(
       txBytes,
       keypair.toSuiAddress(),
-      gasBudget
+      gasBudget,
     );
     console.log("sponsoredTx", sponsoredTx);
     expect(
-      await gas.getSponsoredTransactionBlockStatus(sponsoredTx.txDigest)
+      await gas.getSponsoredTransactionBlockStatus(sponsoredTx.txDigest),
     ).toBe("IN_FLIGHT");
 
     const signedTx = await keypair.signTransactionBlock(
-      fromB64(sponsoredTx.txBytes)
+      fromB64(sponsoredTx.txBytes),
     );
     expect(signedTx.bytes).toBe(sponsoredTx.txBytes);
 
@@ -89,22 +89,22 @@ describe("GasStationClient", () => {
   it(
     "successfully requests gas sponsorship, gets inflight status, and executes tx",
     happyTest(2_000_000),
-    30_000
+    30_000,
   );
 
   it(
     "successfully requests gas sponsorship with auto budget, gets inflight status, and executes tx",
     happyTest(),
-    30_000
+    30_000,
   );
 
   it("fails to get sponsorship for invalid transaction", async () => {
     await expect(
-      gas.sponsorTransactionBlock("fake tx bytes", "0x00", 1_000_000)
+      gas.sponsorTransactionBlock("fake tx bytes", "0x00", 1_000_000),
     ).rejects.toThrow("Invalid params");
   });
 
   it("successfully query fund information", async () => {
-    expect(await gas.getFund()).toBeDefined()
-  })
+    expect(await gas.getFund()).toBeDefined();
+  });
 });

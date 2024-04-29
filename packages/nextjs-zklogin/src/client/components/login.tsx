@@ -24,14 +24,14 @@ import { ZkLoginLocalSession } from "../hooks/session.js";
 export function withNewZkLoginSession<P extends object>(
   getMaxEpoch: () => Promise<number> | number,
   Component: FunctionComponent<P & { session: ZkLoginLocalSession }>,
-  Loading: FunctionComponent<P> = () => <p>Preparing zkLogin session...</p>
+  Loading: FunctionComponent<P> = () => <p>Preparing zkLogin session...</p>,
 ) {
   const WrappedComponent: FunctionComponent<P> = (props) => {
     const { mutateAsync: newSession } = useNewZkLoginSession();
     const [session, setSession] = useState<ZkLoginLocalSession>();
 
     useEffect(() => {
-      (async () => {
+      void (async () => {
         const session = await newSession({ getMaxEpoch });
         setSession(session);
       })();
@@ -57,7 +57,7 @@ export function withNewZkLoginSession<P extends object>(
  */
 export async function relativeToCurrentEpoch(
   sui: SuiClient,
-  epochsBeyondCurrent: number = 1
+  epochsBeyondCurrent = 1,
 ): Promise<number> {
   const { epoch } = await sui.getLatestSuiSystemState();
   return Number(epoch) + epochsBeyondCurrent;
@@ -85,9 +85,9 @@ export function getGoogleAuthUrl(
   session: ZkLoginLocalSession,
   clientId: string,
   callback: URL,
-  redirectTo: string = "/",
+  redirectTo = "/",
   extraScopes: string[] = [],
-  prompt: string[] = []
+  prompt: string[] = [],
 ): URL {
   const params = new URLSearchParams({
     client_id: clientId,
@@ -123,8 +123,8 @@ export function getFacebookAuthUrl(
   session: ZkLoginLocalSession,
   clientId: string,
   callback: URL,
-  redirectTo: string = "/",
-  extraScopes: string[] = []
+  redirectTo = "/",
+  extraScopes: string[] = [],
 ): URL {
   const params = new URLSearchParams({
     client_id: clientId,
@@ -160,9 +160,9 @@ export function getTwitchAuthUrl(
   session: ZkLoginLocalSession,
   clientId: string,
   callback: URL,
-  redirectTo: string = "/",
+  redirectTo = "/",
   extraScopes: string[] = [],
-  extraClaims: string[] = []
+  extraClaims: string[] = [],
 ): URL {
   const params = new URLSearchParams({
     client_id: clientId,

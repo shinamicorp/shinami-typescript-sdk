@@ -23,6 +23,7 @@ jobs:
       - run: npm run lint
       - run: npm run coverage
         env:
-          NODE_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
-          GAS_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
-          WALLET_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+          SUI_NODE_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          SUI_GAS_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          SUI_WALLET_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}

@@ -1,4 +1,4 @@
-import { createSuiClient } from "@shinami/clients";
+import { createSuiClient } from "@shinami/clients/sui";
 import { SUI_NETWORK } from "../shared/sui";
 import { throwExpression } from "../shared/utils";
 
@@ -26,8 +26,8 @@ export function getSuiVisionTransactionUrl(digest: string) {
 export const sui = createSuiClient(
   process.env.NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY ??
     throwExpression(
-      new Error("NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY not configured")
+      new Error("NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY not configured"),
     ),
   process.env.NEXT_PUBLIC_SHINAMI_NODE_RPC_URL_OVERRIDE,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE
+  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE,
 );
