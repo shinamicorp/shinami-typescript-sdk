@@ -10,7 +10,7 @@ import {
   Deserializer,
 } from "@aptos-labs/ts-sdk";
 import { Infer, array, integer, object, string } from "superstruct";
-import { ShinamiRpcClient } from "../rpc.js";
+import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 
 const GAS_STATION_RPC_URL = "https://api.shinami.com/aptos/gas/v1";
 
@@ -50,10 +50,10 @@ export class GasStationClient extends ShinamiRpcClient {
   ): Promise<AccountAuthenticator> {
     const { feePayer } = await this.request(
       "gas_sponsorTransaction",
-      [
+      trimTrailingParams([
         transaction.rawTransaction.bcsToHex().toString(),
         transaction.secondarySignerAddresses?.map((x) => x.toString()),
-      ],
+      ]),
       SponsorTransactionResult,
     );
 
