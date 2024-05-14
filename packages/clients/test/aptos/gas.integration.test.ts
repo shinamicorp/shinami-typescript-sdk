@@ -38,7 +38,7 @@ describe("GasStationClient", () => {
     expect(await gas.rpcDiscover()).toMatchObject({
       openrpc: "1.2.6",
       info: {
-        title: "Shinami Gas Station RPC",
+        title: "Shinami gas station RPC for Aptos",
         version: /\d+\.\d+\.\d+/,
       },
     });
