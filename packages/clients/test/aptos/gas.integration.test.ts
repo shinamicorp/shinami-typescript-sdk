@@ -110,7 +110,7 @@ describe("GasStationClient", () => {
   it(
     "successfully requests gas sponsorship and executes tx with 50min expiration",
     happyTest({
-      expireTimestamp: Date.now() / 1000 + 50 * 60,
+      expireTimestamp: Math.floor(Date.now() / 1000) + 50 * 60,
     }),
     30_000,
   );
@@ -124,7 +124,7 @@ describe("GasStationClient", () => {
       },
       withFeePayer: true,
       options: {
-        expireTimestamp: Date.now() / 1000 + 70 * 60,
+        expireTimestamp: Math.floor(Date.now() / 1000) + 70 * 60,
       },
     });
 
