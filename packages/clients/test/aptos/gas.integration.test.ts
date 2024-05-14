@@ -7,14 +7,15 @@ import {
   Account,
   Hex,
   InputGenerateTransactionOptions,
-  SigningSchemeInput,
   isUserTransactionResponse,
+  SigningSchemeInput,
 } from "@aptos-labs/ts-sdk";
 import { beforeAll, describe, expect, it } from "@jest/globals";
+import { JSONRPCError } from "@open-rpc/client-js";
 import {
-  EXAMPLE_PACKAGE_ID,
   createAptos,
   createGasClient,
+  EXAMPLE_PACKAGE_ID,
 } from "./integration.env.js";
 
 const aptos = createAptos();
@@ -55,8 +56,16 @@ describe("GasStationClient", () => {
       options,
     });
 
-    const feePayerSig = await gas.sponsorTransaction(transaction);
-    console.log("feePayerSig", feePayerSig);
+    let feePayerSig;
+    try {
+      feePayerSig = await gas.sponsorTransaction(transaction);
+      console.log("feePayerSig", feePayerSig);
+    } catch (e) {
+      if (e instanceof JSONRPCError) {
+        console.error("JSONRPCError", e.message, e.data);
+      }
+      throw e;
+    }
 
     const senderSig = aptos.transaction.sign({
       signer: account,
