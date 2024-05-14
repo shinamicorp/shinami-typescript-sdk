@@ -25,8 +25,7 @@ const account = Account.generate({
   legacy: false,
 });
 
-// TODO - turn on once public API goes live
-describe.skip("GasStationClient", () => {
+describe("GasStationClient", () => {
   beforeAll(async () => {
     console.log("account address", account.accountAddress.toString());
     console.log(
