@@ -79,6 +79,11 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY: fake_key
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: fake_id
+          NEXT_PUBLIC_FACEBOOK_CLIENT_ID: fake_id
+          NEXT_PUBLIC_TWITCH_CLIENT_ID: fake_id
       - run: npm publish --workspace "packages/$PACKAGE" --tag "$TAG" --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
