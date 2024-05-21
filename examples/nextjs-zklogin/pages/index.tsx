@@ -15,10 +15,7 @@ export default function Index() {
       <>
         <h1>Hello, {user.oidProvider} user!</h1>
         <div>
-          <Link
-            href={getSuiVisionAccountUrl(user.wallet)}
-            target="_blank"
-          >
+          <Link href={getSuiVisionAccountUrl(user.wallet)} target="_blank">
             My zkLogin wallet address
           </Link>
         </div>

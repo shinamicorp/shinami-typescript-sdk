@@ -11,7 +11,7 @@ import { ZkLoginLocalSession, useSaveZkLoginLocalSession } from "./session.js";
 
 /**
  * React hook for initializing a new zkLogin session.
- * 
+ *
  * Uses TanStack mutation.
  */
 export function useNewZkLoginSession(): UseMutationResult<
@@ -32,7 +32,7 @@ export function useNewZkLoginSession(): UseMutationResult<
       const nonce = generateNonce(
         ephemeralKeyPair.getPublicKey(),
         maxEpoch,
-        jwtRandomness
+        jwtRandomness,
       );
 
       const session = { ephemeralKeyPair, maxEpoch, jwtRandomness, nonce };

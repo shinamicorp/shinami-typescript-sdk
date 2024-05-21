@@ -38,7 +38,7 @@ export function authHandler(
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
   allowedApps: OAuthApplications,
-  authorizeUser: UserAuthorizer = () => ({})
+  authorizeUser: UserAuthorizer = () => ({}),
 ): NextApiHandler {
   return withInternalErrorHandler(
     catchAllDispatcher({
@@ -47,10 +47,10 @@ export function authHandler(
         saltProvider,
         zkProofProvider,
         allowedApps,
-        authorizeUser
+        authorizeUser,
       ),
       logout,
       me: me(epochProvider),
-    })
+    }),
   );
 }

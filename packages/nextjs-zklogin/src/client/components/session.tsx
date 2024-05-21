@@ -61,7 +61,7 @@ export function ZkLoginSessionProvider({ children }: PropsWithChildren) {
 export function withZkLoginSessionRequired<P extends object, T = unknown>(
   Component: FunctionComponent<P & { session: ZkLoginSessionActive<T> }>,
   Loading: FunctionComponent<P> = () => <p>Loading zkLogin session...</p>,
-  Redirecting: FunctionComponent<P> = () => <p>Redirecting to login page...</p>
+  Redirecting: FunctionComponent<P> = () => <p>Redirecting to login page...</p>,
 ): FunctionComponent<P> {
   const WrappedComponent: FunctionComponent<P> = (props) => {
     const session = useZkLoginSession<T>();
@@ -69,7 +69,7 @@ export function withZkLoginSessionRequired<P extends object, T = unknown>(
 
     if (session.isLoading) return <Loading {...props} />;
     if (!session.user) {
-      router.push({
+      void router.push({
         pathname: LOGIN_PAGE_PATH,
         query: { redirectTo: router.asPath },
       });

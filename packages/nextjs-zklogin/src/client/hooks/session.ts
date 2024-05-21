@@ -41,7 +41,7 @@ export function useZkLoginLocalSession(): UseQueryResult<ZkLoginLocalSession> {
       const secret = localStorage.getItem(EPHEMERAL_SECRET_NAME);
       if (!secret) throw new Error(`${EPHEMERAL_SECRET_NAME} not found`);
       const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(
-        decodeSuiPrivateKey(secret).secretKey
+        decodeSuiPrivateKey(secret).secretKey,
       );
 
       const _maxEpoch = localStorage.getItem(MAX_EPOCH_NAME);
@@ -78,17 +78,18 @@ export function useSaveZkLoginLocalSession(): UseMutationResult<
 > {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (session) => {
+    mutationFn: (session) => {
       localStorage.setItem(
         EPHEMERAL_SECRET_NAME,
-        session.ephemeralKeyPair.getSecretKey()
+        session.ephemeralKeyPair.getSecretKey(),
       );
       localStorage.setItem(MAX_EPOCH_NAME, session.maxEpoch.toString());
       localStorage.setItem(JWT_RANDOMNESS_NAME, session.jwtRandomness);
       localStorage.setItem(NONCE_NAME, session.nonce);
+      return Promise.resolve();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: zkLoginLocalQueryKey });
+      void queryClient.invalidateQueries({ queryKey: zkLoginLocalQueryKey });
     },
   });
 }
@@ -130,7 +131,7 @@ export function useZkLoginSession<T = unknown>(): ZkLoginSession<T> {
   const session = useContext(ZkLoginSessionContext) as ZkLoginSession<T>;
   if (!session)
     throw new Error(
-      "useZkLoginSession must be used inside ZkLoginSessionProvider"
+      "useZkLoginSession must be used inside ZkLoginSessionProvider",
     );
   return session;
 }

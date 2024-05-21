@@ -50,8 +50,8 @@ export function withZkLoginUserRequired<TRes, TAuth = unknown>(
   handler: (
     req: NextApiRequest,
     res: NextApiResponse<TRes>,
-    user: ZkLoginUser<TAuth>
-  ) => unknown | Promise<unknown>
+    user: ZkLoginUser<TAuth>,
+  ) => unknown | Promise<unknown>, // eslint-disable-line @typescript-eslint/no-redundant-type-constituents
 ): NextApiHandler<TRes | ApiErrorBody> {
   return withInternalErrorHandler(
     withSession<TRes | ApiErrorBody>(async (req, res) => {
@@ -65,6 +65,6 @@ export function withZkLoginUserRequired<TRes, TAuth = unknown>(
       }
 
       return handler(req, res, req.session.user as ZkLoginUser<TAuth>);
-    })
+    }),
   );
 }

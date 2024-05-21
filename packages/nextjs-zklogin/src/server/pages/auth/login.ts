@@ -38,7 +38,7 @@ class ZkLoginAuthError extends Error {}
 async function getExpires(
   req: NextApiRequest,
   epochProvider: CurrentEpochProvider,
-  allowedApps: OAuthApplications
+  allowedApps: OAuthApplications,
 ): Promise<Date> {
   const [error, body] = validate(req.body, ZkLoginRequest, { mask: true });
   if (error) throw new ZkLoginAuthError(error.message);
@@ -61,7 +61,7 @@ async function getZkLoginUser<T>(
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
   allowedApps: OAuthApplications,
-  authorizeUser: UserAuthorizer<T>
+  authorizeUser: UserAuthorizer<T>,
 ): Promise<ZkLoginUser<T>> {
   const [error, body] = validate(req.body, ZkLoginRequest);
   if (error) throw new ZkLoginAuthError(error.message);
@@ -84,7 +84,7 @@ async function getZkLoginUser<T>(
     generateNonce(
       publicKeyFromBase64(body.extendedEphemeralPublicKey),
       body.maxEpoch,
-      body.jwtRandomness
+      body.jwtRandomness,
     )
   )
     throw new ZkLoginAuthError("Invalid jwt nonce");
@@ -105,7 +105,7 @@ async function getZkLoginUser<T>(
   const authContext = await authorizeUser(
     body.oidProvider,
     id,
-    jwtClaims as JwtClaims
+    jwtClaims as JwtClaims,
   );
   if (authContext === undefined)
     throw new ZkLoginAuthError("User not authorized");
@@ -126,7 +126,7 @@ async function getZkLoginUser<T>(
     salt,
     body.keyClaimName,
     keyClaimValue,
-    aud
+    aud,
   ).toString();
   const partialProof = await getZkProof(zkProofProvider, {
     jwt: body.jwt,
@@ -153,7 +153,7 @@ function loginHandler(
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
   allowedApps: OAuthApplications,
-  authorizeUser: UserAuthorizer
+  authorizeUser: UserAuthorizer,
 ): NextApiHandler {
   return withIronSessionApiRoute(
     async (req, res) => {
@@ -166,7 +166,7 @@ function loginHandler(
           saltProvider,
           zkProofProvider,
           allowedApps,
-          authorizeUser
+          authorizeUser,
         );
       } catch (e) {
         if (!(e instanceof ZkLoginAuthError)) throw e;
@@ -194,7 +194,7 @@ function loginHandler(
           maxAge: Math.floor((expires.getTime() - new Date().getTime()) / 1000),
         },
       };
-    }
+    },
   );
 }
 
@@ -206,7 +206,7 @@ export function login(
   saltProvider: SaltProvider,
   zkProofProvider: ZkProofProvider,
   allowedApps: OAuthApplications,
-  authorizeUser: UserAuthorizer
+  authorizeUser: UserAuthorizer,
 ): NextApiHandler {
   return methodDispatcher({
     POST: loginHandler(
@@ -214,7 +214,7 @@ export function login(
       saltProvider,
       zkProofProvider,
       allowedApps,
-      authorizeUser
+      authorizeUser,
     ),
   });
 }

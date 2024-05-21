@@ -4,7 +4,7 @@
  */
 
 import { getZkLoginSignature } from "@mysten/sui.js/zklogin";
-import { ZkLoginUserId } from "@shinami/clients";
+import { ZkLoginUserId } from "@shinami/clients/sui";
 import {
   Infer,
   array,
@@ -17,7 +17,7 @@ import {
   union,
 } from "superstruct";
 import { publicKeyFromBase64 } from "./utils.js";
-export { ZkLoginUserId } from "@shinami/clients";
+export { ZkLoginUserId } from "@shinami/clients/sui";
 
 export const ExtendedPublicKeyString = refine(
   string(),
@@ -30,7 +30,7 @@ export const ExtendedPublicKeyString = refine(
       if (e instanceof Error) return e.message;
       throw e;
     }
-  }
+  },
 );
 export type ExtendedPublicKeyString = Infer<typeof ExtendedPublicKeyString>;
 
@@ -64,7 +64,7 @@ export const MinimalJwtClaims = object({
   nonce: string(),
 });
 export type MinimalJwtClaims = Infer<typeof MinimalJwtClaims>;
-export type JwtClaims = MinimalJwtClaims & { [otherClaim: string]: unknown };
+export type JwtClaims = MinimalJwtClaims & Record<string, unknown>;
 
 export const ZkLoginUser = object({
   id: ZkLoginUserId,
@@ -90,7 +90,7 @@ export type PartialZkLoginProof = Omit<ZkLoginProof, "addressSeed">;
 
 export function assembleZkLoginSignature(
   user: ZkLoginUser,
-  userSignature: string
+  userSignature: string,
 ): string {
   return getZkLoginSignature({
     inputs: user.zkProof as ZkLoginProof,

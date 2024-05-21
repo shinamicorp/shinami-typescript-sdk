@@ -2,12 +2,18 @@
 
 [![npm version](https://badge.fury.io/js/@shinami%2Fclients.svg)](https://badge.fury.io/js/@shinami%2Fclients)
 
-TypeScript clients for [Shinami](https://www.shinami.com/) services for the [Sui](https://sui.io/) blockchain.
+TypeScript clients for [Shinami](https://www.shinami.com/) services.
 
-- [Node service](#node-service)
-- [Gas station](#gas-station)
-- [Invisible wallet](#invisible-wallet)
-- [zkLogin wallet](#zklogin-wallet)
+For [Sui](https://sui.io/):
+
+- [Node service](#node-service-sui)
+- [Gas station](#gas-station-sui)
+- [Invisible wallet](#invisible-wallet-sui)
+- [zkLogin wallet](#zklogin-wallet-sui)
+
+For [Aptos](https://aptos.dev/):
+
+- [Gas station](#gas-station-aptos)
 
 ## Install
 
@@ -15,14 +21,24 @@ TypeScript clients for [Shinami](https://www.shinami.com/) services for the [Sui
 $ npm install @shinami/clients
 ```
 
+To develop against a supported blockchain, you will also need to install their respective SDK:
+
+```shell
+# For Sui
+npm install @mysten/sui.js
+
+# For Aptos
+npm install @aptos-labs/ts-sdk
+```
+
 ## Usage
 
-### Node service
+### Node service (Sui)
 
 To create a Sui RPC client:
 
 ```ts
-import { createSuiClient } from "@shinami/clients";
+import { createSuiClient } from "@shinami/clients/sui";
 
 // Obtain NODE_ACCESS_KEY from your Shinami web portal.
 const sui = createSuiClient(NODE_ACCESS_KEY);
@@ -33,7 +49,7 @@ It supports both HTTP JSON RPC requests as well as WebSocket subscriptions.
 
 **Note that `NODE_ACCESS_KEY` determines which Sui network later operations are targeting.**
 
-### Gas station
+### Gas station (Sui)
 
 **Note that gas station should be integrated from your service backend.**
 This is so you don't leak your `GAS_ACCESS_KEY` to your end users, and to allow you to control whose and what transactions to sponsor.
@@ -47,7 +63,7 @@ import {
   GasStationClient,
   buildGaslessTransactionBytes,
   createSuiClient,
-} from "@shinami/clients";
+} from "@shinami/clients/sui";
 
 // Obtain NODE_ACCESS_KEY and GAS_ACCESS_KEY from your Shinami web portal.
 // They MUST be associated with the same network.
@@ -73,7 +89,7 @@ const gaslessTx = await buildGaslessTransactionBytes({
 const { txBytes, signature: gasSignature } = await gas.sponsorTransactionBlock(
   gaslessTx,
   keypair.toSuiAddress(),
-  5_000_000
+  5_000_000,
 );
 
 // Sign the sponsored tx.
@@ -86,7 +102,7 @@ const txResp = await sui.executeTransactionBlock({
 });
 ```
 
-### Invisible wallet
+### Invisible wallet (Sui)
 
 To use the invisible wallet as a signer for a regular (non-sponsored) transaction block:
 
@@ -97,7 +113,7 @@ import {
   ShinamiWalletSigner,
   WalletClient,
   createSuiClient,
-} from "@shinami/clients";
+} from "@shinami/clients/sui";
 
 // Obtain NODE_ACCESS_KEY and WALLET_ACCESS_KEY from your Shinami web portal.
 const sui = createSuiClient(NODE_ACCESS_KEY);
@@ -139,7 +155,7 @@ import {
   WalletClient,
   buildGaslessTransactionBytes,
   createSuiClient,
-} from "@shinami/clients";
+} from "@shinami/clients/sui";
 
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
@@ -173,38 +189,8 @@ const gaslessTx = await buildGaslessTransactionBytes({
 // Execute the gasless tx using your invisible wallet.
 const txResp = await signer.executeGaslessTransactionBlock(
   gaslessTx,
-  5_000_000
+  5_000_000,
 );
-```
-
-### zkLogin wallet
-
-You can use Shinami's zkLogin wallet services as the salt provider and zkProver in your [zkLogin](https://docs.sui.io/concepts/cryptography/zklogin) implementation.
-
-```ts
-import { ZkProverClient, ZkWalletClient } from "@shinami/clients";
-
-// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
-const zkw = new ZkWalletClient(WALLET_ACCESS_KEY);
-const zkp = new ZkProverClient(WALLET_ACCESS_KEY);
-
-// Prepare a nonce according to the zkLogin requirements.
-// Obtain a valid jwt with that nonce from a supported OpenID provider.
-
-// Get zkLogin wallet salt.
-const { salt, address } = await zkw.getOrCreateZkLoginWallet(jwt);
-
-// Create a zkProof.
-const { zkProof } = await zkp.createZkLoginProof(
-  jwt,
-  maxEpoch,
-  ephemeralPublicKey,
-  jwtRandomness,
-  salt
-);
-
-// Now you can sign transaction blocks with ephemeralPrivateKey, and assemble the zkLogin signature
-// using zkProof.
 ```
 
 #### Beneficiary graph API
@@ -217,7 +203,7 @@ import {
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
-} from "@shinami/clients";
+} from "@shinami/clients/sui";
 
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
@@ -241,11 +227,99 @@ const graphId = EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET;
 const txDigest = await signer.setBeneficiary(
   graphId,
   // Replace with user's actual wallet address that owns the Bullshark.
-  "0x1234"
+  "0x1234",
 );
 
 // This should return the address we just set.
 const beneficiary = await signer.getBeneficiary(graphId);
+```
+
+### zkLogin wallet (Sui)
+
+You can use Shinami's zkLogin wallet services as the salt provider and zkProver in your [zkLogin](https://docs.sui.io/concepts/cryptography/zklogin) implementation.
+
+```ts
+import { ZkProverClient, ZkWalletClient } from "@shinami/clients/sui";
+
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
+const zkw = new ZkWalletClient(WALLET_ACCESS_KEY);
+const zkp = new ZkProverClient(WALLET_ACCESS_KEY);
+
+// Prepare a nonce according to the zkLogin requirements.
+// Obtain a valid jwt with that nonce from a supported OpenID provider.
+
+// Get zkLogin wallet salt.
+const { salt, address } = await zkw.getOrCreateZkLoginWallet(jwt);
+
+// Create a zkProof.
+const { zkProof } = await zkp.createZkLoginProof(
+  jwt,
+  maxEpoch,
+  ephemeralPublicKey,
+  jwtRandomness,
+  salt,
+);
+
+// Now you can sign transaction blocks with ephemeralPrivateKey, and assemble the zkLogin signature
+// using zkProof.
+```
+
+### Gas station (Aptos)
+
+**Note that gas station should be integrated from your service backend.**
+This is so you don't leak your `GAS_ACCESS_KEY` to your end users, and to allow you to control whose and what transactions to sponsor.
+
+To use gas station with a local signer:
+
+```ts
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { GasStationClient } from "@shinami/clients/aptos";
+
+// Create your Aptos client targeting the desired network.
+const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
+
+// Obtain GAS_ACCESS_KEY from your Shinami web portal.
+// It MUST be associated with the same Aptos network as above.
+const gas = new GasStationClient(GAS_ACCESS_KEY);
+
+// Because we are using sponsored transaction, this account doesn't have to
+// exist on-chain beforehand. It'll be created as part of the first transaction.
+// In practice, you'll likely want to persist the account key as opposed to
+// always generating new ones.
+const account = Account.generate({
+  scheme: SigningSchemeInput.Ed25519,
+});
+
+// Build a transaction as you normally would, but with fee payer placeholder.
+const transaction = await aptos.transaction.build.simple({
+  sender: account.accountAddress,
+  data: {
+    function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+    functionArguments: [1, 2],
+  },
+  withFeePayer: true,
+});
+
+// Get it sponsored.
+const feePayerSig = await gas.sponsorTransaction(transaction);
+
+// Sign the sponsored transaction as usual.
+const senderSig = aptos.transaction.sign({
+  signer: account,
+  transaction,
+});
+
+// Submit the signed transaction with fee payer signature.
+const pending = await aptos.transaction.submit.simple({
+  transaction,
+  senderAuthenticator: senderSig,
+  feePayerAuthenticator: feePayerSig,
+});
+
+// Wait for it to be committed on-chain.
+const committed = await aptos.transaction.waitForTransaction({
+  transactionHash: pending.hash,
+});
 ```
 
 ## Development
@@ -270,33 +344,43 @@ $ npm run test
 
 ### Integration test
 
-The integration tests make use of the [Move example](../../move_example/) package, which has been deployed to [Sui Testnet](https://suiexplorer.com/object/0xd8f042479dcb0028d868051bd53f0d3a41c600db7b14241674db1c2e60124975?network=testnet).
-Obtain `<your_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
+The integration tests for Sui make use of the [Sui Move example](../../examples/sui-move/) package, which has been deployed to [Sui Testnet](https://testnet.suivision.xyz/package/0xd8f042479dcb0028d868051bd53f0d3a41c600db7b14241674db1c2e60124975).
+Obtain `<your_sui_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
 The key must be authorized for all of these services, targeting _Sui Testnet_:
 
 - Node service
 - Gas station - you must also have some available balance in your gas fund.
 - Wallet service
 
+The integration tests for Aptos make use of the [Aptos Move example](../../examples/aptos-move/) package, which has been deployed to [Aptos Testnet](https://explorer.aptoslabs.com/account/0x08f91c1523658608e41e628b9a36790a19ec272a2c27084cf2acacbb45fc1643/modules/code/math?network=testnet).
+Obtain `<your_aptos_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
+The key must be authorized for all of these services, targeting _Aptos Testnet_:
+
+- Gas station - you must also have some available balance in your gas fund.
+
+Once you have the super keys for both chains,
+
 ```shell
-export NODE_ACCESS_KEY=<your_super_access_key>
-export GAS_ACCESS_KEY=<your_super_access_key>
-export WALLET_ACCESS_KEY=<your_super_access_key>
+export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
+export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
+export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
+export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 
 npm run integration
 ```
 
 The integration tests by default talk to Shinami's production endpoints.
-You can also make it talk to alternative endpoints by modifying [integration.env.ts](test/integration.env.ts).
+You can also make it talk to alternative endpoints by modifying [sui/integration.env.ts](test/sui/integration.env.ts) and [aptos/integration.env.ts](test/aptos/integration.env.ts).
 
 ### Code coverage
 
 Similar to [integration test](#integration-test):
 
 ```shell
-export NODE_ACCESS_KEY=<your_super_access_key>
-export GAS_ACCESS_KEY=<your_super_access_key>
-export WALLET_ACCESS_KEY=<your_super_access_key>
+export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
+export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
+export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
+export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 
 npm run coverage
 ```

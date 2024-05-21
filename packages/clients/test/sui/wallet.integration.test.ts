@@ -14,7 +14,7 @@ import {
   KeySession,
   ShinamiWalletSigner,
   buildGaslessTransactionBytes,
-} from "../src/index.js";
+} from "../../src/sui/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
   createKeyClient,
@@ -94,7 +94,7 @@ describe("ShinamiWallet", () => {
       const txResp = await signer3.executeGaslessTransactionBlock(
         gaslessTx,
         gasBudget,
-        { showEffects: true, showEvents: true }
+        { showEffects: true, showEvents: true },
       );
       console.log("txResp", txResp);
       expect(txResp).toMatchObject({
@@ -117,13 +117,13 @@ describe("ShinamiWallet", () => {
   it(
     "executes gasless transaction block",
     executeAddTx(1, 2, 2_000_000),
-    30_000
+    30_000,
   );
 
   it(
     "executes gasless transaction block with auto budget",
     executeAddTx(3, 4),
-    30_000
+    30_000,
   );
 
   it("sets a beneficiary address and gets it back", async () => {
@@ -131,11 +131,11 @@ describe("ShinamiWallet", () => {
       "0x0000000000000000000000000000000000000000000000000000000000001111";
     const txDigest = await signer.setBeneficiary(
       EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
-      beneficiary
+      beneficiary,
     );
     console.log("txDigest", txDigest);
     expect(
-      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET)
+      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
     ).resolves.toBe(beneficiary);
   }, 30_000);
 
@@ -144,21 +144,21 @@ describe("ShinamiWallet", () => {
       "0x0000000000000000000000000000000000000000000000000000000000002222";
     const txDigest = await signer.setBeneficiary(
       EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
-      beneficiary
+      beneficiary,
     );
     console.log("txDigest", txDigest);
     expect(
-      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET)
+      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
     ).resolves.toBe(beneficiary);
   }, 30_000);
 
   it("unsets beneficiary address", async () => {
     const txDigest = await signer.unsetBeneficiary(
-      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET
+      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
     );
     console.log("txDigest", txDigest);
     expect(
-      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET)
+      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
     ).resolves.toBe(null);
   }, 30_000);
 });

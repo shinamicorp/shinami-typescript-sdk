@@ -5,14 +5,19 @@
   "workspaces": [
     "packages/clients",
     "packages/legacy",
-    "packages/nextjs-zklogin"
+    "packages/nextjs-zklogin",
+    "examples/nextjs-zklogin"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "prettier --check . && npm run lint --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "integration": "npm run integration --workspaces --if-present",
-    "coverage": "npm run coverage --workspaces --if-present"
+    "coverage": "npm run coverage --workspaces --if-present",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
   }
 }

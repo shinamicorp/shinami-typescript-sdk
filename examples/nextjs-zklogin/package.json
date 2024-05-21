@@ -6,7 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@shinami/nextjs-zklogin": "^0.3.0",
+    "@shinami/nextjs-zklogin": "^0.3.1",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

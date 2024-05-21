@@ -3,7 +3,7 @@ import {
   ZkProverClient,
   ZkWalletClient,
   createSuiClient,
-} from "@shinami/clients";
+} from "@shinami/clients/sui";
 import { throwExpression } from "../shared/utils";
 
 // This key is only used on the backend / api. It's not exposed to the frontend.
@@ -17,7 +17,7 @@ const SHINAMI_SUPER_ACCESS_KEY =
 export const sui = createSuiClient(
   SHINAMI_SUPER_ACCESS_KEY,
   process.env.NEXT_PUBLIC_SHINAMI_NODE_RPC_URL_OVERRIDE,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE
+  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE,
 );
 
 /**
@@ -27,7 +27,7 @@ export const sui = createSuiClient(
  */
 export const gas = new GasStationClient(
   SHINAMI_SUPER_ACCESS_KEY,
-  process.env.SHINAMI_GAS_RPC_URL_OVERRIDE
+  process.env.SHINAMI_GAS_RPC_URL_OVERRIDE,
 );
 
 /**
@@ -37,7 +37,7 @@ export const gas = new GasStationClient(
  */
 export const zkw = new ZkWalletClient(
   SHINAMI_SUPER_ACCESS_KEY,
-  process.env.SHINAMI_ZKWALLET_RPC_URL_OVERRIDE
+  process.env.SHINAMI_ZKWALLET_RPC_URL_OVERRIDE,
 );
 
 /**
@@ -47,5 +47,5 @@ export const zkw = new ZkWalletClient(
  */
 export const zkp = new ZkProverClient(
   SHINAMI_SUPER_ACCESS_KEY,
-  process.env.SHINAMI_ZKPROVER_RPC_URL_OVERRIDE
+  process.env.SHINAMI_ZKPROVER_RPC_URL_OVERRIDE,
 );

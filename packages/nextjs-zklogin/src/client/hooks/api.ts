@@ -52,14 +52,14 @@ export async function callJsonApi<T>({
     },
     body: JSON.stringify(body),
   });
-  const data = await resp.json();
+  const data: unknown = await resp.json();
   if (!resp.ok) {
     throw new ApiError(
       resp.status,
-      is(data, ApiErrorBody) ? data : { error: JSON.stringify(data) }
+      is(data, ApiErrorBody) ? data : { error: JSON.stringify(data) },
     );
   }
-  return resultSchema ? mask(data, resultSchema) : data;
+  return resultSchema ? mask(data, resultSchema) : (data as T);
 }
 
 function apiQueryFn<T = unknown>(schema?: Struct<T>): QueryFunction<T> {
@@ -123,7 +123,7 @@ export function useLogin(): UseMutationResult<
       resultSchema: ZkLoginUser,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ["api", `${AUTH_API_BASE}/me`],
       });
     },
@@ -141,7 +141,7 @@ export function useLogout(): UseMutationResult<unknown, ApiError> {
   return useMutation({
     mutationFn: apiMutationFn({ uri: () => `${AUTH_API_BASE}/logout` }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: ["api", `${AUTH_API_BASE}/me`],
       });
     },

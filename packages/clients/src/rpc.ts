@@ -29,7 +29,7 @@ export class ShinamiRpcClient {
             "X-API-Key": accessKey,
           },
         }),
-      ])
+      ]),
     );
   }
 
@@ -43,10 +43,10 @@ export class ShinamiRpcClient {
   async request<T>(
     method: string,
     params?: unknown[] | object,
-    schema?: Struct<T>
+    schema?: Struct<T>,
   ): Promise<T> {
-    const result = await this.client.request({ method, params });
-    if (!schema) return result;
+    const result: unknown = await this.client.request({ method, params });
+    if (!schema) return result as T;
     return mask(result, schema);
   }
 
@@ -65,7 +65,7 @@ export class ShinamiRpcClient {
  * @returns Trimmed params.
  */
 export function trimTrailingParams(
-  params: readonly unknown[]
+  params: readonly unknown[],
 ): readonly unknown[] {
   let end = params.length;
   while (end > 0) {

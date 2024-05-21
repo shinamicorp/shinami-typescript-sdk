@@ -11,7 +11,7 @@ import {
 import { toB64 } from "@mysten/sui.js/utils";
 import { JSONRPCError } from "@open-rpc/client-js";
 import { Infer, nullable, object, string } from "superstruct";
-import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "./rpc.js";
+import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 
 const KEY_RPC_URL = "https://api.shinami.com/key/v1";
 const WALLET_RPC_URL = "https://api.shinami.com/wallet/v1";
@@ -70,7 +70,7 @@ export class WalletClient extends ShinamiRpcClient {
     return this.request(
       "shinami_wal_createWallet",
       [walletId, sessionToken],
-      string()
+      string(),
     );
   }
 
@@ -93,12 +93,12 @@ export class WalletClient extends ShinamiRpcClient {
   signTransactionBlock(
     walletId: string,
     sessionToken: string,
-    txBytes: string
+    txBytes: string,
   ): Promise<SignTransactionResult> {
     return this.request(
       "shinami_wal_signTransactionBlock",
       [walletId, sessionToken, txBytes],
-      SignTransactionResult
+      SignTransactionResult,
     );
   }
 
@@ -114,12 +114,12 @@ export class WalletClient extends ShinamiRpcClient {
     walletId: string,
     sessionToken: string,
     message: string,
-    wrapBcs = true
+    wrapBcs = true,
   ): Promise<string> {
     return this.request(
       "shinami_wal_signPersonalMessage",
       [walletId, sessionToken, message, wrapBcs],
-      string()
+      string(),
     );
   }
 
@@ -146,7 +146,7 @@ export class WalletClient extends ShinamiRpcClient {
     txBytes: string,
     gasBudget?: number | string,
     options?: SuiTransactionBlockResponseOptions,
-    requestType?: ExecuteTransactionRequestType
+    requestType?: ExecuteTransactionRequestType,
   ): Promise<SuiTransactionBlockResponse> {
     return this.request(
       "shinami_wal_executeGaslessTransactionBlock",
@@ -157,7 +157,7 @@ export class WalletClient extends ShinamiRpcClient {
         gasBudget,
         options,
         requestType,
-      ])
+      ]),
       /* Not validating result for now */
     );
   }
@@ -184,12 +184,12 @@ export class WalletClient extends ShinamiRpcClient {
     walletId: string,
     sessionToken: string,
     beneficiaryGraphId: string,
-    beneficiaryAddress: string
+    beneficiaryAddress: string,
   ): Promise<string> {
     return this.request(
       "shinami_walx_setBeneficiary",
       [walletId, sessionToken, beneficiaryGraphId, beneficiaryAddress],
-      string()
+      string(),
     );
   }
 
@@ -209,12 +209,12 @@ export class WalletClient extends ShinamiRpcClient {
   unsetBeneficiary(
     walletId: string,
     sessionToken: string,
-    beneficiaryGraphId: string
+    beneficiaryGraphId: string,
   ): Promise<string> {
     return this.request(
       "shinami_walx_unsetBeneficiary",
       [walletId, sessionToken, beneficiaryGraphId],
-      string()
+      string(),
     );
   }
 
@@ -232,12 +232,12 @@ export class WalletClient extends ShinamiRpcClient {
    */
   getBeneficiary(
     walletId: string,
-    beneficiaryGraphId: string
+    beneficiaryGraphId: string,
   ): Promise<string | null> {
     return this.request(
       "shinami_walx_getBeneficiary",
       [walletId, beneficiaryGraphId],
-      nullable(string())
+      nullable(string()),
     );
   }
 }
@@ -279,7 +279,7 @@ export class KeySession {
       } catch (e: unknown) {
         if (e instanceof JSONRPCError && e.code === -32602) {
           const details = errorDetails(e);
-          if (details && details.details.includes("Bad session token")) {
+          if (details?.details?.includes("Bad session token")) {
             return await run(await this.refreshToken());
           }
         }
@@ -304,19 +304,19 @@ export class ShinamiWalletSigner {
   constructor(
     walletId: string,
     walletClient: WalletClient,
-    session: KeySession
+    session: KeySession,
   );
   constructor(
     walletId: string,
     walletClient: WalletClient,
     secret: string,
-    keyClient: KeyClient
+    keyClient: KeyClient,
   );
   constructor(
     walletId: string,
     walletClient: WalletClient,
     secretOrSession: string | KeySession,
-    keyClient?: KeyClient
+    keyClient?: KeyClient,
   ) {
     this.walletId = walletId;
     this.walletClient = walletClient;
@@ -361,13 +361,12 @@ export class ShinamiWalletSigner {
   async tryCreate(): Promise<string | undefined> {
     try {
       return await this.session.withToken((token) =>
-        this.walletClient.createWallet(this.walletId, token)
+        this.walletClient.createWallet(this.walletId, token),
       );
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602) {
         const details = errorDetails(e);
-        if (details && details.details.includes("Wallet ID already exists"))
-          return;
+        if (details?.details?.includes("Wallet ID already exists")) return;
       }
       throw e;
     }
@@ -379,11 +378,11 @@ export class ShinamiWalletSigner {
    * @returns Signing result.
    */
   signTransactionBlock(
-    txBytes: string | Uint8Array
+    txBytes: string | Uint8Array,
   ): Promise<SignTransactionResult> {
     const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
     return this.session.withToken((token) =>
-      this.walletClient.signTransactionBlock(this.walletId, token, _txBytes)
+      this.walletClient.signTransactionBlock(this.walletId, token, _txBytes),
     );
   }
 
@@ -395,7 +394,7 @@ export class ShinamiWalletSigner {
    */
   signPersonalMessage(
     message: string | Uint8Array,
-    wrapBcs = true
+    wrapBcs = true,
   ): Promise<string> {
     const _message = message instanceof Uint8Array ? toB64(message) : message;
     return this.session.withToken((token) =>
@@ -403,8 +402,8 @@ export class ShinamiWalletSigner {
         this.walletId,
         token,
         _message,
-        wrapBcs
-      )
+        wrapBcs,
+      ),
     );
   }
 
@@ -427,7 +426,7 @@ export class ShinamiWalletSigner {
     txBytes: string | Uint8Array,
     gasBudget?: number | string,
     options?: SuiTransactionBlockResponseOptions,
-    requestType?: ExecuteTransactionRequestType
+    requestType?: ExecuteTransactionRequestType,
   ): Promise<SuiTransactionBlockResponse> {
     const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
     return this.session.withToken((token) =>
@@ -437,8 +436,8 @@ export class ShinamiWalletSigner {
         _txBytes,
         gasBudget,
         options,
-        requestType
-      )
+        requestType,
+      ),
     );
   }
 
@@ -460,15 +459,15 @@ export class ShinamiWalletSigner {
    */
   setBeneficiary(
     beneficiaryGraphId: string,
-    beneficiaryAddress: string
+    beneficiaryAddress: string,
   ): Promise<string> {
     return this.session.withToken((token) =>
       this.walletClient.setBeneficiary(
         this.walletId,
         token,
         beneficiaryGraphId,
-        beneficiaryAddress
-      )
+        beneficiaryAddress,
+      ),
     );
   }
 
@@ -488,8 +487,8 @@ export class ShinamiWalletSigner {
       this.walletClient.unsetBeneficiary(
         this.walletId,
         token,
-        beneficiaryGraphId
-      )
+        beneficiaryGraphId,
+      ),
     );
   }
 

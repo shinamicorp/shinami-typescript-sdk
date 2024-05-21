@@ -21,12 +21,18 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY: fake_key
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: fake_id
+          NEXT_PUBLIC_FACEBOOK_CLIENT_ID: fake_id
+          NEXT_PUBLIC_TWITCH_CLIENT_ID: fake_id
       - run: npm run lint
       - run: npm run coverage
         env:
-          NODE_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
-          GAS_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
-          WALLET_ACCESS_KEY: ${{ secrets.SUPER_ACCESS_KEY }}
+          SUI_NODE_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          SUI_GAS_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          SUI_WALLET_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
 
       # TODO - coverage report
 

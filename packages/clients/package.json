@@ -1,13 +1,15 @@
 {
   "name": "@shinami/clients",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "description": "TypeScript clients for Shinami services",
   "sideEffects": false,
   "engines": {
     "node": ">=14"
   },
   "files": [
-    "dist"
+    "dist",
+    "sui",
+    "aptos"
   ],
   "type": "module",
   "main": "dist/cjs/index.js",
@@ -15,6 +17,14 @@
     ".": {
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./sui": {
+      "import": "./dist/esm/sui/index.js",
+      "require": "./dist/cjs/sui/index.js"
+    },
+    "./aptos": {
+      "import": "./dist/esm/aptos/index.js",
+      "require": "./dist/cjs/aptos/index.js"
     }
   },
   "scripts": {
@@ -30,6 +40,7 @@
   "keywords": [
     "Shinami",
     "Sui",
+    "Aptos",
     "node",
     "gas",
     "wallet"
@@ -53,18 +64,28 @@
     "superstruct": "^1.0.3"
   },
   "devDependencies": {
+    "@aptos-labs/ts-sdk": ">=1.13.1",
+    "@mysten/sui.js": ">=0.46.1",
     "@tsconfig/recommended": "^1.0.3",
     "@types/uuid": "^9.0.2",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
-    "eslint": "^8.51.0",
+    "eslint": "^8.57.0",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
+    "typescript-eslint": "^7.7.1",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
+    "@aptos-labs/ts-sdk": ">=1.13.1",
     "@mysten/sui.js": ">=0.46.1"
+  },
+  "peerDependenciesMeta": {
+    "@aptos-labs/ts-sdk": {
+      "optional": true
+    },
+    "@mysten/sui.js": {
+      "optional": true
+    }
   }
 }

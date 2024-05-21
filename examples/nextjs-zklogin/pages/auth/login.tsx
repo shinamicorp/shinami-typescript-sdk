@@ -36,8 +36,8 @@ export default withNewZkLoginSession(
                     session,
                     GOOGLE_CLIENT_ID!,
                     new URL("google", callbackBaseUrl),
-                    redirectTo
-                  )
+                    redirectTo,
+                  ),
                 );
               }}
             >
@@ -54,8 +54,8 @@ export default withNewZkLoginSession(
                     session,
                     FACEBOOK_CLIENT_ID!,
                     new URL("facebook", callbackBaseUrl),
-                    redirectTo
-                  )
+                    redirectTo,
+                  ),
                 );
               }}
             >
@@ -72,8 +72,8 @@ export default withNewZkLoginSession(
                     session,
                     TWITCH_CLIENT_ID!,
                     new URL("twitch", callbackBaseUrl),
-                    redirectTo
-                  )
+                    redirectTo,
+                  ),
                 );
               }}
             >
@@ -83,5 +83,5 @@ export default withNewZkLoginSession(
         )}
       </>
     );
-  }
+  },
 );

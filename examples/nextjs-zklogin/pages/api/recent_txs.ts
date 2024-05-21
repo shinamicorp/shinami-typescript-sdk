@@ -14,5 +14,5 @@ export default withZkLoginUserRequired<RecentTxsResponse>(
     });
 
     res.json({ txDigests: txs.data.map((x) => x.digest) });
-  }
+  },
 );

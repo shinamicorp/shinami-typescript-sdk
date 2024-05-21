@@ -43,7 +43,7 @@ function withOpenIdCallback<P>(
   oidProvider: OidProvider,
   keyClaimName: string,
   getState: (params: URLSearchParams) => State,
-  getJwt: (params: URLSearchParams) => string
+  getJwt: (params: URLSearchParams) => string,
 ) {
   const WrappedComponent: FunctionComponent<P> = (props) => {
     const [status, setStatus] = useState<CallbackStatus>("loading");
@@ -56,7 +56,7 @@ function withOpenIdCallback<P>(
     const { mutateAsync: login } = useLogin();
 
     useEffect(() => {
-      (async function () {
+      void (async function () {
         setStatus("loading");
 
         try {
@@ -86,7 +86,7 @@ function withOpenIdCallback<P>(
           });
 
           setStatus("redirecting");
-          replace(state.redirectTo);
+          await replace(state.redirectTo);
         } catch (e) {
           setStatus("error");
           throw e;
@@ -105,7 +105,7 @@ function withOpenIdCallback<P>(
  */
 export function withGoogleCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
-  keyClaimName: string = "sub"
+  keyClaimName = "sub",
 ) {
   return withOpenIdCallback(
     Component,
@@ -114,7 +114,7 @@ export function withGoogleCallback<P>(
     (params) => {
       const state = new URLSearchParams(
         params.get("state") ??
-          throwExpression(new Error("Missing state from params"))
+          throwExpression(new Error("Missing state from params")),
       );
       return {
         nonce:
@@ -127,7 +127,7 @@ export function withGoogleCallback<P>(
     },
     (params) =>
       params.get("id_token") ??
-      throwExpression(new Error("Missing id_token from params"))
+      throwExpression(new Error("Missing id_token from params")),
   );
 }
 
@@ -136,7 +136,7 @@ export function withGoogleCallback<P>(
  */
 export function withFacebookCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
-  keyClaimName: string = "sub"
+  keyClaimName = "sub",
 ) {
   return withOpenIdCallback(
     Component,
@@ -145,7 +145,7 @@ export function withFacebookCallback<P>(
     (params) => {
       const state = new URLSearchParams(
         params.get("state") ??
-          throwExpression(new Error("Missing state from params"))
+          throwExpression(new Error("Missing state from params")),
       );
       return {
         nonce:
@@ -158,7 +158,7 @@ export function withFacebookCallback<P>(
     },
     (params) =>
       params.get("id_token") ??
-      throwExpression(new Error("Missing id_token from params"))
+      throwExpression(new Error("Missing id_token from params")),
   );
 }
 
@@ -167,7 +167,7 @@ export function withFacebookCallback<P>(
  */
 export function withTwitchCallback<P>(
   Component: FunctionComponent<P & { status: CallbackStatus }>,
-  keyClaimName: string = "sub"
+  keyClaimName = "sub",
 ) {
   return withOpenIdCallback(
     Component,
@@ -178,8 +178,8 @@ export function withTwitchCallback<P>(
         // Twitch does a second URL encoding on state when calling back.
         decodeURIComponent(
           params.get("state") ??
-            throwExpression(new Error("Missing state from params"))
-        )
+            throwExpression(new Error("Missing state from params")),
+        ),
       );
       return {
         nonce:
@@ -192,6 +192,6 @@ export function withTwitchCallback<P>(
     },
     (params) =>
       params.get("id_token") ??
-      throwExpression(new Error("Missing id_token from params"))
+      throwExpression(new Error("Missing id_token from params")),
   );
 }
