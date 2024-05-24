@@ -132,4 +132,67 @@ describe("GasStationClient", () => {
       "Invalid params",
     );
   }, 30_000);
+
+  it("successfully sponsors and submits transaction", async () => {
+    const transaction = await aptos.transaction.build.simple({
+      sender: account.accountAddress,
+      data: {
+        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        functionArguments: [1, 2],
+      },
+      withFeePayer: true,
+    });
+
+    const senderSig = aptos.transaction.sign({
+      signer: account,
+      transaction,
+    });
+
+    const pending = await gas.sponsorAndSubmitSignedTransaction(
+      transaction,
+      senderSig,
+    );
+    console.log("pending", pending);
+
+    const committed = await aptos.transaction.waitForTransaction({
+      transactionHash: pending.hash,
+      options: {
+        checkSuccess: true,
+      },
+    });
+    console.log("committed", committed);
+    if (!isUserTransactionResponse(committed)) {
+      throw new Error("Unexpected committed transaction type");
+    }
+
+    expect(
+      committed.events.find(
+        (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
+      ),
+    ).toMatchObject({
+      data: {
+        result: "3", // 1 + 2
+      },
+    });
+  }, 30_000);
+
+  it("fails to sponsor and submit transaction with bad signature", async () => {
+    const transaction = await aptos.transaction.build.simple({
+      sender: account.accountAddress,
+      data: {
+        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        functionArguments: [1, 2],
+      },
+      withFeePayer: true,
+    });
+
+    const badSig = aptos.transaction.sign({
+      signer: Account.generate(),
+      transaction,
+    });
+
+    const promise = gas.sponsorAndSubmitSignedTransaction(transaction, badSig);
+    await expect(promise).rejects.toThrow(JSONRPCError);
+    await expect(promise).rejects.toThrow("Transaction submission failed");
+  }, 30_000);
 });
