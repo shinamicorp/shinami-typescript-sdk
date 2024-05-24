@@ -15,7 +15,11 @@ export function createAptos() {
 }
 
 export function createGasClient() {
-  return new GasStationClient(requireEnv("APTOS_GAS_ACCESS_KEY"));
+  return new GasStationClient(
+    requireEnv("APTOS_GAS_ACCESS_KEY"),
+    // TODO - revert
+    "https://api.dev.shinami.com/aptos/gas/v1",
+  );
 }
 
 function requireEnv(env: string): string {

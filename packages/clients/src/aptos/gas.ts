@@ -12,7 +12,7 @@ import {
   PendingTransactionResponse,
   SimpleTransaction,
 } from "@aptos-labs/ts-sdk";
-import { Infer, array, integer, object, string } from "superstruct";
+import { Infer, array, integer, object, string, unknown } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 
 const GAS_STATION_RPC_URL = "https://api.shinami.com/aptos/gas/v1";
@@ -27,6 +27,13 @@ const SponsorTransactionResult = object({
   feePayer: RpcAccountSignature,
 });
 type SponsorTransactionResult = Infer<typeof SponsorTransactionResult>;
+
+const SponsorAndSubmitSignedTransactionResult = object({
+  pendingTransaction: unknown(),
+});
+type SponsorAndSubmitSignedTransactionResult = Infer<
+  typeof SponsorAndSubmitSignedTransactionResult
+>;
 
 /**
  * Aptos gas station RPC client.
@@ -116,10 +123,15 @@ export class GasStationClient extends ShinamiRpcClient {
       );
     }
 
-    return await this.request("gas_sponsorAndSubmitSignedTransaction", [
-      transaction.rawTransaction.bcsToHex().toString(),
-      senderSignature.bcsToHex().toString(),
-      secondarySigners,
-    ]);
+    const { pendingTransaction } = await this.request(
+      "gas_sponsorAndSubmitSignedTransaction",
+      [
+        transaction.rawTransaction.bcsToHex().toString(),
+        senderSignature.bcsToHex().toString(),
+        secondarySigners,
+      ],
+      SponsorAndSubmitSignedTransactionResult,
+    );
+    return pendingTransaction as PendingTransactionResponse;
   }
 }
