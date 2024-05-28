@@ -35,6 +35,13 @@ type SponsorAndSubmitSignedTransactionResult = Infer<
   typeof SponsorAndSubmitSignedTransactionResult
 >;
 
+const Fund = object({
+  name: string(),
+  balance: integer(),
+  inFlight: integer(),
+});
+type Fund = Infer<typeof Fund>;
+
 /**
  * Aptos gas station RPC client.
  */
@@ -133,5 +140,12 @@ export class GasStationClient extends ShinamiRpcClient {
       SponsorAndSubmitSignedTransactionResult,
     );
     return pendingTransaction as PendingTransactionResponse;
+  }
+
+  /**
+   * Gets information about the fund associated with the access key.
+   */
+  async getFund(): Promise<Fund> {
+    return await this.request("gas_getFund", [], Fund);
   }
 }

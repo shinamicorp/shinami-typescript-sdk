@@ -301,4 +301,11 @@ describe("GasStationClient", () => {
       },
     });
   }, 30_000);
+
+  it("successfully gets fund info", async () => {
+    const fund = await gas.getFund();
+    expect(fund.name).toBe("another test fund");
+    expect(fund.balance).toBeGreaterThan(0);
+    expect(fund.inFlight).toBeGreaterThanOrEqual(0);
+  });
 });
