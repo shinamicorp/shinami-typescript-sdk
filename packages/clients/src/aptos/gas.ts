@@ -36,6 +36,7 @@ type SponsorAndSubmitSignedTransactionResult = Infer<
 >;
 
 const Fund = object({
+  network: string(),
   name: string(),
   balance: integer(),
   inFlight: integer(),
