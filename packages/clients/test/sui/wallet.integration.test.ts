@@ -31,7 +31,7 @@ describe("KeyClient", () => {
     expect(await key.rpcDiscover()).toMatchObject({
       openrpc: "1.2.6",
       info: {
-        title: "Shinami Key service RPC",
+        title: "Shinami Sui Key service RPC",
         version: /\d+\.\d+\.\d+/,
       },
     });
