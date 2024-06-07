@@ -305,7 +305,7 @@ describe("GasStationClient", () => {
   it("successfully gets fund info", async () => {
     const fund = await gas.getFund();
     expect(fund.network).toBe("APTOS_TESTNET");
-    expect(fund.name).toBe("another test fund");
+    expect(fund.name).toBe("SDK CI");
     expect(fund.balance).toBeGreaterThan(0);
     expect(fund.inFlight).toBeGreaterThanOrEqual(0);
   });
