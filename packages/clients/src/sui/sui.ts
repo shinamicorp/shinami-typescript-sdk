@@ -1,9 +1,9 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient, SuiHTTPTransport } from "@mysten/sui.js/client";
+import { SuiClient, SuiHTTPTransport } from "@mysten/sui/client";
 
 const NODE_RPC_URL = "https://api.shinami.com/node/v1";
 const NODE_WS_URL = "wss://api.shinami.com/node/v1";

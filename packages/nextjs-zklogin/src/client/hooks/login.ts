@@ -1,9 +1,9 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { generateNonce, generateRandomness } from "@mysten/zklogin";
 import { UseMutationResult, useMutation } from "@tanstack/react-query";
 import { useLogout } from "./api.js";

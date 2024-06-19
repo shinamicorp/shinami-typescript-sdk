@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,8 +7,8 @@ import {
   SuiClient,
   SuiTransactionBlockResponse,
   SuiTransactionBlockResponseOptions,
-} from "@mysten/sui.js/client";
-import { GasStationClient } from "@shinami/clients/sui";
+} from "@mysten/sui/client";
+import { GasStationClient, GaslessTransaction } from "@shinami/clients/sui";
 import { NextApiHandler, NextApiRequest } from "next";
 import { validate } from "superstruct";
 import { ApiErrorBody } from "../../error.js";
@@ -17,17 +17,12 @@ import { ZkLoginUser, assembleZkLoginSignature } from "../../user.js";
 import { withZkLoginUserRequired } from "./session.js";
 import { catchAllDispatcher, methodDispatcher } from "./utils.js";
 
-export interface GaslessTransactionBytesWithBudget {
-  gaslessTxBytes: string;
-  gasBudget?: number; // Will use auto-budget if omitted.
-}
-
-export type GaslessTransactionBytesBuilder<TAuth = unknown> = (
+export type GaslessTransactionBuilder<TAuth = unknown> = (
   req: NextApiRequest,
   user: ZkLoginUser<TAuth>,
 ) =>
-  | Promise<GaslessTransactionBytesWithBudget>
-  | GaslessTransactionBytesWithBudget;
+  | Promise<Omit<GaslessTransaction, "sender">>
+  | Omit<GaslessTransaction, "sender">;
 
 export type TransactionBytesBuilder<TAuth = unknown> = (
   req: NextApiRequest,
@@ -62,24 +57,23 @@ function txHandler<TAuth = unknown>(
 
 function sponsoredTxHandler<TAuth = unknown>(
   gas: GasStationClient,
-  buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>,
+  buildGaslessTx: GaslessTransactionBuilder<TAuth>,
 ): NextApiHandler<PreparedTransactionBytes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
       const user = req.session.user! as ZkLoginUser<TAuth>;
       let tx;
       try {
-        tx = await buildGaslessTxBytes(req, user);
+        tx = await buildGaslessTx(req, user);
       } catch (e) {
         if (!(e instanceof InvalidRequest)) throw e;
         return res.status(400).json({ error: e.message });
       }
 
-      const { txBytes, signature } = await gas.sponsorTransactionBlock(
-        tx.gaslessTxBytes,
-        user.wallet,
-        tx.gasBudget,
-      );
+      const { txBytes, signature } = await gas.sponsorTransaction({
+        ...tx,
+        sender: user.wallet,
+      });
       res.json({ txBytes, gasSignature: signature });
     },
   });
@@ -121,15 +115,15 @@ function execHandler<TAuth = unknown, TRes = unknown>(
 }
 
 /**
- * Implements API routes for building and executing a Sui transaction block.
+ * Implements API routes for building and executing a Sui transaction.
  *
  * Two routes are implemented under the hood:
- * - [base_route]/tx for building the transaction block.
- * - [base_route]/exec for executing the transaction block after signed by frontend, and parsing the
+ * - [base_route]/tx for building the transaction.
+ * - [base_route]/exec for executing the transaction after signed by frontend, and parsing the
  *   transaction response.
  *
  * @param sui `SuiClient` for transaction building and execution.
- * @param buildTxBytes Function to build a transaction block (encoded in Base64).
+ * @param buildTxBytes Function to build a transaction (encoded in Base64).
  * @param parseTxRes Function to parse the transaction response.
  * @param txOptions Transaction response options.
  * @returns A Next.js API route handler.
@@ -150,16 +144,16 @@ export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
 }
 
 /**
- * Implements API routes for building, sponsoring, and executing a Sui transaction block.
+ * Implements API routes for building, sponsoring, and executing a Sui transaction.
  *
  * Two routes are implemented under the hood:
- * - [base_route]/tx for building and sponsoring the transaction block.
- * - [base_route]/exec for executing the transaction block after signed by frontend, and parsing the
+ * - [base_route]/tx for building and sponsoring the transaction.
+ * - [base_route]/exec for executing the transaction after signed by frontend, and parsing the
  *   transaction response.
  *
  * @param sui `SuiClient` for transaction building and execution.
- * @param gas `GasStationClient` for sponsoring transaction block.
- * @param buildGaslessTxBytes Function to build a gasless transaction block (encoded in Base64).
+ * @param gas `GasStationClient` for sponsoring transaction.
+ * @param buildGaslessTx Function to build a gasless transaction.
  * @param parseTxRes Function to parse the transaction response.
  * @param txOptions Transaction response options.
  * @returns A Next.js API route handler.
@@ -167,14 +161,14 @@ export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
 export function zkLoginSponsoredTxExecHandler<TAuth = unknown, TRes = unknown>(
   sui: SuiClient,
   gas: GasStationClient,
-  buildGaslessTxBytes: GaslessTransactionBytesBuilder<TAuth>,
+  buildGaslessTx: GaslessTransactionBuilder<TAuth>,
   parseTxRes: TransactionResponseParser<TAuth, TRes>,
   txOptions: SuiTransactionBlockResponseOptions = {},
 ): NextApiHandler {
   return withZkLoginUserRequired(
     sui,
     catchAllDispatcher({
-      tx: sponsoredTxHandler(gas, buildGaslessTxBytes),
+      tx: sponsoredTxHandler(gas, buildGaslessTx),
       exec: execHandler(sui, parseTxRes, txOptions),
     }),
   );

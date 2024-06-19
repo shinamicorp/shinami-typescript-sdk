@@ -1,4 +1,4 @@
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
 import { SaltProvider, ZkProofProvider } from "@shinami/nextjs-zklogin/server";
 import { SUI_NETWORK } from "../shared/sui";
 

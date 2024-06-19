@@ -1,6 +1,6 @@
 {
   "name": "@shinami/clients",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "TypeScript clients for Shinami services",
   "sideEffects": false,
   "engines": {
@@ -64,8 +64,6 @@
     "superstruct": "^1.0.3"
   },
   "devDependencies": {
-    "@aptos-labs/ts-sdk": ">=1.13.3",
-    "@mysten/sui.js": ">=0.46.1",
     "@tsconfig/recommended": "^1.0.3",
     "@types/uuid": "^9.0.2",
     "eslint": "^8.57.0",
@@ -78,13 +76,13 @@
   },
   "peerDependencies": {
     "@aptos-labs/ts-sdk": ">=1.13.3",
-    "@mysten/sui.js": ">=0.46.1"
+    "@mysten/sui": ">=1.0.4"
   },
   "peerDependenciesMeta": {
     "@aptos-labs/ts-sdk": {
       "optional": true
     },
-    "@mysten/sui.js": {
+    "@mysten/sui": {
       "optional": true
     }
   }

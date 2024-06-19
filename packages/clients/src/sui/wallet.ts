@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -7,11 +7,12 @@ import {
   ExecuteTransactionRequestType,
   SuiTransactionBlockResponse,
   SuiTransactionBlockResponseOptions,
-} from "@mysten/sui.js/client";
-import { toB64 } from "@mysten/sui.js/utils";
+} from "@mysten/sui/client";
+import { toB64 } from "@mysten/sui/utils";
 import { JSONRPCError } from "@open-rpc/client-js";
 import { Infer, nullable, object, string } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
+import { GaslessTransaction } from "./gas.js";
 
 const KEY_RPC_URL = "https://api.shinami.com/key/v1";
 const WALLET_RPC_URL = "https://api.shinami.com/wallet/v1";
@@ -84,17 +85,18 @@ export class WalletClient extends ShinamiRpcClient {
   }
 
   /**
-   * Signs a transaction block with the specified wallet.
+   * Signs a transaction with the specified wallet.
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
-   * @param txBytes Base64 encoded transaction bytes.
+   * @param txBytes Transaction bytes. If `string`, assumed to be Base64 encoded.
    * @returns Signing result.
    */
-  signTransactionBlock(
+  signTransaction(
     walletId: string,
     sessionToken: string,
-    txBytes: string,
+    txBytes: string | Uint8Array,
   ): Promise<SignTransactionResult> {
+    if (txBytes instanceof Uint8Array) txBytes = toB64(txBytes);
     return this.request(
       "shinami_wal_signTransactionBlock",
       [walletId, sessionToken, txBytes],
@@ -106,16 +108,17 @@ export class WalletClient extends ShinamiRpcClient {
    * Signs a personal message with the specified wallet.
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
-   * @param message Base64 encoded personal message.
+   * @param message Personal message bytes. If `string`, assumed to be Base64 encoded.
    * @param wrapBcs If true, wrap the message bytes in a BCS struct before signing.
    * @returns Base64 encoded serialized signature.
    */
   signPersonalMessage(
     walletId: string,
     sessionToken: string,
-    message: string,
+    message: string | Uint8Array,
     wrapBcs = true,
   ): Promise<string> {
+    if (message instanceof Uint8Array) message = toB64(message);
     return this.request(
       "shinami_wal_signPersonalMessage",
       [walletId, sessionToken, message, wrapBcs],
@@ -124,7 +127,7 @@ export class WalletClient extends ShinamiRpcClient {
   }
 
   /**
-   * Sponsors, signs, and executes a gasless transaction block.
+   * Sponsors, signs, and executes a gasless transaction.
    *
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
@@ -133,18 +136,15 @@ export class WalletClient extends ShinamiRpcClient {
    *
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
-   * @param txBytes Base64 encoded gasless transaction bytes. These are the BCS bytes of a
-   *    `TransactionKind` as opposed to `TransactionData`.
-   * @param gasBudget Gas budget. If omitted, it will be estimated from the transaction.
+   * @param tx Gasless transaction.
    * @param options Transaction execution response options.
    * @param requestType Transaction execution request type.
    * @returns Transaction execution response.
    */
-  executeGaslessTransactionBlock(
+  executeGaslessTransaction(
     walletId: string,
     sessionToken: string,
-    txBytes: string,
-    gasBudget?: number | string,
+    tx: Omit<GaslessTransaction, "sender">,
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType,
   ): Promise<SuiTransactionBlockResponse> {
@@ -153,12 +153,13 @@ export class WalletClient extends ShinamiRpcClient {
       trimTrailingParams([
         walletId,
         sessionToken,
-        txBytes,
-        gasBudget,
+        tx.txKind,
+        tx.gasBudget,
         options,
         requestType,
+        // TODO - tx.gasPrice once API adds support
       ]),
-      /* Not validating result for now */
+      /* Not validating result because it's from Sui node */
     );
   }
 
@@ -373,16 +374,15 @@ export class ShinamiWalletSigner {
   }
 
   /**
-   * Signs a transaction block with this wallet.
-   * @param txBytes Serialized transaction block. If `string`, assumed to be Base64 encoded.
+   * Signs a transaction with this wallet.
+   * @param txBytes Transaction bytes. If `string`, assumed to be Base64 encoded.
    * @returns Signing result.
    */
-  signTransactionBlock(
+  signTransaction(
     txBytes: string | Uint8Array,
   ): Promise<SignTransactionResult> {
-    const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
     return this.session.withToken((token) =>
-      this.walletClient.signTransactionBlock(this.walletId, token, _txBytes),
+      this.walletClient.signTransaction(this.walletId, token, txBytes),
     );
   }
 
@@ -396,19 +396,18 @@ export class ShinamiWalletSigner {
     message: string | Uint8Array,
     wrapBcs = true,
   ): Promise<string> {
-    const _message = message instanceof Uint8Array ? toB64(message) : message;
     return this.session.withToken((token) =>
       this.walletClient.signPersonalMessage(
         this.walletId,
         token,
-        _message,
+        message,
         wrapBcs,
       ),
     );
   }
 
   /**
-   * Sponsors, signs, and executes a gasless transaction block.
+   * Sponsors, signs, and executes a gasless transaction.
    *
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
@@ -422,19 +421,16 @@ export class ShinamiWalletSigner {
    * @param requestType Transaction execution request type.
    * @returns Transaction execution response.
    */
-  executeGaslessTransactionBlock(
-    txBytes: string | Uint8Array,
-    gasBudget?: number | string,
+  executeGaslessTransaction(
+    tx: Omit<GaslessTransaction, "sender">,
     options?: SuiTransactionBlockResponseOptions,
     requestType?: ExecuteTransactionRequestType,
   ): Promise<SuiTransactionBlockResponse> {
-    const _txBytes = txBytes instanceof Uint8Array ? toB64(txBytes) : txBytes;
     return this.session.withToken((token) =>
-      this.walletClient.executeGaslessTransactionBlock(
+      this.walletClient.executeGaslessTransaction(
         this.walletId,
         token,
-        _txBytes,
-        gasBudget,
+        tx,
         options,
         requestType,
       ),

@@ -19,20 +19,22 @@ export default withZkLoginSessionRequired(({ session }) => {
       <h1>Hello, {user.oidProvider} user!</h1>
       <div>
         <form
-          onSubmit={async (e) => {
-            e.preventDefault();
+          onSubmit={(e) => {
+            void (async () => {
+              e.preventDefault();
 
-            const data = new FormData(e.currentTarget);
-            const x = parseInt(data.get("x") as string);
-            const y = parseInt(data.get("y") as string);
-            if (isNaN(x) || isNaN(y)) return;
+              const data = new FormData(e.currentTarget);
+              const x = parseInt(data.get("x") as string);
+              const y = parseInt(data.get("y") as string);
+              if (isNaN(x) || isNaN(y)) return;
 
-            const result = await add({
-              x,
-              y,
-              keyPair: localSession.ephemeralKeyPair,
-            });
-            setResult(result);
+              const result = await add({
+                x,
+                y,
+                keyPair: localSession.ephemeralKeyPair,
+              });
+              setResult(result);
+            })();
           }}
         >
           <div>

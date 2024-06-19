@@ -2,9 +2,9 @@ import { EXAMPLE_MOVE_PACKAGE_ID } from "@/lib/api/move";
 import { gas, sui } from "@/lib/api/shinami";
 import { AddRequest, AddResponse, AddResult } from "@/lib/shared/interfaces";
 import { first } from "@/lib/shared/utils";
-import { buildGaslessTransactionBytes } from "@shinami/clients/sui";
+import { buildGaslessTransaction } from "@shinami/clients/sui";
 import {
-  GaslessTransactionBytesBuilder,
+  GaslessTransactionBuilder,
   InvalidRequest,
   TransactionResponseParser,
   zkLoginSponsoredTxExecHandler,
@@ -12,33 +12,32 @@ import {
 import { mask, validate } from "superstruct";
 
 /**
- * Builds a gasless transaction block according to the request.
+ * Builds a gasless transaction according to the request.
  */
-const buildTx: GaslessTransactionBytesBuilder = async (req, { wallet }) => {
+const buildTx: GaslessTransactionBuilder = async (req, { wallet }) => {
   const [error, body] = validate(req.body, AddRequest);
   if (error) throw new InvalidRequest(error.message);
 
   console.log("Preparing add tx for zkLogin wallet", wallet);
 
-  const gaslessTxBytes = await buildGaslessTransactionBytes({
-    sui,
-    build: async (txb) => {
-      // Source code for this example Move function:
-      // https://github.com/shinamicorp/shinami-typescript-sdk/blob/90f19396df9baadd71704a0c752f759c8e7088b4/move_example/sources/math.move#L13
-      txb.moveCall({
-        target: `${EXAMPLE_MOVE_PACKAGE_ID}::math::add`,
-        arguments: [txb.pure(body.x), txb.pure(body.y)],
-      });
-    },
-  });
+  return await buildGaslessTransaction((txb) => {
+    // Source code for this example Move function:
+    // https://github.com/shinamicorp/shinami-typescript-sdk/blob/90f19396df9baadd71704a0c752f759c8e7088b4/move_example/sources/math.move#L13
+    txb.moveCall({
+      target: `${EXAMPLE_MOVE_PACKAGE_ID}::math::add`,
+      arguments: [txb.pure.u64(body.x), txb.pure.u64(body.y)],
+    });
 
-  return { gaslessTxBytes, gasBudget: 5_000_000 };
+    // Optionally, you can set gas budget and price here or in options.
+    // txb.setGasBudget(5_000_000);
+    // txb.setGasPrice(1_000);
+  });
 };
 
 /**
  * Parses the transaction response.
  */
-const parseTxRes: TransactionResponseParser<AddResponse> = async (_, txRes) => {
+const parseTxRes: TransactionResponseParser<AddResponse> = (_, txRes) => {
   // Requires "showEvents: true" in tx response options.
   const event = first(txRes.events);
   if (!event) throw new Error("Event missing from tx response");
