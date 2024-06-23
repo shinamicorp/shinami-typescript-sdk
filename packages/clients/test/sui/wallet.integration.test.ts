@@ -81,7 +81,8 @@ describe("ShinamiWallet", () => {
   });
 
   const executeAddTx =
-    (x: number, y: number, gasBudget?: number) => async () => {
+    (x: number, y: number, gasBudget?: number, gasPrice?: number) =>
+    async () => {
       const gaslessTx = await buildGaslessTransaction(
         (txb) => {
           txb.moveCall({
@@ -89,7 +90,7 @@ describe("ShinamiWallet", () => {
             arguments: [txb.pure.u64(x), txb.pure.u64(y)],
           });
         },
-        { gasBudget },
+        { gasBudget, gasPrice },
       );
       const txResp = await signer3.executeGaslessTransaction(gaslessTx, {
         showEffects: true,
@@ -115,7 +116,7 @@ describe("ShinamiWallet", () => {
 
   it(
     "executes gasless transaction block",
-    executeAddTx(1, 2, 2_000_000),
+    executeAddTx(1, 2, 2_000_000, 1_001),
     30_000,
   );
 

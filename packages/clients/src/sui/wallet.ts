@@ -157,7 +157,7 @@ export class WalletClient extends ShinamiRpcClient {
         tx.gasBudget,
         options,
         requestType,
-        // TODO - tx.gasPrice once API adds support
+        tx.gasPrice,
       ]),
       /* Not validating result because it's from Sui node */
     );
