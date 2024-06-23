@@ -157,44 +157,15 @@ export class GasStationClient extends ShinamiRpcClient {
 
 /**
  * Builds a gasless transaction.
- * @param tx `Transaction` object pre-populated with the target transaction data.
+ * @param txOrBuild Either a `Transaction` object pre-populated with the target transaction data, or
+ *    a builder function to populate it.
  * @param options Options
- *    - sender - Optional sender address. Can also be set on `tx`.
- *    - gasBudget - Optional gas budget. Can also be set on `tx`.
- *    - gasPrice - Optional gas price. Can also be set on `tx`.
- *    - sui - `SuiClient`. Required if `tx` is not fully resolved.
+ *    - sender - Optional sender address. Can also be set in the transaction data.
+ *    - gasBudget - Optional gas budget. Can also be set in the transaction data.
+ *    - gasPrice - Optional gas price. Can also be set in the transaction data.
+ *    - sui - `SuiClient`. Required if the transaction uses non fully resolved inputs.
  * @returns A gasless transaction to be sponsored.
  */
-export async function buildGaslessTransaction(
-  tx: Transaction,
-  options?: {
-    sender?: string;
-    gasBudget?: number | string;
-    gasPrice?: number | string;
-    sui?: SuiClient;
-  },
-): Promise<GaslessTransaction>;
-
-/**
- * Builds a gasless transaction.
- * @param build Builder function to populate transaction data.
- * @param options Options
- *    - sender - Optional sender address. Can also be set during `build`.
- *    - gasBudget - Optional gas budget. Can also be set during `build`.
- *    - gasPrice - Optional gas price. Can also be set during `build`.
- *    - sui - `SuiClient`. Required if `build` uses non fully resolved inputs.
- * @returns A gasless transaction to be sponsored.
- */
-export async function buildGaslessTransaction(
-  build: (tx: Transaction) => void | Promise<void>,
-  options?: {
-    sender?: string;
-    gasBudget?: number | string;
-    gasPrice?: number | string;
-    sui?: SuiClient;
-  },
-): Promise<GaslessTransaction>;
-
 export async function buildGaslessTransaction(
   txOrBuild: Transaction | ((tx: Transaction) => void | Promise<void>),
   options?: {
