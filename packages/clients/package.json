@@ -64,6 +64,8 @@
     "superstruct": "^1.0.3"
   },
   "devDependencies": {
+    "@aptos-labs/ts-sdk": ">=1.13.3",
+    "@mysten/sui": ">=1.0.4",
     "@tsconfig/recommended": "^1.0.3",
     "@types/uuid": "^9.0.2",
     "eslint": "^8.57.0",
