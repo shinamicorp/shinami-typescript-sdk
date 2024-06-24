@@ -31,7 +31,7 @@ export default withNewZkLoginSession(
           <div>
             <button
               onClick={() => {
-                router.replace(
+                void router.replace(
                   getGoogleAuthUrl(
                     session,
                     GOOGLE_CLIENT_ID!,
@@ -49,7 +49,7 @@ export default withNewZkLoginSession(
           <div>
             <button
               onClick={() => {
-                router.replace(
+                void router.replace(
                   getFacebookAuthUrl(
                     session,
                     FACEBOOK_CLIENT_ID!,
@@ -67,7 +67,7 @@ export default withNewZkLoginSession(
           <div>
             <button
               onClick={() => {
-                router.replace(
+                void router.replace(
                   getTwitchAuthUrl(
                     session,
                     TWITCH_CLIENT_ID!,

@@ -1,10 +1,10 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient } from "@mysten/sui.js/client";
-import { PublicKey } from "@mysten/sui.js/cryptography";
+import { SuiClient } from "@mysten/sui/client";
+import { PublicKey } from "@mysten/sui/cryptography";
 import { ZkProverClient, ZkWalletClient } from "@shinami/clients/sui";
 import { JWTVerifyGetKey, createRemoteJWKSet } from "jose";
 import {

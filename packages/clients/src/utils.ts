@@ -3,4 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from "@shinami/clients";
+export function throwExpression(error: unknown): never {
+  throw error;
+}

@@ -1,15 +1,41 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { toB64 } from "@mysten/sui.js/utils";
+import { SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
+import { toB64 } from "@mysten/sui/utils";
 import { Infer, enums, number, object, optional, string } from "superstruct";
-import { ShinamiRpcClient } from "../rpc.js";
+import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
+import { throwExpression } from "../utils.js";
 
 const GAS_STATION_RPC_URL = "https://api.shinami.com/gas/v1";
+
+/**
+ * A gasless transaction to be sponsored.
+ */
+export interface GaslessTransaction {
+  /**
+   * Base64 encoded `TransactionKind`.
+   */
+  txKind: string;
+
+  /**
+   * Optional sender address. Required when submitting for sponsorship.
+   */
+  sender?: string;
+
+  /**
+   * Optional gas budget. If omitted, it will be estimated from the transaction.
+   */
+  gasBudget?: number | string;
+
+  /**
+   * Optional gas price. If omitted, the reference price will be used.
+   */
+  gasPrice?: number | string;
+}
 
 /**
  * A fully sponsored transaction block.
@@ -86,21 +112,21 @@ export class GasStationClient extends ShinamiRpcClient {
   }
 
   /**
-   * Requests sponsorship for a gasless transaction block.
-   * @param txBytes Base64 encoded gasless transaction bytes. These are the BCS bytes of a
-   *    `TransactionKind` as opposed to `TransactionData`.
-   * @param sender Transaction sender address.
-   * @param gasBudget Gas budget. If omitted, it will be estimated from the transaction.
+   * Requests sponsorship for a transaction.
+   * @param tx Gasless transaction.
    * @returns A fully sponsored transaction block.
    */
-  sponsorTransactionBlock(
-    txBytes: string,
-    sender: string,
-    gasBudget?: number | string,
+  async sponsorTransaction(
+    tx: GaslessTransaction,
   ): Promise<SponsoredTransaction> {
     return this.request(
       "gas_sponsorTransactionBlock",
-      [txBytes, sender, gasBudget],
+      trimTrailingParams([
+        tx.txKind,
+        tx.sender ?? throwExpression(new Error("Missing sender")),
+        tx.gasBudget,
+        tx.gasPrice,
+      ]),
       SponsoredTransaction,
     );
   }
@@ -110,7 +136,7 @@ export class GasStationClient extends ShinamiRpcClient {
    * @param txDigest Sponsored transaction digetst.
    * @returns Sponsored transaction status.
    */
-  getSponsoredTransactionBlockStatus(
+  getSponsoredTransactionStatus(
     txDigest: string,
   ): Promise<SponsoredTransactionStatus> {
     return this.request(
@@ -131,27 +157,39 @@ export class GasStationClient extends ShinamiRpcClient {
 
 /**
  * Builds a gasless transaction.
- * @param sui Sui JSON RPC provider.
- * @param txb Optional base `TransactionBlock`. An empty one will be used if not specified.
- * @param build Optional builder function to further populate the base `TransactionBlock`.
- * @returns Base64 encoded gasless transaction bytes that can be passed to `sponsorTransactionBlock`
- *    request.
+ * @param txOrBuild Either a `Transaction` object pre-populated with the target transaction data, or
+ *    a builder function to populate it.
+ * @param options Options
+ *    - sender - Optional sender address. Can also be set in the transaction data.
+ *    - gasBudget - Optional gas budget. Can also be set in the transaction data.
+ *    - gasPrice - Optional gas price. Can also be set in the transaction data.
+ *    - sui - `SuiClient`. Required if the transaction uses non fully resolved inputs.
+ * @returns A gasless transaction to be sponsored.
  */
-export async function buildGaslessTransactionBytes({
-  sui,
-  txb,
-  build,
-}: {
-  sui: SuiClient;
-  txb?: TransactionBlock;
-  build?: (txb: TransactionBlock) => Promise<void>;
-}): Promise<string> {
-  const _txb = txb ?? new TransactionBlock();
-  if (build) await build(_txb);
-  return toB64(
-    await _txb.build({
-      client: sui,
-      onlyTransactionKind: true,
-    }),
-  );
+export async function buildGaslessTransaction(
+  txOrBuild: Transaction | ((tx: Transaction) => void | Promise<void>),
+  options?: {
+    sender?: string;
+    gasBudget?: number | string;
+    gasPrice?: number | string;
+    sui?: SuiClient;
+  },
+): Promise<GaslessTransaction> {
+  let tx: Transaction;
+  if (txOrBuild instanceof Transaction) {
+    tx = txOrBuild;
+  } else {
+    tx = new Transaction();
+    await txOrBuild(tx);
+  }
+  const txData = tx.getData();
+
+  return {
+    txKind: toB64(
+      await tx.build({ client: options?.sui, onlyTransactionKind: true }),
+    ),
+    sender: options?.sender ?? txData.sender ?? undefined,
+    gasBudget: options?.gasBudget ?? txData.gasData.budget ?? undefined,
+    gasPrice: options?.gasPrice ?? txData.gasData.price ?? undefined,
+  };
 }

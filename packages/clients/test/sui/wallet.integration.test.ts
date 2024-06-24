@@ -1,19 +1,19 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { describe, expect, it } from "@jest/globals";
 import {
-  verifyPersonalMessage,
-  verifyTransactionBlock,
-} from "@mysten/sui.js/verify";
+  verifyPersonalMessageSignature,
+  verifyTransactionSignature,
+} from "@mysten/sui/verify";
 import { v4 as uuidv4 } from "uuid";
 import {
   EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
   KeySession,
   ShinamiWalletSigner,
-  buildGaslessTransactionBytes,
+  buildGaslessTransaction,
 } from "../../src/sui/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
@@ -68,34 +68,34 @@ describe("ShinamiWallet", () => {
 
   it("signs a transaction block", async () => {
     const txBytes = Uint8Array.from([1, 2, 3]);
-    const { signature } = await signer.signTransactionBlock(txBytes);
-    const pubKey = await verifyTransactionBlock(txBytes, signature);
+    const { signature } = await signer.signTransaction(txBytes);
+    const pubKey = await verifyTransactionSignature(txBytes, signature);
     expect(pubKey.toSuiAddress()).toBe(await signer.getAddress());
   });
 
   it("signs a personal message", async () => {
     const message = Uint8Array.from([1, 2, 3]);
     const signature = await signer2.signPersonalMessage(message);
-    const pubKey = await verifyPersonalMessage(message, signature);
+    const pubKey = await verifyPersonalMessageSignature(message, signature);
     expect(pubKey.toSuiAddress()).toBe(await signer2.getAddress());
   });
 
   const executeAddTx =
-    (x: number, y: number, gasBudget?: number) => async () => {
-      const gaslessTx = await buildGaslessTransactionBytes({
-        sui,
-        build: async (txb) => {
+    (x: number, y: number, gasBudget?: number, gasPrice?: number) =>
+    async () => {
+      const gaslessTx = await buildGaslessTransaction(
+        (txb) => {
           txb.moveCall({
             target: `${EXAMPLE_PACKAGE_ID}::math::add`,
-            arguments: [txb.pure(x), txb.pure(y)],
+            arguments: [txb.pure.u64(x), txb.pure.u64(y)],
           });
         },
-      });
-      const txResp = await signer3.executeGaslessTransactionBlock(
-        gaslessTx,
-        gasBudget,
-        { showEffects: true, showEvents: true },
+        { gasBudget, gasPrice },
       );
+      const txResp = await signer3.executeGaslessTransaction(gaslessTx, {
+        showEffects: true,
+        showEvents: true,
+      });
       console.log("txResp", txResp);
       expect(txResp).toMatchObject({
         effects: {
@@ -116,7 +116,7 @@ describe("ShinamiWallet", () => {
 
   it(
     "executes gasless transaction block",
-    executeAddTx(1, 2, 2_000_000),
+    executeAddTx(1, 2, 2_000_000, 1_001),
     30_000,
   );
 

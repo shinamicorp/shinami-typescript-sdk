@@ -1,9 +1,9 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useNewZkLoginSession } from "../hooks/login.js";
 import { ZkLoginLocalSession } from "../hooks/session.js";

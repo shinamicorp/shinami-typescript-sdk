@@ -1,4 +1,4 @@
-# Copyright 2023 Shinami Corp.
+# Copyright 2023-2024 Shinami Corp.
 # SPDX-License-Identifier: Apache-2.0
 
 name: Continuous Integration
@@ -12,21 +12,16 @@ on:
       - main
 
 jobs:
-  build_sdk:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - run: npm ci
-      - run: npm run build
-        env:
-          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY: fake_key
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID: fake_id
-          NEXT_PUBLIC_FACEBOOK_CLIENT_ID: fake_id
-          NEXT_PUBLIC_TWITCH_CLIENT_ID: fake_id
-      - run: npm run lint
+      - uses: actions/setup-python@v5 # needed by pre-commit
+      - uses: pre-commit/action@v3.0.1
       - run: npm run coverage
         env:
           SUI_NODE_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
@@ -39,7 +34,7 @@ jobs:
   check_copyright_header:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: stable

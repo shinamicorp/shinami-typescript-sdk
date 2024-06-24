@@ -1,10 +1,10 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Keypair } from "@mysten/sui.js/cryptography";
-import { fromB64 } from "@mysten/sui.js/utils";
+import { Keypair } from "@mysten/sui/cryptography";
+import { fromB64 } from "@mysten/sui/utils";
 import { MutationFunction } from "@tanstack/react-query";
 import { Struct } from "superstruct";
 import { PreparedTransactionBytes, SignedTransactionBytes } from "../../tx.js";
@@ -42,7 +42,7 @@ export function apiTxExecMutationFn<
       body: _body,
       resultSchema: PreparedTransactionBytes,
     })(params);
-    const { signature } = await params.keyPair.signTransactionBlock(
+    const { signature } = await params.keyPair.signTransaction(
       fromB64(tx.txBytes),
     );
     return await apiMutationFn<T, SignedTransactionBytes>({

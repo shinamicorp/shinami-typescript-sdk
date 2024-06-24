@@ -1,0 +1,24 @@
+# Copyright 2023-2024 Shinami Corp.
+# SPDX-License-Identifier: Apache-2.0
+
+repos:
+  - repo: local
+    hooks:
+      - id: build
+        name: Build
+        language: system
+        entry: >-
+          env
+          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY=fake_key
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID=fake_id
+          NEXT_PUBLIC_FACEBOOK_CLIENT_ID=fake_id
+          NEXT_PUBLIC_TWITCH_CLIENT_ID=fake_id
+          npm run build
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: lint
+        name: Lint
+        language: system
+        entry: npm run lint
+        pass_filenames: false
+        stages: [pre-commit]

@@ -1,9 +1,9 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PublicKey } from "@mysten/sui.js/cryptography";
+import { PublicKey } from "@mysten/sui/cryptography";
 import { Infer, object, type } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { bigIntToBase64 } from "./utils.js";

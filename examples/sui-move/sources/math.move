@@ -1,4 +1,4 @@
-// Copyright 2023 Shinami Corp.
+// Copyright 2023-2024 Shinami Corp.
 // SPDX-License-Identifier: Apache-2.0
 
 /// Example module with some math functions.

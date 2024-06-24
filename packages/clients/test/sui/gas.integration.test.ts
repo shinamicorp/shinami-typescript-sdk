@@ -1,12 +1,12 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { beforeAll, describe, expect, it } from "@jest/globals";
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
-import { fromB64 } from "@mysten/sui.js/utils";
-import { buildGaslessTransactionBytes } from "../../src/sui/index.js";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+import { fromB64 } from "@mysten/sui/utils";
+import { buildGaslessTransaction } from "../../src/sui/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
   createGasClient,
@@ -21,7 +21,7 @@ const keypair = new Ed25519Keypair();
 describe("GasStationClient", () => {
   beforeAll(async () => {
     console.log("sui address", keypair.toSuiAddress());
-    console.log("private key", keypair.export().privateKey);
+    console.log("private key", keypair.getSecretKey());
   });
 
   it("discovers OpenRPC spec", async () => {
@@ -35,27 +35,22 @@ describe("GasStationClient", () => {
   });
 
   const happyTest = (gasBudget?: number) => async () => {
-    const txBytes = await buildGaslessTransactionBytes({
-      sui,
-      build: async (txb) => {
-        txb.moveCall({
-          target: `${EXAMPLE_PACKAGE_ID}::math::add`,
-          arguments: [txb.pure(1), txb.pure(2)],
-        });
-      },
+    const gaslessTx = await buildGaslessTransaction((txb) => {
+      txb.moveCall({
+        target: `${EXAMPLE_PACKAGE_ID}::math::add`,
+        arguments: [txb.pure.u64(1), txb.pure.u64(2)],
+      });
+      txb.setSender(keypair.toSuiAddress());
+      if (gasBudget) txb.setGasBudget(gasBudget);
     });
 
-    const sponsoredTx = await gas.sponsorTransactionBlock(
-      txBytes,
-      keypair.toSuiAddress(),
-      gasBudget,
-    );
+    const sponsoredTx = await gas.sponsorTransaction(gaslessTx);
     console.log("sponsoredTx", sponsoredTx);
-    expect(
-      await gas.getSponsoredTransactionBlockStatus(sponsoredTx.txDigest),
-    ).toBe("IN_FLIGHT");
+    expect(await gas.getSponsoredTransactionStatus(sponsoredTx.txDigest)).toBe(
+      "IN_FLIGHT",
+    );
 
-    const signedTx = await keypair.signTransactionBlock(
+    const signedTx = await keypair.signTransaction(
       fromB64(sponsoredTx.txBytes),
     );
     expect(signedTx.bytes).toBe(sponsoredTx.txBytes);
@@ -100,7 +95,11 @@ describe("GasStationClient", () => {
 
   it("fails to get sponsorship for invalid transaction", async () => {
     await expect(
-      gas.sponsorTransactionBlock("fake tx bytes", "0x00", 1_000_000),
+      gas.sponsorTransaction({
+        txKind: "fake tx bytes",
+        sender: "0x00",
+        gasBudget: 1_000_000,
+      }),
     ).rejects.toThrow("Invalid params");
   });
 

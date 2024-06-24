@@ -37,7 +37,7 @@ export function useAddMutation(): UseMutationResult<
       resultSchema: AddResponse,
     }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["api", "recent_txs"] });
+      void qc.invalidateQueries({ queryKey: ["api", "recent_txs"] });
     },
   });
 }

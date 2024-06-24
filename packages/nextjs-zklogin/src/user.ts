@@ -1,9 +1,9 @@
 /**
- * Copyright 2023 Shinami Corp.
+ * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getZkLoginSignature } from "@mysten/sui.js/zklogin";
+import { getZkLoginSignature } from "@mysten/sui/zklogin";
 import { ZkLoginUserId } from "@shinami/clients/sui";
 import {
   Infer,

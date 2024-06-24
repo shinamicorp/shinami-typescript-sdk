@@ -25,7 +25,7 @@ To develop against a supported blockchain, you will also need to install their r
 
 ```shell
 # For Sui
-npm install @mysten/sui.js
+npm install @mysten/sui
 
 # For Aptos
 npm install @aptos-labs/ts-sdk
@@ -57,11 +57,11 @@ This is so you don't leak your `GAS_ACCESS_KEY` to your end users, and to allow 
 To use gas station with a local signer:
 
 ```ts
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
-import { fromB64 } from "@mysten/sui.js/utils";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+import { fromB64 } from "@mysten/sui/utils";
 import {
   GasStationClient,
-  buildGaslessTransactionBytes,
+  buildGaslessTransaction,
   createSuiClient,
 } from "@shinami/clients/sui";
 
@@ -73,27 +73,24 @@ const gas = new GasStationClient(GAS_ACCESS_KEY);
 // You'll want to persist the key pair instead of always creating new ones.
 const keypair = new Ed25519Keypair();
 
-const gaslessTx = await buildGaslessTransactionBytes({
-  sui,
-  build: async (txb) => {
-    // Program your TransactionBlock.
-    // DO NOT set sender or gas data.
-    txb.moveCall({
-      target: `${EXAMPLE_PACKAGE_ID}::math::add`,
-      arguments: [txb.pure(1), txb.pure(2)],
-    });
-  },
+const gaslessTx = await buildGaslessTransaction((txb) => {
+  // Program your Transaction.
+  txb.moveCall({
+    target: `${EXAMPLE_PACKAGE_ID}::math::add`,
+    arguments: [txb.pure.u64(1), txb.pure.u64(2)],
+  });
+
+  // Sender is required for sponsorship.
+  // You don't need to set gas payment.
+  txb.setSender(keypair.toSuiAddress());
 });
 
 // Request gas sponsorship.
-const { txBytes, signature: gasSignature } = await gas.sponsorTransactionBlock(
-  gaslessTx,
-  keypair.toSuiAddress(),
-  5_000_000,
-);
+const { txBytes, signature: gasSignature } =
+  await gas.sponsorTransaction(gaslessTx);
 
 // Sign the sponsored tx.
-const { signature } = await keypair.signTransactionBlock(fromB64(txBytes));
+const { signature } = await keypair.signTransaction(fromB64(txBytes));
 
 // Execute the sponsored & signed tx.
 const txResp = await sui.executeTransactionBlock({
@@ -104,10 +101,10 @@ const txResp = await sui.executeTransactionBlock({
 
 ### Invisible wallet (Sui)
 
-To use the invisible wallet as a signer for a regular (non-sponsored) transaction block:
+To use the invisible wallet as a signer for a regular (non-sponsored) transaction:
 
 ```ts
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import {
   KeyClient,
   ShinamiWalletSigner,
@@ -125,11 +122,11 @@ const wal = new WalletClient(WALLET_ACCESS_KEY);
 // Shinami cannot recover it for you.
 const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
-// Program your TransactionBlock.
-const txb = new TransactionBlock();
+// Program your Transaction.
+const txb = new Transaction();
 txb.moveCall({
   target: `${EXAMPLE_PACKAGE_ID}::math::add`,
-  arguments: [txb.pure(1), txb.pure(2)],
+  arguments: [txb.pure.u64(1), txb.pure.u64(2)],
 });
 txb.setSender(await signer.getAddress(true /* autoCreate */));
 txb.setGasBudget(5_000_000);
@@ -137,7 +134,7 @@ txb.setGasBudget(5_000_000);
 const txBytes = await txb.build({ client: sui });
 
 // Sign tx with invisible wallet.
-const { signature } = await signer.signTransactionBlock(txBytes);
+const { signature } = await signer.signTransaction(txBytes);
 
 // Execute the signed tx.
 const txResp = await sui.executeTransactionBlock({
@@ -146,14 +143,14 @@ const txResp = await sui.executeTransactionBlock({
 });
 ```
 
-To use the invisible wallet to execute a gasless transaction block, which seamlessly integrates with Shinami node service and gas station:
+To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami node service and gas station:
 
 ```ts
 import {
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
-  buildGaslessTransactionBytes,
+  buildGaslessTransaction,
   createSuiClient,
 } from "@shinami/clients/sui";
 
@@ -174,23 +171,17 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 // Safe to do if unsure about the wallet's existence.
 await signer.tryCreate();
 
-const gaslessTx = await buildGaslessTransactionBytes({
-  sui,
-  build: async (txb) => {
-    // Program your TransactionBlock.
-    // DO NOT set sender or gas data.
-    txb.moveCall({
-      target: `${EXAMPLE_PACKAGE_ID}::math::add`,
-      arguments: [txb.pure(1), txb.pure(2)],
-    });
-  },
+const gaslessTx = await buildGaslessTransaction((txb) => {
+  // Program your Transaction.
+  // You don't need to set sender or gas payment when executing from invisible wallet.
+  txb.moveCall({
+    target: `${EXAMPLE_PACKAGE_ID}::math::add`,
+    arguments: [txb.pure.u64(1), txb.pure.u64(2)],
+  });
 });
 
 // Execute the gasless tx using your invisible wallet.
-const txResp = await signer.executeGaslessTransactionBlock(
-  gaslessTx,
-  5_000_000,
-);
+const txResp = await signer.executeGaslessTransaction(gaslessTx);
 ```
 
 #### Beneficiary graph API
@@ -260,7 +251,7 @@ const { zkProof } = await zkp.createZkLoginProof(
   salt,
 );
 
-// Now you can sign transaction blocks with ephemeralPrivateKey, and assemble the zkLogin signature
+// Now you can sign transactions with ephemeralPrivateKey, and assemble the zkLogin signature
 // using zkProof.
 ```
 
