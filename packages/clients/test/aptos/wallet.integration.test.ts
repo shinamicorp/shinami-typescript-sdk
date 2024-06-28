@@ -138,12 +138,6 @@ describe("ShinamiAptosWallet", () => {
     );
     const accountAuthenticatorEd25519 =
       accountAuthenticator as AccountAuthenticatorEd25519;
-
-    const pending = aptos.transaction.submit.simple({
-      transaction,
-      senderAuthenticator: accountAuthenticatorEd25519,
-    });
-
     const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
       {
         message: signingMessage,
