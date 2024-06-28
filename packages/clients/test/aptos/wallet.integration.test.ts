@@ -5,19 +5,19 @@
 
 import { describe, expect, it } from "@jest/globals";
 import { v4 as uuidv4 } from "uuid";
-import { KeySession, ShinamiWalletSigner } from "../../src/aptos/index.js"
+import { KeySession, ShinamiWalletSigner } from "../../src/aptos/index.js";
 import {
   EXAMPLE_PACKAGE_ID,
   createAptos,
   createWalletClient,
   createKeyClient,
 } from "./integration.env.js";
-import { 
-  AccountAddress, 
-  Deserializer, 
-  AccountAuthenticator, 
-  AccountAuthenticatorEd25519, 
-  isUserTransactionResponse 
+import {
+  AccountAddress,
+  Deserializer,
+  AccountAuthenticator,
+  AccountAuthenticatorEd25519,
+  isUserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
 
 const aptos = createAptos();
@@ -25,7 +25,7 @@ const key = createKeyClient();
 const wal = createWalletClient();
 
 function delay(ms: number) {
-  return new Promise( resolve => setTimeout(resolve, ms) );
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 describe("KeyClient", () => {
@@ -59,21 +59,27 @@ describe("ShinamiAptosWallet", () => {
   const signer2 = new ShinamiWalletSigner(walletId, wal, session);
   console.log("walletId", walletId);
 
-  it("creates and retrieves an initialized wallet address", async() => {
-    const createdAddress = await signer2.getAddress(true, true)
+  it("creates and retrieves an initialized wallet address", async () => {
+    const createdAddress = await signer2.getAddress(true, true);
     expect(createdAddress).toMatch(/0x[0-9a-f]+/);
-    await delay(3_000);   // allow iniaitlized address to propagate on chain
-    const accountInfo = await aptos.account.getAccountInfo({accountAddress: createdAddress});
+    await delay(3_000); // allow iniaitlized address to propagate on chain
+    const accountInfo = await aptos.account.getAccountInfo({
+      accountAddress: createdAddress,
+    });
     expect(accountInfo.authentication_key).toBe(createdAddress);
   }, 20_000);
 
-  it("creates and retrieves an uninitialized wallet address", async() => {
+  it("creates and retrieves an uninitialized wallet address", async () => {
     expect(await signer1.getAddress(true, false)).toMatch(/0x[0-9a-f]+/);
   });
 
-  it("signs a simple transaction correctly", async() => {
-    const senderAcct = AccountAddress.from(await signer1.getAddress(true, true));
-    const receiverAcct = AccountAddress.from(await signer2.getAddress(true, true));
+  it("signs a simple transaction correctly", async () => {
+    const senderAcct = AccountAddress.from(
+      await signer1.getAddress(true, true),
+    );
+    const receiverAcct = AccountAddress.from(
+      await signer2.getAddress(true, true),
+    );
     await delay(3_000);
     const transaction = await aptos.transaction.build.simple({
       sender: senderAcct,
@@ -82,27 +88,35 @@ describe("ShinamiAptosWallet", () => {
         functionArguments: [receiverAcct, 0],
       },
       withFeePayer: false,
-      options : {
+      options: {
         expireTimestamp: Math.floor(Date.now() / 1000) + 60,
       },
     });
 
     const signTransactionResult = await signer1.signTransaction(transaction);
-    const signingMessage = aptos.getSigningMessage({transaction})
-  
+    const signingMessage = aptos.getSigningMessage({ transaction });
+
     const accountAuthenticator = AccountAuthenticator.deserialize(
       new Deserializer(Uint8Array.from(signTransactionResult.signature)),
     );
-    const accountAuthenticatorEd25519 = (accountAuthenticator as AccountAuthenticatorEd25519);
+    const accountAuthenticatorEd25519 =
+      accountAuthenticator as AccountAuthenticatorEd25519;
     const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
-      {message: signingMessage, signature: accountAuthenticatorEd25519.signature}
+      {
+        message: signingMessage,
+        signature: accountAuthenticatorEd25519.signature,
+      },
     );
     expect(verifyResult).toBe(true);
   }, 20_000);
 
-  it("signs multi-agent transaction correctly", async() => {
-    const senderAcct = AccountAddress.from(await signer1.getAddress(true, true));
-    const receiverAcct = AccountAddress.from(await signer2.getAddress(true, true));
+  it("signs multi-agent transaction correctly", async () => {
+    const senderAcct = AccountAddress.from(
+      await signer1.getAddress(true, true),
+    );
+    const receiverAcct = AccountAddress.from(
+      await signer2.getAddress(true, true),
+    );
     await delay(3_000);
     const transaction = await aptos.transaction.build.multiAgent({
       sender: senderAcct,
@@ -112,30 +126,34 @@ describe("ShinamiAptosWallet", () => {
       },
       secondarySignerAddresses: [receiverAcct],
       withFeePayer: false,
-      options : {
+      options: {
         expireTimestamp: Math.floor(Date.now() / 1000) + 60,
       },
     });
 
     const signTransactionResult = await signer1.signTransaction(transaction);
-    const signingMessage = aptos.getSigningMessage({transaction})
+    const signingMessage = aptos.getSigningMessage({ transaction });
     const accountAuthenticator = AccountAuthenticator.deserialize(
       new Deserializer(Uint8Array.from(signTransactionResult.signature)),
     );
-    const accountAuthenticatorEd25519 = (accountAuthenticator as AccountAuthenticatorEd25519);
+    const accountAuthenticatorEd25519 =
+      accountAuthenticator as AccountAuthenticatorEd25519;
 
     const pending = aptos.transaction.submit.simple({
       transaction,
-      senderAuthenticator: accountAuthenticatorEd25519
+      senderAuthenticator: accountAuthenticatorEd25519,
     });
 
     const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
-     {message: signingMessage, signature: accountAuthenticatorEd25519.signature}
-   );
-   expect(verifyResult).toBe(true);
+      {
+        message: signingMessage,
+        signature: accountAuthenticatorEd25519.signature,
+      },
+    );
+    expect(verifyResult).toBe(true);
   }, 20_000);
 
-  it("executes a simple transaction gaslessly", async() => {
+  it("executes a simple transaction gaslessly", async () => {
     const senderAcct = AccountAddress.from(await signer1.getAddress(true));
     const transaction = await aptos.transaction.build.simple({
       sender: senderAcct,

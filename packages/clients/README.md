@@ -319,13 +319,13 @@ const committed = await aptos.transaction.waitForTransaction({
 To use the invisible wallet as a signer for a regular (non-sponsored) transaction:
 
 ```ts
-import { 
-  Aptos, 
-  AptosConfig, 
-  Network, 
-  AccountAddress, 
-  AccountAuthenticator, 
-  AccountAuthenticatorEd25519 
+import {
+  Aptos,
+  AptosConfig,
+  Network,
+  AccountAddress,
+  AccountAuthenticator,
+  AccountAuthenticatorEd25519,
 } from "@aptos-labs/ts-sdk";
 import {
   KeyClient,
@@ -333,7 +333,7 @@ import {
   WalletClient,
 } from "@shinami/clients/aptos";
 
-// Create your Aptos client targeting the desired network. 
+// Create your Aptos client targeting the desired network.
 const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
 
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal.
@@ -345,7 +345,7 @@ const wal = new WalletClient(WALLET_ACCESS_KEY);
 // Shinami cannot recover it for you.
 const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
-// Get or create the sender account on chain. Since this is a non-sponsored transaction, 
+// Get or create the sender account on chain. Since this is a non-sponsored transaction,
 // your account MUST have APT in it in order to execute a transaction.
 const senderAccount = AccountAddress.from(await signer.getAddress(true, true));
 
@@ -373,7 +373,7 @@ const accountAuthenticator = AccountAuthenticator.deserialize(
 // Submit the tx for execution
 const pending = aptos.transaction.submit.simple({
   transaction,
-  senderAuthenticator: (accountAuthenticator as AccountAuthenticatorEd25519)
+  senderAuthenticator: accountAuthenticator as AccountAuthenticatorEd25519,
 });
 
 // Wait for it to be committed on-chain.
@@ -385,11 +385,11 @@ const committed = await aptos.transaction.waitForTransaction({
 To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami's Aptos gas station:
 
 ```ts
-import { 
-  Aptos, 
-  AptosConfig, 
-  Network, 
-  AccountAddress, 
+import {
+  Aptos,
+  AptosConfig,
+  Network,
+  AccountAddress,
 } from "@aptos-labs/ts-sdk";
 import {
   KeyClient,
@@ -397,7 +397,7 @@ import {
   WalletClient,
 } from "@shinami/clients/aptos";
 
-// Create your Aptos client targeting the desired network. 
+// Create your Aptos client targeting the desired network.
 const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
 
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.

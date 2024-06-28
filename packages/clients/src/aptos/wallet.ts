@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SimpleTransaction, MultiAgentTransaction, AnyRawTransaction, AccountAuthenticator, PendingTransactionResponse } from "@aptos-labs/ts-sdk";
+import {
+  SimpleTransaction,
+  MultiAgentTransaction,
+  AnyRawTransaction,
+  AccountAuthenticator,
+  PendingTransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import { Infer, array, integer, object, string, unknown } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { JSONRPCError } from "@open-rpc/client-js";
@@ -20,7 +26,7 @@ export class KeyClient extends ShinamiRpcClient {
    * @param url Optional URL override.
    */
   constructor(accessKey: string, url: string = KEY_RPC_URL) {
-      super(accessKey, url);
+    super(accessKey, url);
   }
 
   /**
@@ -47,7 +53,7 @@ type WalletInfo = Infer<typeof WalletInfo>;
  */
 const SignTransactionResult = object({
   signature: array(integer()),
-})
+});
 type SignTransactionResult = Infer<typeof SignTransactionResult>;
 
 /**
@@ -78,7 +84,10 @@ export class WalletClient extends ShinamiRpcClient {
    * @param sessionToken Session token. Obtained by `KeyClient.createSession`.
    * @returns Aptos address of the created wallet.
    */
-  async createWallet(walletId: string, sessionToken: string): Promise<WalletInfo> {
+  async createWallet(
+    walletId: string,
+    sessionToken: string,
+  ): Promise<WalletInfo> {
     return this.request(
       "wal_createWallet",
       [walletId, sessionToken],
@@ -92,7 +101,10 @@ export class WalletClient extends ShinamiRpcClient {
    * @param sessionToken Session token. Obtained by `KeyClient.createSession`.
    * @returns Aptos address of the created wallet that is now initialized on chain.
    */
-  async initializeWalletOnChain(walletId: string, sessionToken: string): Promise<WalletInfo> {
+  async initializeWalletOnChain(
+    walletId: string,
+    sessionToken: string,
+  ): Promise<WalletInfo> {
     return this.request(
       "wal_initializeWalletOnChain",
       [walletId, sessionToken],
@@ -106,7 +118,10 @@ export class WalletClient extends ShinamiRpcClient {
    * @param sessionToken Session token. Obtained by `KeyClient.createSession`.
    * @returns Aptos address of the created wallet that is also initialized on chain.
    */
-  async createWalletOnChain(walletId: string, sessionToken: string): Promise<WalletInfo> {
+  async createWalletOnChain(
+    walletId: string,
+    sessionToken: string,
+  ): Promise<WalletInfo> {
     return this.request(
       "wal_createWalletOnChain",
       [walletId, sessionToken],
@@ -115,7 +130,7 @@ export class WalletClient extends ShinamiRpcClient {
   }
 
   /**
-   * Retrieves a wallet address. 
+   * Retrieves a wallet address.
    * @param walletId Wallet id. Does not have to be an initialized address.
    * @returns Wallet address
    */
@@ -138,13 +153,13 @@ export class WalletClient extends ShinamiRpcClient {
     return this.request(
       "wal_signTransaction",
       trimTrailingParams([
-        walletId, 
-        sessionToken, 
+        walletId,
+        sessionToken,
         transaction.rawTransaction.bcsToHex().toString(),
         transaction.secondarySignerAddresses?.map((x) => x.toString()),
-        transaction.feePayerAddress?.toString()
+        transaction.feePayerAddress?.toString(),
       ]),
-      SignTransactionResult
+      SignTransactionResult,
     );
   }
 
@@ -187,16 +202,17 @@ export class WalletClient extends ShinamiRpcClient {
     const secondarySigners = [];
     if (transaction.secondarySignerAddresses) {
       if (
-        secondarySignatures?.length !== transaction.secondarySignerAddresses.length
+        secondarySignatures?.length !==
+        transaction.secondarySignerAddresses.length
       )
         throw new Error("Unexpected number of secondary signatures");
-      
-        secondarySigners.push(
-          ...transaction.secondarySignerAddresses.map((address, i) => ({
-            address: address.toString(),
-            signature: secondarySignatures[i].bcsToHex().toString(),
-          })),
-        );
+
+      secondarySigners.push(
+        ...transaction.secondarySignerAddresses.map((address, i) => ({
+          address: address.toString(),
+          signature: secondarySignatures[i].bcsToHex().toString(),
+        })),
+      );
     }
     const { pendingTransaction } = await this.request(
       "wal_executeGaslessTransaction",
@@ -206,12 +222,11 @@ export class WalletClient extends ShinamiRpcClient {
         transaction.rawTransaction.bcsToHex().toString(),
         secondarySigners,
       ],
-      ExecuteGaslessTransactionResult
+      ExecuteGaslessTransactionResult,
     );
     return pendingTransaction as PendingTransactionResponse;
   }
 }
-
 
 /**
  * A secret session with Shinami Aptos key service.
@@ -309,18 +324,23 @@ export class ShinamiWalletSigner {
    * @returns Wallet address.
    */
   async getAddress(autoCreate = false, onChain = false): Promise<string> {
-    if (!this.address) this.address = await this._getAddress(autoCreate, onChain);
+    if (!this.address)
+      this.address = await this._getAddress(autoCreate, onChain);
     return this.address;
   }
 
-  private async _getAddress(autoCreate: boolean, onChain: boolean): Promise<string> {
+  private async _getAddress(
+    autoCreate: boolean,
+    onChain: boolean,
+  ): Promise<string> {
     try {
       return (await this.walletClient.getWallet(this.walletId)).accountAddress;
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602 && autoCreate) {
         const address = await this.tryCreate(onChain);
         if (address) return address;
-        return (await this.walletClient.getWallet(this.walletId)).accountAddress;
+        return (await this.walletClient.getWallet(this.walletId))
+          .accountAddress;
       }
       throw e;
     }
@@ -334,9 +354,13 @@ export class ShinamiWalletSigner {
    */
   async tryCreate(onChain: boolean): Promise<string | undefined> {
     try {
-      return (await this.session.withToken((token) =>
-        onChain ? this.walletClient.createWalletOnChain(this.walletId, token) : this.walletClient.createWallet(this.walletId, token)
-      )).accountAddress;
+      return (
+        await this.session.withToken((token) =>
+          onChain
+            ? this.walletClient.createWalletOnChain(this.walletId, token)
+            : this.walletClient.createWallet(this.walletId, token),
+        )
+      ).accountAddress;
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602) {
         const details = errorDetails(e);
@@ -367,7 +391,7 @@ export class ShinamiWalletSigner {
    */
   executeGaslessTransaction(
     transaction: SimpleTransaction,
-  ): Promise<PendingTransactionResponse>
+  ): Promise<PendingTransactionResponse>;
 
   /**
    * Sponsors, signs, and executes a MultiAgentTransaction gaslessly with the specified wallet as the sender.
@@ -378,20 +402,29 @@ export class ShinamiWalletSigner {
    */
   executeGaslessTransaction(
     transaction: MultiAgentTransaction,
-    secondarySignatures: AccountAuthenticator[]
-  ): Promise<PendingTransactionResponse>
+    secondarySignatures: AccountAuthenticator[],
+  ): Promise<PendingTransactionResponse>;
 
   executeGaslessTransaction(
     transaction: AnyRawTransaction,
-    secondarySignatures?: AccountAuthenticator[]
+    secondarySignatures?: AccountAuthenticator[],
   ): Promise<PendingTransactionResponse> {
     if (secondarySignatures !== undefined) {
       return this.session.withToken((token) =>
-        this.walletClient.executeGaslessTransaction(this.walletId, token, transaction as MultiAgentTransaction, secondarySignatures)
+        this.walletClient.executeGaslessTransaction(
+          this.walletId,
+          token,
+          transaction as MultiAgentTransaction,
+          secondarySignatures,
+        ),
       );
     } else {
       return this.session.withToken((token) =>
-        this.walletClient.executeGaslessTransaction(this.walletId, token, transaction as SimpleTransaction)
+        this.walletClient.executeGaslessTransaction(
+          this.walletId,
+          token,
+          transaction as SimpleTransaction,
+        ),
       );
     }
   }
