@@ -7,12 +7,18 @@ import { describe, expect, it } from "@jest/globals";
 import { v4 as uuidv4 } from "uuid";
 import { KeySession, ShinamiWalletSigner } from "../../src/aptos/index.js"
 import {
-    EXAMPLE_PACKAGE_ID,
-    createAptos,
-    createWalletClient,
-    createKeyClient,
-  } from "./integration.env.js";
-import { AccountAddress, Deserializer, AccountAuthenticator, AccountAuthenticatorEd25519, isUserTransactionResponse } from "@aptos-labs/ts-sdk";
+  EXAMPLE_PACKAGE_ID,
+  createAptos,
+  createWalletClient,
+  createKeyClient,
+} from "./integration.env.js";
+import { 
+  AccountAddress, 
+  Deserializer, 
+  AccountAuthenticator, 
+  AccountAuthenticatorEd25519, 
+  isUserTransactionResponse 
+} from "@aptos-labs/ts-sdk";
 
 const aptos = createAptos();
 const key = createKeyClient();
