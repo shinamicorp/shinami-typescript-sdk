@@ -347,7 +347,7 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
 // Get or create the sender account on chain. Since this is a non-sponsored transaction, 
 // your account MUST have APT in it in order to execute a transaction.
-const senderAccount = AccountAddress.from(await signer1.getAddress(true, true));
+const senderAccount = AccountAddress.from(await signer.getAddress(true, true));
 
 // Create a transaction with no feePayer set. This is an example of a SimpleTransaction
 const transaction = await aptos.transaction.build.simple({
@@ -414,7 +414,7 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
 // Get or create the sender account on chain. You do not need APT in this account since
 // we'll be using Shinami's gas station to sponsor the transaction.
-const senderAccount = AccountAddress.from(await signer1.getAddress(true, true));
+const senderAccount = AccountAddress.from(await signer.getAddress(true, true));
 
 // Create a transaction with feePayer set. This is an example of a SimpleTransaction
 const transaction = await aptos.transaction.build.simple({
@@ -481,6 +481,7 @@ export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
+export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 
 npm run integration
 ```
@@ -497,6 +498,7 @@ export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
+export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 
 npm run coverage
 ```
