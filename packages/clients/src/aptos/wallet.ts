@@ -4,6 +4,8 @@
  */
 
 import {
+  AccountAddress,
+  Deserializer,
   SimpleTransaction,
   MultiAgentTransaction,
   AnyRawTransaction,
@@ -41,15 +43,15 @@ export class KeyClient extends ShinamiRpcClient {
 }
 
 /**
- * Data wrapper for a Shinami Aptos wallet.
+ * Results for wallet operation methods.
  */
-const WalletInfo = object({
+const WalletResult = object({
   accountAddress: string(),
 });
-type WalletInfo = Infer<typeof WalletInfo>;
+type WalletResult = Infer<typeof WalletResult>;
 
 /**
- * Transaction signing result
+ * Result of signing a transaction
  */
 const SignTransactionResult = object({
   signature: array(integer()),
@@ -87,12 +89,13 @@ export class WalletClient extends ShinamiRpcClient {
   async createWallet(
     walletId: string,
     sessionToken: string,
-  ): Promise<WalletInfo> {
-    return this.request(
+  ): Promise<AccountAddress> {
+    const { accountAddress } = await this.request(
       "wal_createWallet",
       [walletId, sessionToken],
-      WalletInfo,
+      WalletResult,
     );
+    return AccountAddress.from(accountAddress);
   }
 
   /**
@@ -104,12 +107,13 @@ export class WalletClient extends ShinamiRpcClient {
   async initializeWalletOnChain(
     walletId: string,
     sessionToken: string,
-  ): Promise<WalletInfo> {
-    return this.request(
+  ): Promise<AccountAddress> {
+    const { accountAddress } = await this.request(
       "wal_initializeWalletOnChain",
       [walletId, sessionToken],
-      WalletInfo,
+      WalletResult,
     );
+    return AccountAddress.from(accountAddress);
   }
 
   /**
@@ -121,12 +125,13 @@ export class WalletClient extends ShinamiRpcClient {
   async createWalletOnChain(
     walletId: string,
     sessionToken: string,
-  ): Promise<WalletInfo> {
-    return this.request(
+  ): Promise<AccountAddress> {
+    const { accountAddress } = await this.request(
       "wal_createWalletOnChain",
       [walletId, sessionToken],
-      WalletInfo,
+      WalletResult,
     );
+    return AccountAddress.from(accountAddress);
   }
 
   /**
@@ -134,8 +139,13 @@ export class WalletClient extends ShinamiRpcClient {
    * @param walletId Wallet id. Does not have to be an initialized address.
    * @returns Wallet address
    */
-  async getWallet(walletId: string): Promise<WalletInfo> {
-    return this.request("wal_getWallet", [walletId], WalletInfo);
+  async getWallet(walletId: string): Promise<AccountAddress> {
+    const { accountAddress } = await this.request(
+      "wal_getWallet",
+      [walletId],
+      WalletResult,
+    );
+    return AccountAddress.from(accountAddress);
   }
 
   /**
@@ -149,8 +159,8 @@ export class WalletClient extends ShinamiRpcClient {
     walletId: string,
     sessionToken: string,
     transaction: AnyRawTransaction,
-  ): Promise<SignTransactionResult> {
-    return this.request(
+  ): Promise<AccountAuthenticator> {
+    const { signature } = await this.request(
       "wal_signTransaction",
       trimTrailingParams([
         walletId,
@@ -160,6 +170,9 @@ export class WalletClient extends ShinamiRpcClient {
         transaction.feePayerAddress?.toString(),
       ]),
       SignTransactionResult,
+    );
+    return AccountAuthenticator.deserialize(
+      new Deserializer(new Uint8Array(signature)),
     );
   }
 
@@ -285,7 +298,7 @@ export class ShinamiWalletSigner {
   readonly walletClient: WalletClient;
   private readonly session: KeySession;
 
-  private address?: string;
+  private address?: AccountAddress;
 
   constructor(
     walletId: string,
@@ -323,7 +336,10 @@ export class ShinamiWalletSigner {
    *    attached to the access key in the sessionToken. Only relevant if autoCreate is set to `true`
    * @returns Wallet address.
    */
-  async getAddress(autoCreate = false, onChain = false): Promise<string> {
+  async getAddress(
+    autoCreate = false,
+    onChain = false,
+  ): Promise<AccountAddress> {
     if (!this.address)
       this.address = await this._getAddress(autoCreate, onChain);
     return this.address;
@@ -332,15 +348,14 @@ export class ShinamiWalletSigner {
   private async _getAddress(
     autoCreate: boolean,
     onChain: boolean,
-  ): Promise<string> {
+  ): Promise<AccountAddress> {
     try {
-      return (await this.walletClient.getWallet(this.walletId)).accountAddress;
+      return await this.walletClient.getWallet(this.walletId);
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602 && autoCreate) {
         const address = await this.tryCreate(onChain);
         if (address) return address;
-        return (await this.walletClient.getWallet(this.walletId))
-          .accountAddress;
+        return await this.walletClient.getWallet(this.walletId);
       }
       throw e;
     }
@@ -349,18 +364,18 @@ export class ShinamiWalletSigner {
   /**
    * Tries to create this wallet if it doesn't exist.
    * @param onChain If set, it will try to create the wallet and initialize it on chain as well.
+   *    The access key used must be authorized for Aptos gas station. On chain initialization costs
+   *    will be drawn from the attached gas station fund.
    * @returns The wallet address if it was just created. `undefined` if pre-existing, in which case
    *  you can call `getAddfress` to retrieve the said info.
    */
-  async tryCreate(onChain: boolean): Promise<string | undefined> {
+  async tryCreate(onChain: boolean): Promise<AccountAddress | undefined> {
     try {
-      return (
-        await this.session.withToken((token) =>
-          onChain
-            ? this.walletClient.createWalletOnChain(this.walletId, token)
-            : this.walletClient.createWallet(this.walletId, token),
-        )
-      ).accountAddress;
+      return await this.session.withToken((token) =>
+        onChain
+          ? this.walletClient.createWalletOnChain(this.walletId, token)
+          : this.walletClient.createWallet(this.walletId, token),
+      );
     } catch (e: unknown) {
       if (e instanceof JSONRPCError && e.code === -32602) {
         const details = errorDetails(e);
@@ -377,7 +392,7 @@ export class ShinamiWalletSigner {
    */
   signTransaction(
     transaction: AnyRawTransaction,
-  ): Promise<SignTransactionResult> {
+  ): Promise<AccountAuthenticator> {
     return this.session.withToken((token) =>
       this.walletClient.signTransaction(this.walletId, token, transaction),
     );

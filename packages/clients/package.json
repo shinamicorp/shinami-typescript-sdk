@@ -1,6 +1,6 @@
 {
   "name": "@shinami/clients",
-  "version": "0.10.0",
+  "version": "0.9.1",
   "description": "TypeScript clients for Shinami services",
   "sideEffects": false,
   "engines": {
@@ -64,7 +64,7 @@
     "superstruct": "^1.0.3"
   },
   "devDependencies": {
-    "@aptos-labs/ts-sdk": ">=1.22.2",
+    "@aptos-labs/ts-sdk": ">=1.13.3",
     "@mysten/sui": ">=1.0.4",
     "@tsconfig/recommended": "^1.0.3",
     "@types/uuid": "^9.0.2",
