@@ -77,7 +77,7 @@
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@aptos-labs/ts-sdk": ">=1.22.2",
+    "@aptos-labs/ts-sdk": ">=1.13.3",
     "@mysten/sui": ">=1.0.4"
   },
   "peerDependenciesMeta": {
