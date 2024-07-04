@@ -323,8 +323,6 @@ import {
   Aptos,
   AptosConfig,
   Network,
-  AccountAddress,
-  AccountAuthenticator,
   AccountAuthenticatorEd25519,
 } from "@aptos-labs/ts-sdk";
 import {
@@ -347,7 +345,7 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
 // Get or create the sender account on chain. Since this is a non-sponsored transaction,
 // your account MUST have APT in it in order to execute a transaction.
-const senderAccount = AccountAddress.from(await signer.getAddress(true, true));
+const senderAccount = await signer.getAddress(true, true);
 
 // Create a transaction with no feePayer set. This is an example of a SimpleTransaction
 const transaction = await aptos.transaction.build.simple({
@@ -363,12 +361,7 @@ const transaction = await aptos.transaction.build.simple({
 });
 
 // Sign tx with invisible wallet.
-const { signature } = await signer.signTransaction(transaction);
-
-// Deserialize the result to an AccountAuthenticator
-const accountAuthenticator = AccountAuthenticator.deserialize(
-  new Deserializer(Uint8Array.from(signature)),
-);
+const accountAuthenticator = await signer.signTransaction(transaction);
 
 // Submit the tx for execution
 const pending = aptos.transaction.submit.simple({
@@ -385,12 +378,7 @@ const committed = await aptos.transaction.waitForTransaction({
 To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami's Aptos gas station:
 
 ```ts
-import {
-  Aptos,
-  AptosConfig,
-  Network,
-  AccountAddress,
-} from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import {
   KeyClient,
   ShinamiWalletSigner,
@@ -414,7 +402,7 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 
 // Get or create the sender account on chain. You do not need APT in this account since
 // we'll be using Shinami's gas station to sponsor the transaction.
-const senderAccount = AccountAddress.from(await signer.getAddress(true, true));
+const senderAccount = await signer.getAddress(true, true);
 
 // Create a transaction with feePayer set. This is an example of a SimpleTransaction
 const transaction = await aptos.transaction.build.simple({
