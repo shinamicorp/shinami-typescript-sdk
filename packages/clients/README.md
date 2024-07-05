@@ -14,6 +14,7 @@ For [Sui](https://sui.io/):
 For [Aptos](https://aptos.dev/):
 
 - [Gas station](#gas-station-aptos)
+- [Invisible wallet](#invisible-wallet-aptos)
 
 ## Install
 
@@ -313,6 +314,118 @@ const committed = await aptos.transaction.waitForTransaction({
 });
 ```
 
+### Invisible wallet (Aptos)
+
+To use the invisible wallet as a signer for a regular (non-sponsored) transaction:
+
+```ts
+import {
+  Aptos,
+  AptosConfig,
+  Network,
+  AccountAuthenticatorEd25519,
+} from "@aptos-labs/ts-sdk";
+import {
+  KeyClient,
+  ShinamiWalletSigner,
+  WalletClient,
+} from "@shinami/clients/aptos";
+
+// Create your Aptos client targeting the desired network.
+const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
+
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
+const key = new KeyClient(WALLET_ACCESS_KEY);
+const wal = new WalletClient(WALLET_ACCESS_KEY);
+
+// WALLET_SECRET MUST be used consistently with this wallet id.
+// You are responsible for safe-keeping the (walletId, secret) pair.
+// Shinami cannot recover it for you.
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
+
+// Get or create the sender account on chain. Since this is a non-sponsored transaction,
+// your account MUST have APT in it in order to execute a transaction.
+const senderAccount = await signer.getAddress(true, true);
+
+// Create a transaction with no feePayer set. This is an example of a SimpleTransaction
+const transaction = await aptos.transaction.build.simple({
+  sender: senderAccount,
+  data: {
+    function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+    functionArguments: [1, 2],
+  },
+  withFeePayer: false,
+  options: {
+    expireTimestamp: Math.floor(Date.now() / 1000) + 5 * 60,
+  },
+});
+
+// Sign tx with invisible wallet.
+const accountAuthenticator = await signer.signTransaction(transaction);
+
+// Submit the tx for execution
+const pending = aptos.transaction.submit.simple({
+  transaction,
+  senderAuthenticator: accountAuthenticator as AccountAuthenticatorEd25519,
+});
+
+// Wait for it to be committed on-chain.
+const committed = await aptos.transaction.waitForTransaction({
+  transactionHash: pending.hash,
+});
+```
+
+To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami's Aptos gas station:
+
+```ts
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import {
+  KeyClient,
+  ShinamiWalletSigner,
+  WalletClient,
+} from "@shinami/clients/aptos";
+
+// Create your Aptos client targeting the desired network.
+const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
+
+// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
+// It MUST be authorized for all of these Aptos services:
+// - Gas station (The fund your key is tied to must have funds in it)
+// - Wallet service
+const key = new KeyClient(SUPER_ACCESS_KEY);
+const wal = new WalletClient(SUPER_ACCESS_KEY);
+
+// WALLET_SECRET MUST be used consistently with this wallet id.
+// You are responsible for safe-keeping the (walletId, secret) pair.
+// Shinami cannot recover it for you.
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
+
+// Get or create the sender account on chain. You do not need APT in this account since
+// we'll be using Shinami's gas station to sponsor the transaction.
+const senderAccount = await signer.getAddress(true, true);
+
+// Create a transaction with feePayer set. This is an example of a SimpleTransaction
+const transaction = await aptos.transaction.build.simple({
+  sender: senderAccount,
+  data: {
+    function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+    functionArguments: [1, 2],
+  },
+  withFeePayer: true,
+  options: {
+    expireTimestamp: Math.floor(Date.now() / 1000) + 5 * 60,
+  },
+});
+
+// Execute the gasless tx using your invisible wallet.
+const pending = signer.executeGaslessTransaction(transaction);
+
+// Wait for it to be committed on-chain.
+const committed = await aptos.transaction.waitForTransaction({
+  transactionHash: pending.hash,
+});
+```
+
 ## Development
 
 ### Build
@@ -356,6 +469,7 @@ export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
+export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 
 npm run integration
 ```
@@ -372,6 +486,7 @@ export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
+export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 
 npm run coverage
 ```

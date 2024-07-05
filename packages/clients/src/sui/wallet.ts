@@ -14,8 +14,8 @@ import { Infer, nullable, object, string } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { GaslessTransaction } from "./gas.js";
 
-const KEY_RPC_URL = "https://api.shinami.com/key/v1";
-const WALLET_RPC_URL = "https://api.shinami.com/wallet/v1";
+const KEY_RPC_URL = "https://api.shinami.com/sui/key/v1";
+const WALLET_RPC_URL = "https://api.shinami.com/sui/wallet/v1";
 
 /**
  * Shinami Key RPC client.
