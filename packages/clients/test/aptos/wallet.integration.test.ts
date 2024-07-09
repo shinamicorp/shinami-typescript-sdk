@@ -73,14 +73,16 @@ describe("WalletClient", () => {
 });
 
 describe("ShinamiAptosWallet", () => {
-  const walletId = `__wallet_sdk_test_${uuidv4()}`;
+  const walletId1 = `__wallet_sdk_test_${uuidv4()}`;
+  const walletId2 = `__wallet_sdk_test_${uuidv4()}`;
   const session = new KeySession("fake secret", key);
-  const signer1 = new ShinamiWalletSigner(walletId, wal, "fake secret", key);
-  const signer2 = new ShinamiWalletSigner(walletId, wal, session);
-  console.log("walletId", walletId);
+  const signer1 = new ShinamiWalletSigner(walletId1, wal, "fake secret", key);
+  const signer2 = new ShinamiWalletSigner(walletId2, wal, session);
+  console.log("walletId1", walletId1); // will be initialized on chain
+  console.log("walletId2", walletId2);
 
   it("creates and retrieves an initialized wallet address", async () => {
-    const createdAddress = await signer2.getAddress(true, true);
+    const createdAddress = await signer1.getAddress(true, true);
     expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
     let accountInfo;
     try {
@@ -93,24 +95,21 @@ describe("ShinamiAptosWallet", () => {
   }, 20_000);
 
   it("creates and retrieves an uninitialized wallet address", async () => {
-    expect((await signer1.getAddress(true, false)).toString()).toMatch(
+    expect((await signer2.getAddress(true, false)).toString()).toMatch(
       /0x[0-9a-f]+/,
     );
   });
 
   it("signs a simple transaction correctly", async () => {
+    // Sender must be on chain since it will also be the fee payer
     const senderAcct = await signer1.getAddress(true, true);
     try {
       await getAccountInfoWithRetry(senderAcct);
     } catch (error) {
       console.error("Failed to get account info:", error);
     }
-    const receiverAcct = await signer2.getAddress(true, true);
-    try {
-      await getAccountInfoWithRetry(receiverAcct);
-    } catch (error) {
-      console.error("Failed to get account info:", error);
-    }
+
+    const receiverAcct = await signer2.getAddress(true, false);
 
     const transaction = await aptos.transaction.build.simple({
       sender: senderAcct,
@@ -126,7 +125,6 @@ describe("ShinamiAptosWallet", () => {
 
     const accountAuthenticator = await signer1.signTransaction(transaction);
     const signingMessage = aptos.getSigningMessage({ transaction });
-
     const accountAuthenticatorEd25519 =
       accountAuthenticator as AccountAuthenticatorEd25519;
     const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
@@ -145,12 +143,8 @@ describe("ShinamiAptosWallet", () => {
     } catch (error) {
       console.error("Failed to get account info:", error);
     }
-    const receiverAcct = await signer2.getAddress(true, true);
-    try {
-      await getAccountInfoWithRetry(receiverAcct);
-    } catch (error) {
-      console.error("Failed to get account info:", error);
-    }
+    const receiverAcct = await signer2.getAddress(true, false);
+
     const transaction = await aptos.transaction.build.multiAgent({
       sender: senderAcct,
       data: {
