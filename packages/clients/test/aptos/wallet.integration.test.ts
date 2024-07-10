@@ -100,7 +100,36 @@ describe("ShinamiAptosWallet", () => {
     );
   });
 
-  it("signs a simple transaction correctly", async () => {
+  it("signs a simple transaction with fee payer correctly", async () => {
+    const senderAcct = await signer1.getAddress(true);
+    const receiverAcct = await signer2.getAddress(true, false);
+
+    const transaction = await aptos.transaction.build.simple({
+      sender: senderAcct,
+      data: {
+        function: "0x1::aptos_account::transfer",
+        functionArguments: [receiverAcct, 0],
+      },
+      withFeePayer: true,
+      options: {
+        expireTimestamp: Math.floor(Date.now() / 1000) + 60,
+      },
+    });
+
+    const accountAuthenticator = await signer1.signTransaction(transaction);
+    const signingMessage = aptos.getSigningMessage({ transaction });
+    const accountAuthenticatorEd25519 =
+      accountAuthenticator as AccountAuthenticatorEd25519;
+    const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
+      {
+        message: signingMessage,
+        signature: accountAuthenticatorEd25519.signature,
+      },
+    );
+    expect(verifyResult).toBe(true);
+  }, 20_000);
+
+  it("signs a simple transaction without feepayer correctly", async () => {
     // Sender must be on chain since it will also be the fee payer
     const senderAcct = await signer1.getAddress(true, true);
     try {

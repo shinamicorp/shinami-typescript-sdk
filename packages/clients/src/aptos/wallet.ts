@@ -166,7 +166,7 @@ export class WalletClient extends ShinamiRpcClient {
         walletId,
         sessionToken,
         transaction.rawTransaction.bcsToHex().toString(),
-        transaction.secondarySignerAddresses?.map((x) => x.toString()),
+        transaction.secondarySignerAddresses?.map((x) => x.toString()) ?? [],
         transaction.feePayerAddress?.toString(),
       ]),
       SignTransactionResult,
@@ -329,8 +329,9 @@ export class ShinamiWalletSigner {
   }
 
   /**
-   * Retrieves the wallet address.
-   * @param autoCreate Whether to automatically create the wallet (off chain) if it doesn't exist yet.
+   * Retrieves the wallet address if created in Shinami.
+   * You cannot use `getAddress` to initialize a wallet address on chain. Use `initializeWalletOnChain` instead.
+   * @param autoCreate Whether to automatically create the wallet (off chain) if it doesn't exist yet in Shinami.
    *    If `false`, and the wallet doesn't exist, an error will be thrown.
    * @param onChain whether to initialize the address on chain after creation. It will use the network
    *    attached to the access key in the sessionToken. Only relevant if autoCreate is set to `true`
