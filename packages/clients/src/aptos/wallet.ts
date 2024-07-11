@@ -299,7 +299,7 @@ export class ShinamiWalletSigner {
   private readonly session: KeySession;
 
   private address?: AccountAddress;
-  private isInitialized: boolean = false;
+  private isInitialized = false;
 
   constructor(
     walletId: string,
