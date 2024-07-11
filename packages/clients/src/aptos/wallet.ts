@@ -166,7 +166,7 @@ export class WalletClient extends ShinamiRpcClient {
         walletId,
         sessionToken,
         transaction.rawTransaction.bcsToHex().toString(),
-        transaction.secondarySignerAddresses?.map((x) => x.toString()),
+        transaction.secondarySignerAddresses?.map((x) => x.toString()) ?? [],
         transaction.feePayerAddress?.toString(),
       ]),
       SignTransactionResult,
@@ -299,6 +299,7 @@ export class ShinamiWalletSigner {
   private readonly session: KeySession;
 
   private address?: AccountAddress;
+  private isInitialized = false;
 
   constructor(
     walletId: string,
@@ -329,19 +330,25 @@ export class ShinamiWalletSigner {
   }
 
   /**
-   * Retrieves the wallet address.
-   * @param autoCreate Whether to automatically create the wallet (off chain) if it doesn't exist yet.
+   * Retrieves the wallet address if created in Shinami.
+   * @param autoCreate Whether to automatically create the wallet (off chain) if it doesn't exist yet in Shinami.
    *    If `false`, and the wallet doesn't exist, an error will be thrown.
-   * @param onChain whether to initialize the address on chain after creation. It will use the network
-   *    attached to the access key in the sessionToken. Only relevant if autoCreate is set to `true`
+   * @param onChain whether to initialize the address on chain. It will use the network attached to the access
+   *    key in the sessionToken.
    * @returns Wallet address.
    */
   async getAddress(
     autoCreate = false,
     onChain = false,
   ): Promise<AccountAddress> {
-    if (!this.address)
+    if (!this.address) {
+      // wallet has not yet been created or initialized
       this.address = await this._getAddress(autoCreate, onChain);
+    } else if (!this.isInitialized && onChain) {
+      // it is created in Shinami but not on chain, and onChain param is set
+      await this.tryInitializeOnChain();
+      this.isInitialized = true;
+    }
     return this.address;
   }
 
@@ -357,6 +364,23 @@ export class ShinamiWalletSigner {
         if (address) return address;
         return await this.walletClient.getWallet(this.walletId);
       }
+      throw e;
+    }
+  }
+
+  /**
+   * Tries to initialize this wallet on chain.
+   * @returns The wallet address that was successfully initialized on chain. `undefined` if this
+   *  wallet already exists on chain. An error will be thrown if wallet has not been created on
+   *  Shinami yet.
+   */
+  async tryInitializeOnChain(): Promise<AccountAddress | undefined> {
+    try {
+      return await this.session.withToken((token) =>
+        this.walletClient.initializeWalletOnChain(this.walletId, token),
+      );
+    } catch (e: unknown) {
+      if (e instanceof JSONRPCError && e.code === -32013) return;
       throw e;
     }
   }
