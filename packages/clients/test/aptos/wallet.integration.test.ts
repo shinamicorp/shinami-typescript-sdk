@@ -18,10 +18,12 @@ import {
   AptosApiError,
   isUserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+import { JSONRPCError } from "@open-rpc/client-js";
 
 const aptos = createAptos();
 const key = createKeyClient();
 const wal = createWalletClient();
+const longTimeoutMs = 30_000;
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,9 +77,12 @@ describe("WalletClient", () => {
 describe("ShinamiAptosWallet", () => {
   const walletId1 = `__wallet_sdk_test_${uuidv4()}`;
   const walletId2 = `__wallet_sdk_test_${uuidv4()}`;
+  const walletId3 = `__wallet_sdk_test_${uuidv4()}`;
   const session = new KeySession("fake secret", key);
   const signer1 = new ShinamiWalletSigner(walletId1, wal, "fake secret", key);
   const signer2 = new ShinamiWalletSigner(walletId2, wal, session);
+  const signer3 = new ShinamiWalletSigner(walletId3, wal, session);
+
   console.log("walletId1", walletId1); // will be initialized on chain
   console.log("walletId2", walletId2);
 
@@ -90,7 +95,6 @@ describe("ShinamiAptosWallet", () => {
     } catch (error) {
       console.error("Failed to get account info:", error);
     }
-
     expect(accountInfo.authentication_key).toBe(createdAddress.toString());
   }, 20_000);
 
@@ -100,139 +104,198 @@ describe("ShinamiAptosWallet", () => {
     );
   });
 
-  it("signs a simple transaction with fee payer correctly", async () => {
-    const senderAcct = await signer1.getAddress(true);
-    const receiverAcct = await signer2.getAddress(true, false);
+  it(
+    "throws error when initializing an uncreated wallet",
+    async () => {
+      try {
+        await signer3.getAddress(false, false);
+        throw new Error("Error not thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(JSONRPCError);
+        expect((error as JSONRPCError).message).toBe("Invalid params");
+      }
+    },
+    longTimeoutMs,
+  );
 
-    const transaction = await aptos.transaction.build.simple({
-      sender: senderAcct,
-      data: {
-        function: "0x1::aptos_account::transfer",
-        functionArguments: [receiverAcct, 0],
-      },
-      withFeePayer: true,
-      options: {
-        expireTimestamp: Math.floor(Date.now() / 1000) + 60,
-      },
-    });
+  it(
+    "initializes and retrieves a created wallet on chain correctly",
+    async () => {
+      let createdAddress = await signer3.getAddress(true, false);
+      expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
+      let accountInfo;
+      try {
+        accountInfo = await getAccountInfoWithRetry(createdAddress);
+        throw new Error("Error should have been thrown");
+      } catch (error) {
+        // Only created in Shinami. Should not be on chain.
+        expect(error).toBeInstanceOf(AptosApiError);
+        expect((error as AptosApiError).message).toContain("Account not found");
+      }
 
-    const accountAuthenticator = await signer1.signTransaction(transaction);
-    const signingMessage = aptos.getSigningMessage({ transaction });
-    const accountAuthenticatorEd25519 =
-      accountAuthenticator as AccountAuthenticatorEd25519;
-    const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
-      {
-        message: signingMessage,
-        signature: accountAuthenticatorEd25519.signature,
-      },
-    );
-    expect(verifyResult).toBe(true);
-  }, 20_000);
+      // Should still correctly fetch address from Shinami if off chain.
+      createdAddress = await signer3.getAddress(false, false);
+      expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
 
-  it("signs a simple transaction without feepayer correctly", async () => {
-    // Sender must be on chain since it will also be the fee payer
-    const senderAcct = await signer1.getAddress(true, true);
-    try {
-      await getAccountInfoWithRetry(senderAcct);
-    } catch (error) {
-      console.error("Failed to get account info:", error);
-    }
+      createdAddress = await signer3.getAddress(false, true);
+      expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
+      try {
+        accountInfo = await getAccountInfoWithRetry(createdAddress);
+      } catch (error) {
+        throw new Error("Blah");
+      }
+      // Should now be initialized on chain.
+      expect(accountInfo.authentication_key).toBe(createdAddress.toString());
+    },
+    longTimeoutMs,
+  );
 
-    const receiverAcct = await signer2.getAddress(true, false);
+  it(
+    "signs a simple transaction with fee payer correctly",
+    async () => {
+      const senderAcct = await signer1.getAddress(true);
+      const receiverAcct = await signer2.getAddress(true, false);
 
-    const transaction = await aptos.transaction.build.simple({
-      sender: senderAcct,
-      data: {
-        function: "0x1::aptos_account::transfer",
-        functionArguments: [receiverAcct, 0],
-      },
-      withFeePayer: false,
-      options: {
-        expireTimestamp: Math.floor(Date.now() / 1000) + 60,
-      },
-    });
+      const transaction = await aptos.transaction.build.simple({
+        sender: senderAcct,
+        data: {
+          function: "0x1::aptos_account::transfer",
+          functionArguments: [receiverAcct, 0],
+        },
+        withFeePayer: true,
+        options: {
+          expireTimestamp: Math.floor(Date.now() / 1000) + 60,
+        },
+      });
 
-    const accountAuthenticator = await signer1.signTransaction(transaction);
-    const signingMessage = aptos.getSigningMessage({ transaction });
-    const accountAuthenticatorEd25519 =
-      accountAuthenticator as AccountAuthenticatorEd25519;
-    const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
-      {
-        message: signingMessage,
-        signature: accountAuthenticatorEd25519.signature,
-      },
-    );
-    expect(verifyResult).toBe(true);
-  }, 20_000);
+      const accountAuthenticator = await signer1.signTransaction(transaction);
+      const signingMessage = aptos.getSigningMessage({ transaction });
+      const accountAuthenticatorEd25519 =
+        accountAuthenticator as AccountAuthenticatorEd25519;
+      const verifyResult =
+        accountAuthenticatorEd25519.public_key.verifySignature({
+          message: signingMessage,
+          signature: accountAuthenticatorEd25519.signature,
+        });
+      expect(verifyResult).toBe(true);
+    },
+    longTimeoutMs,
+  );
 
-  it("signs multi-agent transaction correctly", async () => {
-    const senderAcct = await signer1.getAddress(true, true);
-    try {
-      await getAccountInfoWithRetry(senderAcct);
-    } catch (error) {
-      console.error("Failed to get account info:", error);
-    }
-    const receiverAcct = await signer2.getAddress(true, false);
+  it(
+    "signs a simple transaction without feepayer correctly",
+    async () => {
+      // Sender must be on chain since it will also be the fee payer
+      const senderAcct = await signer1.getAddress(true, true);
+      try {
+        await getAccountInfoWithRetry(senderAcct);
+      } catch (error) {
+        console.error("Failed to get account info:", error);
+      }
 
-    const transaction = await aptos.transaction.build.multiAgent({
-      sender: senderAcct,
-      data: {
-        function: "0x1::aptos_account::transfer",
-        functionArguments: [receiverAcct, 0],
-      },
-      secondarySignerAddresses: [receiverAcct],
-      withFeePayer: false,
-      options: {
-        expireTimestamp: Math.floor(Date.now() / 1000) + 60,
-      },
-    });
+      const receiverAcct = await signer2.getAddress(true, false);
 
-    const accountAuthenticator = await signer1.signTransaction(transaction);
-    const signingMessage = aptos.getSigningMessage({ transaction });
+      const transaction = await aptos.transaction.build.simple({
+        sender: senderAcct,
+        data: {
+          function: "0x1::aptos_account::transfer",
+          functionArguments: [receiverAcct, 0],
+        },
+        withFeePayer: false,
+        options: {
+          expireTimestamp: Math.floor(Date.now() / 1000) + 60,
+        },
+      });
 
-    const accountAuthenticatorEd25519 =
-      accountAuthenticator as AccountAuthenticatorEd25519;
-    const verifyResult = accountAuthenticatorEd25519.public_key.verifySignature(
-      {
-        message: signingMessage,
-        signature: accountAuthenticatorEd25519.signature,
-      },
-    );
-    expect(verifyResult).toBe(true);
-  }, 20_000);
+      const accountAuthenticator = await signer1.signTransaction(transaction);
+      const signingMessage = aptos.getSigningMessage({ transaction });
+      const accountAuthenticatorEd25519 =
+        accountAuthenticator as AccountAuthenticatorEd25519;
+      const verifyResult =
+        accountAuthenticatorEd25519.public_key.verifySignature({
+          message: signingMessage,
+          signature: accountAuthenticatorEd25519.signature,
+        });
+      expect(verifyResult).toBe(true);
+    },
+    longTimeoutMs,
+  );
 
-  it("executes a simple transaction gaslessly", async () => {
-    const senderAcct = await signer1.getAddress(true);
-    const transaction = await aptos.transaction.build.simple({
-      sender: senderAcct,
-      data: {
-        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
-        functionArguments: [1, 2],
-      },
-      withFeePayer: true,
-      options: {
-        expireTimestamp: Math.floor(Date.now() / 1000) + 5 * 60,
-      },
-    });
-    const pending = await signer1.executeGaslessTransaction(transaction);
-    const committed = await aptos.transaction.waitForTransaction({
-      transactionHash: pending.hash,
-      options: {
-        checkSuccess: true,
-      },
-    });
-    console.log("committed", committed);
-    if (!isUserTransactionResponse(committed)) {
-      throw new Error("Unexpected committed transaction type");
-    }
-    expect(
-      committed.events.find(
-        (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
-      ),
-    ).toMatchObject({
-      data: {
-        result: "3", // 1 + 2
-      },
-    });
-  }, 20_000);
+  it(
+    "signs multi-agent transaction correctly",
+    async () => {
+      const senderAcct = await signer1.getAddress(true, true);
+      try {
+        await getAccountInfoWithRetry(senderAcct);
+      } catch (error) {
+        console.error("Failed to get account info:", error);
+      }
+      const receiverAcct = await signer2.getAddress(true, false);
+
+      const transaction = await aptos.transaction.build.multiAgent({
+        sender: senderAcct,
+        data: {
+          function: "0x1::aptos_account::transfer",
+          functionArguments: [receiverAcct, 0],
+        },
+        secondarySignerAddresses: [receiverAcct],
+        withFeePayer: false,
+        options: {
+          expireTimestamp: Math.floor(Date.now() / 1000) + 60,
+        },
+      });
+
+      const accountAuthenticator = await signer1.signTransaction(transaction);
+      const signingMessage = aptos.getSigningMessage({ transaction });
+
+      const accountAuthenticatorEd25519 =
+        accountAuthenticator as AccountAuthenticatorEd25519;
+      const verifyResult =
+        accountAuthenticatorEd25519.public_key.verifySignature({
+          message: signingMessage,
+          signature: accountAuthenticatorEd25519.signature,
+        });
+      expect(verifyResult).toBe(true);
+    },
+    longTimeoutMs,
+  );
+
+  it(
+    "executes a simple transaction gaslessly",
+    async () => {
+      const senderAcct = await signer1.getAddress(true);
+      const transaction = await aptos.transaction.build.simple({
+        sender: senderAcct,
+        data: {
+          function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+          functionArguments: [1, 2],
+        },
+        withFeePayer: true,
+        options: {
+          expireTimestamp: Math.floor(Date.now() / 1000) + 5 * 60,
+        },
+      });
+      const pending = await signer1.executeGaslessTransaction(transaction);
+      const committed = await aptos.transaction.waitForTransaction({
+        transactionHash: pending.hash,
+        options: {
+          checkSuccess: true,
+        },
+      });
+      console.log("committed", committed);
+      if (!isUserTransactionResponse(committed)) {
+        throw new Error("Unexpected committed transaction type");
+      }
+      expect(
+        committed.events.find(
+          (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
+        ),
+      ).toMatchObject({
+        data: {
+          result: "3", // 1 + 2
+        },
+      });
+    },
+    longTimeoutMs,
+  );
 });
