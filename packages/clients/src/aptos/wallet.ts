@@ -380,10 +380,7 @@ export class ShinamiWalletSigner {
         this.walletClient.initializeWalletOnChain(this.walletId, token),
       );
     } catch (e: unknown) {
-      if (e instanceof JSONRPCError && e.code === -32013) {
-        const details = errorDetails(e);
-        if (details?.details?.includes("already exists on-chain")) return;
-      }
+      if (e instanceof JSONRPCError && e.code === -32013) return;
       throw e;
     }
   }
