@@ -84,6 +84,7 @@ jobs:
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: fake_id
           NEXT_PUBLIC_FACEBOOK_CLIENT_ID: fake_id
           NEXT_PUBLIC_TWITCH_CLIENT_ID: fake_id
+          NEXT_PUBLIC_APPLE_CLIENT_ID: fake_id
       - run: npm publish --workspace "packages/$PACKAGE" --tag "$TAG" --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

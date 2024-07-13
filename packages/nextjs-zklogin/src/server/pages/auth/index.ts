@@ -12,9 +12,10 @@ import {
   ZkProofProvider,
 } from "../../providers.js";
 import { catchAllDispatcher, withInternalErrorHandler } from "../utils.js";
+import { apple } from "./apple.js";
 import { login } from "./login.js";
-import logout from "./logout.js";
-import me from "./me.js";
+import { logout } from "./logout.js";
+import { me } from "./me.js";
 
 /**
  * Implements auth API routes, by default at `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`.
@@ -51,6 +52,7 @@ export function authHandler(
       ),
       logout,
       me: me(epochProvider),
+      apple,
     }),
   );
 }

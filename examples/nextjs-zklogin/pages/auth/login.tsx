@@ -1,11 +1,13 @@
 import { sui } from "@/lib/hooks/sui";
 import {
+  APPLE_CLIENT_ID,
   FACEBOOK_CLIENT_ID,
   GOOGLE_CLIENT_ID,
   TWITCH_CLIENT_ID,
 } from "@/lib/shared/openid";
 import { first } from "@/lib/shared/utils";
 import {
+  getAppleAuthUrl,
   getFacebookAuthUrl,
   getGoogleAuthUrl,
   getTwitchAuthUrl,
@@ -14,15 +16,13 @@ import {
 } from "@shinami/nextjs-zklogin/client";
 import { useRouter } from "next/router";
 
-// This page should be installed at route "/auth/login".
-// If you need to use a different path, set env NEXT_PUBLIC_LOGIN_PAGE_PATH to override the default,
-// and update "callbackBaseUrl" accordingly.
+// This page should be installed at path "/auth/login".
+// If you move it to a different path, remember to update env NEXT_PUBLIC_LOGIN_PAGE_PATH.
 export default withNewZkLoginSession(
   () => relativeToCurrentEpoch(sui),
   ({ session }) => {
     const router = useRouter();
     const redirectTo = first(router.query.redirectTo);
-    const callbackBaseUrl = new URL("auth/", window.location.origin);
 
     // Render sign-in options based on what's configured.
     return (
@@ -35,7 +35,7 @@ export default withNewZkLoginSession(
                   getGoogleAuthUrl(
                     session,
                     GOOGLE_CLIENT_ID!,
-                    new URL("google", callbackBaseUrl),
+                    "/auth/google", // Update if moved to another path
                     redirectTo,
                   ),
                 );
@@ -53,7 +53,7 @@ export default withNewZkLoginSession(
                   getFacebookAuthUrl(
                     session,
                     FACEBOOK_CLIENT_ID!,
-                    new URL("facebook", callbackBaseUrl),
+                    "/auth/facebook", // Update if moved to another path
                     redirectTo,
                   ),
                 );
@@ -71,13 +71,31 @@ export default withNewZkLoginSession(
                   getTwitchAuthUrl(
                     session,
                     TWITCH_CLIENT_ID!,
-                    new URL("twitch", callbackBaseUrl),
+                    "/auth/twitch", // Update if moved to another path
                     redirectTo,
                   ),
                 );
               }}
             >
               Sign in with Twitch
+            </button>
+          </div>
+        )}
+        {APPLE_CLIENT_ID && (
+          <div>
+            <button
+              onClick={() => {
+                void router.replace(
+                  getAppleAuthUrl(
+                    session,
+                    APPLE_CLIENT_ID!,
+                    "/auth/apple", // Update if moved to another path
+                    redirectTo,
+                  ),
+                );
+              }}
+            >
+              Sign in with Apple
             </button>
           </div>
         )}

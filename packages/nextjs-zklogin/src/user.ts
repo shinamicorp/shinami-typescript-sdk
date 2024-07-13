@@ -11,6 +11,7 @@ import {
   enums,
   integer,
   object,
+  optional,
   refine,
   string,
   type,
@@ -45,7 +46,7 @@ export const BigIntString = refine(string(), "BigIntString", (value) => {
 });
 export type BigIntString = Infer<typeof BigIntString>;
 
-export const OidProvider = enums(["google", "facebook", "twitch"]);
+export const OidProvider = enums(["google", "facebook", "twitch", "apple"]);
 export type OidProvider = Infer<typeof OidProvider>;
 
 export const ZkLoginRequest = object({
@@ -55,6 +56,7 @@ export const ZkLoginRequest = object({
   maxEpoch: integer(),
   jwtRandomness: BigIntString,
   keyClaimName: string(),
+  extras: optional(type({})),
 });
 export type ZkLoginRequest = Infer<typeof ZkLoginRequest>;
 

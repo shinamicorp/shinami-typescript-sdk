@@ -20,6 +20,6 @@ const getHandler: NextApiHandler = (req, res) => {
 /**
  * Implements the logout route.
  */
-export default withSession(
+export const logout = withSession(
   methodDispatcher({ POST: postHandler, GET: getHandler }),
 );

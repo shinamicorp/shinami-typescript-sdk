@@ -30,12 +30,14 @@ interface State {
  * - `getGoogleAuthUrl`
  * - `getFacebookAuthUrl`
  * - `getTwitchAuthUrl`
+ * - `getAppleAuthUrl`
  *
  * @param Component You actual React component to be rendered.
  * @param oidProvider The OpenID provider name.
  * @param keyClaimName The claim name that identifies a user. When unsure, use "sub".
  * @param getState Function to decode state param.
  * @param getJwt Function to extract JWT from params.
+ * @param getExtras Function to extract extra context from params.
  * @returns Wrapped component.
  */
 function withOpenIdCallback<P>(
@@ -44,6 +46,7 @@ function withOpenIdCallback<P>(
   keyClaimName: string,
   getState: (params: URLSearchParams) => State,
   getJwt: (params: URLSearchParams) => string,
+  getExtras: (params: URLSearchParams) => object | undefined = () => undefined,
 ) {
   const WrappedComponent: FunctionComponent<P> = (props) => {
     const [status, setStatus] = useState<CallbackStatus>("loading");
@@ -72,6 +75,7 @@ function withOpenIdCallback<P>(
           const state = getState(params);
           if (state.nonce !== session.nonce) throw new Error("Bad nonce");
           const jwt = getJwt(params);
+          const extras = getExtras(params);
 
           setStatus("loggingIn");
           await login({
@@ -83,6 +87,7 @@ function withOpenIdCallback<P>(
             maxEpoch: session.maxEpoch,
             jwtRandomness: session.jwtRandomness,
             keyClaimName,
+            extras,
           });
 
           setStatus("redirecting");
@@ -193,5 +198,46 @@ export function withTwitchCallback<P>(
     (params) =>
       params.get("id_token") ??
       throwExpression(new Error("Missing id_token from params")),
+  );
+}
+
+/**
+ * React HOC for implementing Apple auth callback page.
+ */
+export function withAppleCallback<P>(
+  Component: FunctionComponent<P & { status: CallbackStatus }>,
+  keyClaimName = "sub",
+) {
+  return withOpenIdCallback(
+    Component,
+    "apple",
+    keyClaimName,
+    (params) => {
+      const state = new URLSearchParams(
+        // This was double encoded when constructing Apple auth URL.
+        decodeURIComponent(
+          params.get("state") ??
+            throwExpression(new Error("Missing state from params")),
+        ),
+      );
+      return {
+        nonce:
+          state.get("nonce") ??
+          throwExpression(new Error("Missing nonce from state")),
+        redirectTo:
+          state.get("redirectTo") ??
+          throwExpression(new Error("Missing redirectTo from state")),
+      };
+    },
+    (params) =>
+      params.get("id_token") ??
+      throwExpression(new Error("Missing id_token from params")),
+    (params) => {
+      // Extra scopes are passed in the "user" parameter only upon the FIRST time a user signs into
+      // the app. The app backend can receive and persist this information in the `authorizeUser`
+      // function specified in `authHandler`.
+      const user = params.get("user");
+      return { user: user ? (JSON.parse(user) as unknown) : undefined };
+    },
   );
 }

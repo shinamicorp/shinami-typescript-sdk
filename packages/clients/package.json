@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "@open-rpc/client-js": "^1.8.1",
-    "superstruct": "^1.0.3"
+    "superstruct": "^2.0.2"
   },
   "devDependencies": {
     "@aptos-labs/ts-sdk": ">=1.13.3",

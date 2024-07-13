@@ -33,15 +33,36 @@ It's recommended to create a `.env.local` file and set them in there, because th
 ### Configure OAuth providers
 
 You will need to configure OAuth providers for your Next.js application.
-See [this guide](https://docs.sui.io/concepts/cryptography/zklogin#configure-a-developer-account-with-openid-provider) for instructions.
+See [this guide](https://docs.sui.io/guides/developer/cryptography/zklogin-integration/developer-account) for instructions.
 You must set at least one of these env variables:
 
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - `NEXT_PUBLIC_FACEBOOK_CLIENT_ID`
 - `NEXT_PUBLIC_TWITCH_CLIENT_ID`
+- `NEXT_PUBLIC_APPLE_CLIENT_ID`
 
-Note that if you are using Twitch, you must add http://localhost:3000/auth/twitch to your application's OAuth Redirect URLs for the local dev server to work.
-Other providers allow `localhost` automatically during development.
+#### About redirect URIs
+
+For Google, Facebook, and Twitch, you must include the respective callback URL in your OAuth application's allowed redirect URIs:
+
+- `https://<your-domain>/auth/google`
+- `https://<your-domain>/auth/facebook`
+- `https://<your-domain>/auth/twitch`
+
+where `<your-domain>` is the domain name you host the app on.
+These providers also support testing on localhost, if you include the respective localhost URL in their allowed redirect URIs:
+
+- `http://localhost:3000/auth/google`
+- `http://localhost:3000/auth/facebook`
+- `http://localhost:3000/auth/twitch`
+
+For Apple, you must authorize a slightly different redirect URI (note the `api/` prefix):
+
+- `https://<your-domain>/api/auth/apple`
+
+Note that Apple doesn't support either `localhost` or `http`.
+Thus for local testing, you'll need to access the dev server on a mock domain, either by modifying `/etc/hosts` (e.g. adding `127.0.0.1 my-local-site.com`) or through a tunneling service such as [ngrok](https://ngrok.com/).
+Either way, you must authorize the resulting URL on your Sign in with Apple application.
 
 ### Generate session secret
 
@@ -74,3 +95,11 @@ npm run dev
 ```
 
 You can now access http://localhost:3000.
+
+To run the dev server with HTTPS, e.g. to test Sign in with Apple, run
+
+```bash
+npm run dev -- --experimental-https
+```
+
+Assuming you've added `127.0.0.1 my-local-site.com` to `/etc/hosts`, you can then access https://my-local-site.com:3000.
