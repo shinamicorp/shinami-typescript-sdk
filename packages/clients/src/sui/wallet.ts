@@ -414,9 +414,7 @@ export class ShinamiWalletSigner {
    * - Gas Station
    * - Node Service
    *
-   * @param txBytes BCS serialized bytes of a `TransactionKind` as opposed to `TransactionData`.
-   *    If `string`, assumed to be Base64 encoded.
-   * @param gasBudget Gas budget. If omitted, it will be estimated from the transaction.
+   * @param tx Gasless transaction.
    * @param options Transaction execution response options.
    * @param requestType Transaction execution request type.
    * @returns Transaction execution response.
