@@ -93,7 +93,7 @@ export function getGoogleAuthUrl(
   prompt: string[] = [],
 ): URL {
   if (typeof callback === "string")
-    callback = new URL(callback, window.location.origin);
+    callback = new URL(callback, window.location.href);
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -135,7 +135,7 @@ export function getFacebookAuthUrl(
   extraScopes: string[] = [],
 ): URL {
   if (typeof callback === "string")
-    callback = new URL(callback, window.location.origin);
+    callback = new URL(callback, window.location.href);
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -178,7 +178,7 @@ export function getTwitchAuthUrl(
   extraClaims: string[] = [],
 ): URL {
   if (typeof callback === "string")
-    callback = new URL(callback, window.location.origin);
+    callback = new URL(callback, window.location.href);
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -223,7 +223,8 @@ export function getAppleAuthUrl(
   redirectTo = "/",
   scopes: string[] = [],
 ): URL {
-  if (callback instanceof URL) callback = callback.toString();
+  if (typeof callback === "string")
+    callback = new URL(callback, window.location.href);
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -232,14 +233,14 @@ export function getAppleAuthUrl(
     response_mode: "form_post",
     redirect_uri: new URL(
       `${AUTH_API_BASE}/apple`,
-      window.location.origin,
+      window.location.href,
     ).toString(),
     scope: scopes.join(" "),
     nonce: session.nonce,
     state: new URLSearchParams({
       redirectTo,
       nonce: session.nonce,
-      callback: callback,
+      callback: callback.toString(),
     }).toString(),
   }).toString();
 

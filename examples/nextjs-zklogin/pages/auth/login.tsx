@@ -35,7 +35,7 @@ export default withNewZkLoginSession(
                   getGoogleAuthUrl(
                     session,
                     GOOGLE_CLIENT_ID!,
-                    "/auth/google", // Update if moved to another path
+                    "google", // Update if moved to another path
                     redirectTo,
                   ),
                 );
@@ -53,7 +53,7 @@ export default withNewZkLoginSession(
                   getFacebookAuthUrl(
                     session,
                     FACEBOOK_CLIENT_ID!,
-                    "/auth/facebook", // Update if moved to another path
+                    "facebook", // Update if moved to another path
                     redirectTo,
                   ),
                 );
@@ -71,7 +71,7 @@ export default withNewZkLoginSession(
                   getTwitchAuthUrl(
                     session,
                     TWITCH_CLIENT_ID!,
-                    "/auth/twitch", // Update if moved to another path
+                    "twitch", // Update if moved to another path
                     redirectTo,
                   ),
                 );
@@ -89,7 +89,7 @@ export default withNewZkLoginSession(
                   getAppleAuthUrl(
                     session,
                     APPLE_CLIENT_ID!,
-                    "/auth/apple", // Update if moved to another path
+                    "apple", // Update if moved to another path
                     redirectTo,
                   ),
                 );
