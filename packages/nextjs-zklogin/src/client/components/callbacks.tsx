@@ -214,11 +214,8 @@ export function withAppleCallback<P>(
     keyClaimName,
     (params) => {
       const state = new URLSearchParams(
-        // This was double encoded when constructing Apple auth URL.
-        decodeURIComponent(
-          params.get("state") ??
-            throwExpression(new Error("Missing state from params")),
-        ),
+        params.get("state") ??
+          throwExpression(new Error("Missing state from params")),
       );
       return {
         nonce:
