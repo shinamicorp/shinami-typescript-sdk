@@ -61,10 +61,10 @@ Please refer to inline documentations for more detailed information.
   - React HOC for implementing the login page.
   - Resets local session state and prepares a new one.
     The new session state will be needed to get a new JWT from the OpenID providers.
-- `getGoogleAuthUrl`, `getFacebookAuthUrl`, `getTwitchAuthUrl`
+- `getGoogleAuthUrl`, `getFacebookAuthUrl`, `getTwitchAuthUrl`, `getAppleAuthUrl`
   - Helper function to compose the auth URLs for each OpenID provider.
   - You'll need to redirect your user to those URLs to complete a sign-in with them.
-- `withGoogleCallback`, `withFacebookCallback`, `withTwitchCallback`
+- `withGoogleCallback`, `withFacebookCallback`, `withTwitchCallback`, `withAppleCallback`
   - React HOC for implementing the callback pages for each OpenID provider.
   - After a successful sign-in, the page will automatically issue a login request to your backend (default at `/api/auth/login`), and redirect the user to the original page they were trying to access.
 - `useZkLoginSession`
@@ -83,7 +83,7 @@ Please refer to inline documentations for more detailed information.
 ### From `@shinami/nextjs-zklogin/server/pages`
 
 - `authHandler`
-  - Implements auth API routes, by default at `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`.
+  - Implements auth API routes, by default at `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/auth/apple`.
 - `withZkLoginUserRequired`
   - Higher-order handler for implementing auth-protected API routes.
   - Requests would result in HTTP 401 if the user doesn't have an active session.

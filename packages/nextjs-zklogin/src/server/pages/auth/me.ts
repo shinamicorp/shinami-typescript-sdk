@@ -16,9 +16,7 @@ const handler: NextApiHandler<ZkLoginUser> = (req, res) => {
 /**
  * Implements the me route.
  */
-export default function me(
-  epochProvider: CurrentEpochProvider,
-): NextApiHandler {
+export function me(epochProvider: CurrentEpochProvider): NextApiHandler {
   return withZkLoginUserRequired(
     epochProvider,
     methodDispatcher({

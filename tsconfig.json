@@ -3,8 +3,8 @@
   "include": ["./src"],
   "compilerOptions": {
     "target": "es2015",
-    "module": "es2015",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "./dist/esm",
     "declaration": true,
     "jsx": "react"

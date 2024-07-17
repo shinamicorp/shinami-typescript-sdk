@@ -5,6 +5,7 @@
 
 import { SuiClient } from "@mysten/sui/client";
 import React, { FunctionComponent, useEffect, useState } from "react";
+import { AUTH_API_BASE } from "../../env.js";
 import { useNewZkLoginSession } from "../hooks/login.js";
 import { ZkLoginLocalSession } from "../hooks/session.js";
 
@@ -70,8 +71,10 @@ export async function relativeToCurrentEpoch(
  *
  * @param session A new zkLogin local session. Can be prepared with `useNewZkLoginSession`.
  * @param clientId Your OAuth application client id.
- * @param callback The callback page URL. Must be whitelisted on your OAuth application settings.
- *    A login will be initiated with your app backend from the callback page.
+ * @param callback The callback page path or URL, which will receive auth tokens and should initiate
+ *    a login with your app backend. You can implement this page using `withGoogleCallback`.
+ *
+ *    You must include this URL in your OAuth 2.0 Client ID's Authorized redirect URIs.
  * @param redirectTo The redirect path after a successful login.
  * @param extraScopes The "openid" scope is included by default. You can optionally request extra
  *    scopes, e.g. "email", which will be included in the JWT claims that can be consumed by your
@@ -84,11 +87,14 @@ export async function relativeToCurrentEpoch(
 export function getGoogleAuthUrl(
   session: ZkLoginLocalSession,
   clientId: string,
-  callback: URL,
+  callback: string | URL,
   redirectTo = "/",
   extraScopes: string[] = [],
   prompt: string[] = [],
 ): URL {
+  if (typeof callback === "string")
+    callback = new URL(callback, window.location.href);
+
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: callback.toString(),
@@ -109,8 +115,10 @@ export function getGoogleAuthUrl(
  *
  * @param session A new zkLogin local session. Can be prepared with `useNewZkLoginSession`.
  * @param clientId Your OAuth application client id.
- * @param callback The callback page URL. Must be whitelisted on your OAuth application settings.
- *    A login will be initiated with your app backend from the callback page.
+ * @param callback The callback page path or URL, which will receive auth tokens and should initiate
+ *    a login with your app backend. You can implement this page using `withFacebookCallback`.
+ *
+ *    You must include this URL in your Facebook Login application's Valid OAuth Redirect URIs.
  * @param redirectTo The redirect path after a successful login.
  * @param extraScopes The "openid" scope is included by default. You can optionally request extra
  *    scopes, e.g. "email", which will be included in the JWT claims that can be consumed by your
@@ -122,10 +130,13 @@ export function getGoogleAuthUrl(
 export function getFacebookAuthUrl(
   session: ZkLoginLocalSession,
   clientId: string,
-  callback: URL,
+  callback: string | URL,
   redirectTo = "/",
   extraScopes: string[] = [],
 ): URL {
+  if (typeof callback === "string")
+    callback = new URL(callback, window.location.href);
+
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: callback.toString(),
@@ -145,8 +156,10 @@ export function getFacebookAuthUrl(
  *
  * @param session A new zkLogin local session. Can be prepared with `useNewZkLoginSession`.
  * @param clientId Your OAuth application client id.
- * @param callback The callback page URL. Must be whitelisted on your OAuth application settings.
- *    A login will be initiated with your app backend from the callback page.
+ * @param callback The callback page path or URL, which will receive auth tokens and should initiate
+ *    a login with your app backend. You can implement this page using `withTwitchCallback`.
+ *
+ *    You must include this URL in your Twitch application's OAuth Redirect URLs.
  * @param redirectTo The redirect path after a successful login.
  * @param extraScopes The "openid" scope is included by default. You can optionally request extra
  *    scopes, e.g. "user:read:email".
@@ -159,11 +172,14 @@ export function getFacebookAuthUrl(
 export function getTwitchAuthUrl(
   session: ZkLoginLocalSession,
   clientId: string,
-  callback: URL,
+  callback: string | URL,
   redirectTo = "/",
   extraScopes: string[] = [],
   extraClaims: string[] = [],
 ): URL {
+  if (typeof callback === "string")
+    callback = new URL(callback, window.location.href);
+
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: callback.toString(),
@@ -177,4 +193,56 @@ export function getTwitchAuthUrl(
   }).toString();
 
   return new URL(`https://id.twitch.tv/oauth2/authorize?${params}`);
+}
+
+/**
+ * Helper function to compose the auth URL for Apple.
+ *
+ * You'll need to redirect your user to this URL to complete the sign-in process.
+ *
+ * @param session A new zkLogin local session. Can be prepared with `useNewZkLoginSession`.
+ * @param clientId Your OAuth application client id. For Apple, it's Services ID.
+ * @param callback The callback page path or URL, which will receive auth tokens and should initiate
+ *    a login with your app backend. You can implement this page using `withAppleCallback`.
+ *
+ *    Note that for Sign in with Apple, the actual redirect URI provided to Apple is at path
+ *    `${AUTH_API_BASE}/apple` (defaults to "/api/auth/apple"), which does a second redirect to this
+ *    callback page. You must include the API route URL instead of this callback page URL in your
+ *    Services ID's authorized Return URLs.
+ * @param redirectTo The redirect path after a successful login.
+ * @param scopes You can optionally request scopes, e.g. "email" and "name", which will be included
+ *    in JWT claims and extra context in the login request to your app backend.
+ * @returns The Apple auth URL.
+ *
+ * @see https://developer.apple.com/documentation/sign_in_with_apple/request_an_authorization_to_the_sign_in_with_apple_server
+ */
+export function getAppleAuthUrl(
+  session: ZkLoginLocalSession,
+  clientId: string,
+  callback: string | URL,
+  redirectTo = "/",
+  scopes: string[] = [],
+): URL {
+  if (typeof callback === "string")
+    callback = new URL(callback, window.location.href);
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: "code id_token",
+    // In order to request scopes, Apple requires this to be a POST callback.
+    response_mode: "form_post",
+    redirect_uri: new URL(
+      `${AUTH_API_BASE}/apple`,
+      window.location.href,
+    ).toString(),
+    scope: scopes.join(" "),
+    nonce: session.nonce,
+    state: new URLSearchParams({
+      redirectTo,
+      nonce: session.nonce,
+      callback: callback.toString(),
+    }).toString(),
+  }).toString();
+
+  return new URL(`https://appleid.apple.com/auth/authorize?${params}`);
 }

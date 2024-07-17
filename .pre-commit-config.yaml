@@ -13,6 +13,7 @@ repos:
           NEXT_PUBLIC_GOOGLE_CLIENT_ID=fake_id
           NEXT_PUBLIC_FACEBOOK_CLIENT_ID=fake_id
           NEXT_PUBLIC_TWITCH_CLIENT_ID=fake_id
+          NEXT_PUBLIC_APPLE_CLIENT_ID=fake_id
           npm run build
         pass_filenames: false
         stages: [pre-commit]

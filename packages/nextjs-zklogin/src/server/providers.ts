@@ -105,6 +105,7 @@ export type UserAuthorizer<T = unknown> = (
   provider: OidProvider,
   user: ZkLoginUserId,
   jwtClaims: JwtClaims,
+  extras?: unknown,
 ) => Promise<T | undefined> | T | undefined;
 
 interface OidProviderConfig {
@@ -124,5 +125,8 @@ export const oidProviders: { [K in OidProvider]: OidProviderConfig } = {
   },
   twitch: {
     getKey: createRemoteJWKSet(new URL("https://id.twitch.tv/oauth2/keys")),
+  },
+  apple: {
+    getKey: createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys")),
   },
 };

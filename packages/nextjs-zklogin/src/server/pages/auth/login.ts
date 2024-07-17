@@ -106,6 +106,7 @@ async function getZkLoginUser<T>(
     body.oidProvider,
     id,
     jwtClaims as JwtClaims,
+    body.extras,
   );
   if (authContext === undefined)
     throw new ZkLoginAuthError("User not authorized");
