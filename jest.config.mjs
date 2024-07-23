@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createDefaultEsmPreset } from "ts-jest";
+
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
-  preset: "ts-jest",
+export default {
+  ...createDefaultEsmPreset(),
   moduleNameMapper: {
     "^(\\.{1,2}/.+)\\.js$": "$1",
   },
