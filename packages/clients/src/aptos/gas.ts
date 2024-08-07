@@ -12,7 +12,15 @@ import {
   PendingTransactionResponse,
   SimpleTransaction,
 } from "@aptos-labs/ts-sdk";
-import { Infer, array, integer, object, string, unknown } from "superstruct";
+import {
+  Infer,
+  array,
+  integer,
+  nullable,
+  object,
+  string,
+  unknown,
+} from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 
 const GAS_STATION_RPC_URL = "https://api.shinami.com/aptos/gas/v1";
@@ -40,6 +48,7 @@ const Fund = object({
   name: string(),
   balance: integer(),
   inFlight: integer(),
+  depositAddress: nullable(string()),
 });
 type Fund = Infer<typeof Fund>;
 
