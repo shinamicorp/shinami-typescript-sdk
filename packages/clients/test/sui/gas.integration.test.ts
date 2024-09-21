@@ -12,6 +12,7 @@ import {
   createGasClient,
   createSuiClient,
 } from "./integration.env.js";
+import { Transaction } from "@mysten/sui/transactions";
 
 const sui = createSuiClient();
 const gas = createGasClient();
@@ -105,5 +106,27 @@ describe("GasStationClient", () => {
 
   it("successfully query fund information", async () => {
     expect(await gas.getFund()).toBeDefined();
+  });
+});
+
+describe("buildGaslessTransaction", () => {
+  it("builds the same gasless transaction with a builder and with a programmed transaction", async () => {
+    const tx1 = await buildGaslessTransaction((txb) => {
+      txb.moveCall({
+        target: `${EXAMPLE_PACKAGE_ID}::math::add`,
+        arguments: [txb.pure.u64(1), txb.pure.u64(2)],
+      });
+      txb.setSender(keypair.toSuiAddress());
+    });
+
+    const txb = new Transaction();
+    txb.moveCall({
+      target: `${EXAMPLE_PACKAGE_ID}::math::add`,
+      arguments: [txb.pure.u64(1), txb.pure.u64(2)],
+    });
+    txb.setSender(keypair.toSuiAddress());
+    const tx2 = await buildGaslessTransaction(txb);
+
+    expect(tx2).toEqual(tx1);
   });
 });
