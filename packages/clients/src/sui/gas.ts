@@ -176,11 +176,11 @@ export async function buildGaslessTransaction(
   },
 ): Promise<GaslessTransaction> {
   let tx: Transaction;
-  if (txOrBuild instanceof Transaction) {
-    tx = txOrBuild;
-  } else {
+  if (typeof txOrBuild === "function") {
     tx = new Transaction();
     await txOrBuild(tx);
+  } else {
+    tx = txOrBuild;
   }
   const txData = tx.getData();
 
