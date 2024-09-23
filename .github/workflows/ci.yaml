@@ -27,6 +27,7 @@ jobs:
           SUI_NODE_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
           SUI_GAS_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
           SUI_WALLET_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          APTOS_NODE_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_WALLET_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
 
