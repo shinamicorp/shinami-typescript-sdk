@@ -8,7 +8,7 @@ import { createAptos } from "./integration.env";
 
 const aptos = createAptos();
 
-test("Shinami Aptos RPC can query Node Service", async () => {
+test("Shinami Aptos client can query Node Service", async () => {
   const state = await aptos.getLedgerInfo();
   expect(state).toMatchObject({
     block_height: expect.stringMatching(/[0-9]+/),

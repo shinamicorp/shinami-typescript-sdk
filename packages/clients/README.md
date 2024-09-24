@@ -13,6 +13,7 @@ For [Sui](https://sui.io/):
 
 For [Aptos](https://aptos.dev/):
 
+- [Node service](#node-service-aptos)
 - [Gas station](#gas-station-aptos)
 - [Invisible wallet](#invisible-wallet-aptos)
 
@@ -263,11 +264,10 @@ To create an Aptos client:
 ```ts
 import { createAptosClient } from "@shinami/clients/aptos";
 
-// Obtain APTOS_NODE_ACCESS_KEY from your Shinami web portal.
-const aptos = createAptosClient(APTOS_NODE_ACCESS_KEY);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
 const state = await aptos.getLedgerInfo();
-console.log(state);
 ```
 
 ### Gas station (Aptos)
@@ -281,8 +281,8 @@ To use gas station with a local signer:
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import { createAptosClient, GasStationClient } from "@shinami/clients/aptos";
 
-// Obtain APTOS_NODE_ACCESS_KEY from your Shinami web portal.
-const aptos = createAptosClient(APTOS_NODE_ACCESS_KEY);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
 // Obtain GAS_ACCESS_KEY from your Shinami web portal.
 // It MUST be associated with the same Aptos network as above.
@@ -346,8 +346,8 @@ import {
   WalletClient,
 } from "@shinami/clients/aptos";
 
-// Obtain APTOS_NODE_ACCESS_KEY from your Shinami web portal.
-const aptos = createAptosClient(APTOS_NODE_ACCESS_KEY);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal.
 const key = new KeyClient(WALLET_ACCESS_KEY);
