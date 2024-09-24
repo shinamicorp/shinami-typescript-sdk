@@ -21,3 +21,20 @@ test("Shinami Aptos client can query Node Service", async () => {
     oldest_ledger_version: expect.stringMatching(/[0-9]+/),
   });
 });
+
+test("Shinami Aptos client can query GraphQL", async () => {
+  const ledgerInfo = await aptos.queryIndexer({
+    query: {
+      query: `
+            query IntegrationTestQuery {
+              ledger_infos {
+                chain_id
+              }
+            }
+          `,
+    },
+  });
+  expect(ledgerInfo).toMatchObject({
+    chain_id: /[0-2]/,
+  });
+});
