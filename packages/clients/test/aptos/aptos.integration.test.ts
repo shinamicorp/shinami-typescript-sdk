@@ -35,6 +35,10 @@ test("Shinami Aptos client can query GraphQL", async () => {
     },
   });
   expect(ledgerInfo).toMatchObject({
-    chain_id: /[0-2]/,
+    ledger_infos: [
+      {
+        chain_id: /[0-2]+/,
+      },
+    ],
   });
 });
