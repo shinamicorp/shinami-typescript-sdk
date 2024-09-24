@@ -3,42 +3,57 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { expect, test } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 import { createAptos } from "./integration.env";
+import { createAptosClient } from "../../src/aptos";
+import { SingleKeyAccount, SigningSchemeInput } from "@aptos-labs/ts-sdk";
 
 const aptos = createAptos();
 
-test("Shinami Aptos client can query Node Service", async () => {
-  const state = await aptos.getLedgerInfo();
-  expect(state).toMatchObject({
-    block_height: expect.stringMatching(/[0-9]+/),
-    chain_id: /[0-9]+/,
-    epoch: expect.stringMatching(/[0-9]+/),
-    git_hash: expect.stringMatching(/[0-9a-f]{5,40}/),
-    ledger_timestamp: expect.stringMatching(/[0-9]+/),
-    node_role: expect.stringMatching("full_node"),
-    oldest_block_height: expect.stringMatching(/[0-9]+/),
-    oldest_ledger_version: expect.stringMatching(/[0-9]+/),
+describe("Shinami Aptos client", () => {
+  it("should query via REST API", async () => {
+    const state = await aptos.getLedgerInfo();
+    expect(state).toMatchObject({
+      block_height: expect.stringMatching(/[0-9]+/),
+      chain_id: /[0-9]+/,
+      epoch: expect.stringMatching(/[0-9]+/),
+      git_hash: expect.stringMatching(/[0-9a-f]{5,40}/),
+      ledger_timestamp: expect.stringMatching(/[0-9]+/),
+      node_role: expect.stringMatching("full_node"),
+      oldest_block_height: expect.stringMatching(/[0-9]+/),
+      oldest_ledger_version: expect.stringMatching(/[0-9]+/),
+    });
   });
-});
 
-test("Shinami Aptos client can query GraphQL", async () => {
-  const ledgerInfo = await aptos.queryIndexer({
-    query: {
-      query: `
-            query IntegrationTestQuery {
-              ledger_infos {
-                chain_id
-              }
-            }
-          `,
-    },
-  });
-  expect(ledgerInfo).toMatchObject({
-    ledger_infos: [
-      {
-        chain_id: /[0-2]+/,
+  it("should query GraphQL successfully", async () => {
+    const ledgerInfo = await aptos.queryIndexer({
+      query: {
+        query: `
+                query IntegrationTestQuery {
+                  ledger_infos {
+                    chain_id
+                  }
+                }
+              `,
       },
-    ],
+    });
+    expect(ledgerInfo).toMatchObject({
+      ledger_infos: [
+        {
+          chain_id: /[0-2]+/,
+        },
+      ],
+    });
+  });
+
+  it("should query Aptos's Faucet using the native client", async () => {
+    const account: SingleKeyAccount = SingleKeyAccount.generate({
+      scheme: SigningSchemeInput.Ed25519,
+    });
+    const fundResp = await aptos.fundAccount({
+      accountAddress: account.accountAddress,
+      amount: 100000000,
+    });
+    console.log(fundResp);
   });
 });

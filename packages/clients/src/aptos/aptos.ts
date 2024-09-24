@@ -19,6 +19,10 @@ export function createAptosClient(
   url: string = NODE_REST_URL,
   indexerUrl: string = NODE_INDEXER_URL,
 ): Aptos {
+  const faucetUrl =
+    accessKey.indexOf("testnet") == -1
+      ? undefined
+      : "https://faucet.testnet.aptoslabs.com";
   return new Aptos(
     new AptosConfig({
       fullnode: url,
@@ -26,6 +30,7 @@ export function createAptosClient(
       clientConfig: {
         API_KEY: accessKey,
       },
+      faucet: faucetUrl,
     }),
   );
 }
