@@ -2,10 +2,32 @@
  * Copyright 2023-2024 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 
 const NODE_REST_URL = "https://api.shinami.com/aptos/node/v1";
 const NODE_INDEXER_URL = "https://api.shinami.com/aptos/graphql/v1";
+
+/**
+ * A private function which extracts the network enum from a Shinami access key
+ * @param accessKey
+ * @returns
+ */
+function extractNetworkFromKey(accessKey: string): Network | undefined {
+  const match = accessKey.match(/_(devnet|testnet|mainnet)_/);
+  switch (match?.[1]) {
+    case "devnet":
+      return Network.DEVNET;
+    case "testnet":
+      return Network.TESTNET;
+    case "mainnet":
+      return Network.MAINNET;
+    default:
+      console.warn(
+        "Access key network qualifier not found, setting as undefined",
+      );
+      return undefined;
+  }
+}
 
 /**
  * Creates an Aptos client pointing to Shinami Node Service
@@ -19,10 +41,7 @@ export function createAptosClient(
   url: string = NODE_REST_URL,
   indexerUrl: string = NODE_INDEXER_URL,
 ): Aptos {
-  const faucetUrl =
-    accessKey.indexOf("testnet") == -1
-      ? undefined
-      : "https://faucet.testnet.aptoslabs.com";
+  const network = extractNetworkFromKey(accessKey);
   return new Aptos(
     new AptosConfig({
       fullnode: url,
@@ -30,7 +49,7 @@ export function createAptosClient(
       clientConfig: {
         API_KEY: accessKey,
       },
-      faucet: faucetUrl,
+      network: network,
     }),
   );
 }
