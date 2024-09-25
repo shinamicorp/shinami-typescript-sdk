@@ -5,7 +5,6 @@
 
 import { describe, expect, it } from "@jest/globals";
 import { createAptos } from "./integration.env";
-import { createAptosClient } from "../../src/aptos";
 import { SingleKeyAccount, SigningSchemeInput } from "@aptos-labs/ts-sdk";
 
 const aptos = createAptos();
