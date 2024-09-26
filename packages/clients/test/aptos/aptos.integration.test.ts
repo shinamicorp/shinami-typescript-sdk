@@ -52,6 +52,9 @@ describe("Shinami Aptos client", () => {
     const fundResp = await aptos.fundAccount({
       accountAddress: account.accountAddress,
       amount: 100000000,
+      options: {
+        waitForIndexer: false,
+      },
     });
     console.log(fundResp);
   });
