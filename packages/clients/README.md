@@ -13,6 +13,7 @@ For [Sui](https://sui.io/):
 
 For [Aptos](https://aptos.dev/):
 
+- [Node service](#node-service-aptos)
 - [Gas station](#gas-station-aptos)
 - [Invisible wallet](#invisible-wallet-aptos)
 
@@ -256,6 +257,19 @@ const { zkProof } = await zkp.createZkLoginProof(
 // using zkProof.
 ```
 
+### Node service (Aptos)
+
+To create an Aptos client:
+
+```ts
+import { createAptosClient } from "@shinami/clients/aptos";
+
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
+
+const state = await aptos.getLedgerInfo();
+```
+
 ### Gas station (Aptos)
 
 **Note that gas station should be integrated from your service backend.**
@@ -265,10 +279,10 @@ To use gas station with a local signer:
 
 ```ts
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import { GasStationClient } from "@shinami/clients/aptos";
+import { createAptosClient, GasStationClient } from "@shinami/clients/aptos";
 
-// Create your Aptos client targeting the desired network.
-const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
 // Obtain GAS_ACCESS_KEY from your Shinami web portal.
 // It MUST be associated with the same Aptos network as above.
@@ -326,13 +340,14 @@ import {
   AccountAuthenticatorEd25519,
 } from "@aptos-labs/ts-sdk";
 import {
+  createAptosClient,
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
 } from "@shinami/clients/aptos";
 
-// Create your Aptos client targeting the desired network.
-const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal.
 const key = new KeyClient(WALLET_ACCESS_KEY);
@@ -380,18 +395,18 @@ To use the invisible wallet to execute a gasless transaction, which seamlessly i
 ```ts
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import {
+  createAptosClient,
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
 } from "@shinami/clients/aptos";
 
-// Create your Aptos client targeting the desired network.
-const aptos = new Aptos(new AptosConfig({ network: Network.TESTNET }));
-
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these Aptos services:
+// - Node service
 // - Gas station (The fund your key is tied to must have funds in it)
 // - Wallet service
+const aptos = createAptosClient(SUPER_ACCESS_KEY);
 const key = new KeyClient(SUPER_ACCESS_KEY);
 const wal = new WalletClient(SUPER_ACCESS_KEY);
 
@@ -468,6 +483,7 @@ Once you have the super keys for both chains,
 export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
+export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 
@@ -485,6 +501,7 @@ Similar to [integration test](#integration-test):
 export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
+export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 
