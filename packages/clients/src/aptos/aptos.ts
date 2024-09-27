@@ -19,6 +19,8 @@ function inferNetworkFromKey(accessKey: string): Network | undefined {
     return Network.TESTNET;
   } else if (accessKey.startsWith("aptos_mainnet")) {
     return Network.MAINNET;
+  } else if (accessKey.startsWith("aptos_local")) {
+    return Network.LOCAL;
   } else {
     console.warn(
       "Access key network qualifier not found, setting as undefined",
