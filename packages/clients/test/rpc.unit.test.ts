@@ -12,6 +12,9 @@ import {
   trimTrailingParams,
 } from "../src/rpc.js";
 
+import { RequestError } from "got";
+import { createLocalMovementClient } from "../src/movement/index.js";
+
 describe("ShinamiRpcClient", () => {
   const mockRequest = jest
     .spyOn(Client.prototype, "request")
@@ -77,5 +80,40 @@ describe("errorDetails", () => {
 
   it("returns undefined when missing error details", () => {
     expect(errorDetails(new JSONRPCError("fake error", 100))).toBe(undefined);
+  });
+});
+
+describe("movement integration tests with local", () => {
+  const movementClient = createLocalMovementClient();
+  const addr =
+    "0x20ec42af4cd365ef4be73b3829eba72b8461e57c5b0341e2fa4b79f0ee88e0a1";
+
+  it("should query movement ledger info", async () => {
+    const state = await movementClient.getLedgerInfo();
+    console.log(state);
+  });
+
+  it("should query account info", async () => {
+    console.log(await movementClient.getAccountInfo({ accountAddress: addr }));
+  });
+
+  it("should fund account via faucet", async () => {
+    movementClient.fundAccount({
+      accountAddress: addr,
+      amount: 10000,
+      options: {
+        waitForIndexer: false,
+      },
+    });
+  });
+
+  it("should successfully query account amounts", async () => {
+    // This fails because it requires the indexer
+    console.log(
+      await movementClient.getAccountAPTAmount({
+        accountAddress: addr,
+        minimumLedgerVersion: 2,
+      }),
+    );
   });
 });
