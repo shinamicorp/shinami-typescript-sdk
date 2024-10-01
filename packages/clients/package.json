@@ -33,7 +33,7 @@
     "build:esm": "tsc --build",
     "lint": "eslint .",
     "clean": "rm -fr ./dist ./coverage",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest unit",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest unit --verbose",
     "integration": "NODE_OPTIONS='--experimental-vm-modules' jest integration",
     "coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage"
   },
