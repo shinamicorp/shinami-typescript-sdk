@@ -5,6 +5,9 @@
 name: Dependency Compatibility
 
 on:
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: 30 17 * * * # Daily at 17:30 UTC
   workflow_dispatch: {}
