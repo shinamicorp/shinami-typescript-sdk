@@ -134,7 +134,9 @@ describe("ShinamiWallet", () => {
       beneficiary,
     );
     console.log("txDigest", txDigest);
-    expect(
+    await sui.waitForTransaction({ digest: txDigest });
+
+    await expect(
       signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
     ).resolves.toBe(beneficiary);
   }, 30_000);
@@ -147,7 +149,9 @@ describe("ShinamiWallet", () => {
       beneficiary,
     );
     console.log("txDigest", txDigest);
-    expect(
+    await sui.waitForTransaction({ digest: txDigest });
+
+    await expect(
       signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
     ).resolves.toBe(beneficiary);
   }, 30_000);
@@ -157,7 +161,9 @@ describe("ShinamiWallet", () => {
       EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
     );
     console.log("txDigest", txDigest);
-    expect(
+    await sui.waitForTransaction({ digest: txDigest });
+
+    await expect(
       signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
     ).resolves.toBe(null);
   }, 30_000);

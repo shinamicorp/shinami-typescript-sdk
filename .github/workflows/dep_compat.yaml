@@ -5,6 +5,9 @@
 name: Dependency Compatibility
 
 on:
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: 30 17 * * * # Daily at 17:30 UTC
   workflow_dispatch: {}
@@ -27,5 +30,6 @@ jobs:
           SUI_NODE_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
           SUI_GAS_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
           SUI_WALLET_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
+          APTOS_NODE_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_WALLET_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
