@@ -6,15 +6,9 @@ repos:
     hooks:
       - id: build
         name: Build
-        language: system
+        language: script
         entry: >-
-          env
-          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY=fake_key
-          NEXT_PUBLIC_GOOGLE_CLIENT_ID=fake_id
-          NEXT_PUBLIC_FACEBOOK_CLIENT_ID=fake_id
-          NEXT_PUBLIC_TWITCH_CLIENT_ID=fake_id
-          NEXT_PUBLIC_APPLE_CLIENT_ID=fake_id
-          npm run build
+          ci_build.sh
         pass_filenames: false
         stages: [pre-commit]
       - id: lint
