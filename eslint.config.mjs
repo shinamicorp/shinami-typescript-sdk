@@ -11,13 +11,7 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   {
-    ignores: [
-      "dist/",
-      "test/",
-      "eslint.config.*",
-      "jest.config.*",
-      "**/coverage/**",
-    ],
+    ignores: ["dist/", "test/", "eslint.config.*", "jest.config.*"],
   },
   {
     languageOptions: {
