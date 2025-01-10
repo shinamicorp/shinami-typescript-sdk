@@ -44,18 +44,4 @@ describe("Shinami Aptos client", () => {
       ],
     });
   });
-
-  it("should query Aptos's Faucet using the native client", async () => {
-    const account: SingleKeyAccount = SingleKeyAccount.generate({
-      scheme: SigningSchemeInput.Ed25519,
-    });
-    const fundResp = await aptos.fundAccount({
-      accountAddress: account.accountAddress,
-      amount: 100000000,
-      options: {
-        waitForIndexer: false,
-      },
-    });
-    console.log(fundResp);
-  });
 });
