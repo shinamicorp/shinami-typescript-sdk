@@ -10,7 +10,7 @@ import { Infer, enums, number, object, optional, string } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { throwExpression } from "../utils.js";
 
-const GAS_STATION_RPC_URL = "https://api.shinami.com/gas/v1";
+const GAS_STATION_RPC_URL = "https://api.shinami.com/sui/gas/v1";
 
 /**
  * A gasless transaction to be sponsored.

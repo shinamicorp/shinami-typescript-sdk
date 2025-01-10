@@ -7,7 +7,7 @@ import { Infer, integer, object, string } from "superstruct";
 import { ShinamiRpcClient } from "../rpc.js";
 import { base64ToBigInt } from "./utils.js";
 
-const ZKWALLET_RPC_URL = "https://api.shinami.com/zkwallet/v1";
+const ZKWALLET_RPC_URL = "https://api.shinami.com/sui/zkwallet/v1";
 
 /**
  * Information that identifies a zkLogin user.
