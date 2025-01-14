@@ -5,8 +5,8 @@
 
 import { SuiClient, SuiHTTPTransport } from "@mysten/sui/client";
 
-const NODE_RPC_URL = "https://api.shinami.com/node/v1";
-const NODE_WS_URL = "wss://api.shinami.com/node/v1";
+const NODE_RPC_URL = "https://api.shinami.com/sui/node/v1";
+const NODE_WS_URL = "wss://api.shinami.com/sui/node/v1";
 
 /**
  * Creates a Sui RPC client using Shinami Node service.

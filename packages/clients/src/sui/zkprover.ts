@@ -8,7 +8,7 @@ import { Infer, object, type } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { bigIntToBase64 } from "./utils.js";
 
-const ZKPROVER_RPC_URL = "https://api.shinami.com/zkprover/v1";
+const ZKPROVER_RPC_URL = "https://api.shinami.com/sui/zkprover/v1";
 
 /**
  * Result schema for createZkLoginProof.
