@@ -30,8 +30,11 @@ jobs:
           APTOS_NODE_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_WALLET_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
-
-      # TODO - coverage report
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: ivanpeng/shinami-typescript-sdk
 
   check_copyright_header:
     runs-on: ubuntu-latest
