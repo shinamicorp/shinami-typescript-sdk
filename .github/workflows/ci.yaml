@@ -33,12 +33,12 @@ jobs:
         run: |
           npm run coverage
       - name: Upload reports to Codecov
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: |
-          curl -Os https://cli.codecov.io/latest/linux/codecov
-          sudo chmod +x codecov
-          npm run upload
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: ivanpeng/shinami-typescript-sdk
+          files: ./coverage/**/lcov.info
+          flags: clients/unit,clients/integration
 
   check_copyright_header:
     runs-on: ubuntu-latest
