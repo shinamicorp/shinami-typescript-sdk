@@ -45,9 +45,10 @@ jobs:
             package="${dir/\//}"
             if [ -d "$package/coverage" ]
               then
-                file="$PWD/$package/coverage/lcov.info"
+                unit_file="$PWD/$package/coverage/unit/lcov.info"
+                integration_file="$PWD/$package/coverage/integration/lcov.info"
                 flag="${package/-/_}"
-                $codecov_file -f $file -F $flag -v -t $CODECOV_TOKEN
+                $codecov_file -f $unit_file -F $flag -v -t $CODECOV_TOKEN
               fi
           done
 
