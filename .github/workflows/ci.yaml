@@ -33,17 +33,22 @@ jobs:
         run: |
           npm run coverage
       - name: Upload reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: |
-            packages/clients/coverage/integration/lcov.info
-            packages/clients/coverage/unit/lcov.info
-            packages/legacy/coverage/integration/lcov.info
-            packages/legacy/coverage/unit/lcov.info
-            packages/nextjs-zklogin/integration/lcov.info
-            packages/nextjs-zklogin/unit/lcov.info
-          flags: clients,legacy,nextjs-zklogin
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          codecov_file="${GITHUB_WORKSPACE}/scripts/codecov.sh"
+          curl -s https://codecov.io/bash > $codecov_file
+          chmod +x $codecov_file
+          cd "${GITHUB_WORKSPACE}/packages";
+          for dir in */; do
+            package="${dir/\//}"
+            if [ -d "$package/coverage" ]
+              then
+                file="$PWD/$package/coverage/lcov.info"
+                flag="${package/-/_}"
+                $codecov_file -f $file -F $flag -v -t $CODECOV_TOKEN
+              fi
+          done
 
   check_copyright_header:
     runs-on: ubuntu-latest
