@@ -1,0 +1,17 @@
+coverage:
+  status:
+    project: true
+
+
+flags:
+  clients:
+    paths: 
+      - packages/clients
+  legacy:
+    paths:
+      - packages/legacy
+  nextjs-zklogin:
+    paths:
+      - packages/nextjs-zklogin
+  
+  

@@ -36,9 +36,14 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: ivanpeng/shinami-typescript-sdk
-          files: ./coverage/**/lcov.info
-          flags: clients/unit,clients/integration
+          files: |
+            packages/clients/coverage/integration/lcov.info
+            packages/clients/coverage/unit/lcov.info
+            packages/legacy/coverage/integration/lcov.info
+            packages/legacy/coverage/unit/lcov.info
+            packages/nextjs-zklogin/integration/lcov.info
+            packages/nextjs-zklogin/unit/lcov.info
+          flags: clients,legacy,nextjs-zklogin
 
   check_copyright_header:
     runs-on: ubuntu-latest
