@@ -35,7 +35,12 @@
     "clean": "rm -fr ./dist ./coverage",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest unit",
     "integration": "NODE_OPTIONS='--experimental-vm-modules' jest integration",
-    "coverage": "NODE_OPTIONS='--experimental-vm-modules' jest unit --coverage"
+    "coverage": "npm run coverage:unit && npm run coverage:integration",
+    "coverage:unit": "NODE_OPTIONS='--experimental-vm-modules' jest unit --coverage",
+    "coverage:integration": "NODE_OPTIONS='--experimental-vm-modules' jest integration --coverage",
+    "upload": "npm run upload:unit && npm run upload:integration",
+    "upload:unit": "./codecov -c -F clients/unit",
+    "upload:integration": "./codecov -c -F clients/integration"
   },
   "keywords": [
     "Shinami",
