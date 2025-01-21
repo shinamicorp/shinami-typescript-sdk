@@ -41,7 +41,7 @@ jobs:
           curl -s https://codecov.io/bash > $codecov_file
           chmod +x $codecov_file
           cd "${GITHUB_WORKSPACE}/packages";
-          for dir in */; do
+          for dir in clients/; do
             package="${dir/\//}"
             if [ -d "$package/coverage" ]
               then

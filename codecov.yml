@@ -4,14 +4,10 @@
 coverage:
   status:
     project: true
-
-flags:
-  clients:
-    paths:
-      - packages/clients
-  legacy:
-    paths:
-      - packages/legacy
-  nextjs-zklogin:
-    paths:
-      - packages/nextjs-zklogin
+# comment:
+#   layout: "diff, flags, files"
+#   behavior: default
+#   require_changes: false
+#   require_base: yes
+#   require_head: yes
+#   branches: null
