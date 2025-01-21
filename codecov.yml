@@ -2,10 +2,9 @@ coverage:
   status:
     project: true
 
-
 flags:
   clients:
-    paths: 
+    paths:
       - packages/clients
   legacy:
     paths:
@@ -13,5 +12,3 @@ flags:
   nextjs-zklogin:
     paths:
       - packages/nextjs-zklogin
-  
-  
