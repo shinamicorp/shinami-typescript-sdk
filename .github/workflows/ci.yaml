@@ -37,6 +37,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           codecov_file="${GITHUB_WORKSPACE}/scripts/codecov.sh"
+          mkdir -p "${GITHUB_WORKSPACE}/scripts"
           curl -s https://codecov.io/bash > $codecov_file
           chmod +x $codecov_file
           cd "${GITHUB_WORKSPACE}/packages";
