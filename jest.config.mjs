@@ -14,5 +14,5 @@ export default {
     "^(\\.{1,2}/.+)\\.js$": "$1",
   },
   collectCoverageFrom: ["src/**/*.{js,ts}"],
-  coverageDirectory: `coverage/${testType}`
+  coverageDirectory: `coverage/${testType}`,
 };
