@@ -33,24 +33,10 @@ jobs:
         run: |
           npm run coverage
       - name: Upload reports to Codecov
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: |
-          codecov_file="${GITHUB_WORKSPACE}/scripts/codecov.sh"
-          mkdir -p "${GITHUB_WORKSPACE}/scripts"
-          curl -s https://codecov.io/bash > $codecov_file
-          chmod +x $codecov_file
-          cd "${GITHUB_WORKSPACE}/packages";
-          for dir in clients/; do
-            package="${dir/\//}"
-            if [ -d "$package/coverage" ]
-              then
-                unit_file="$PWD/$package/coverage/unit/lcov.info"
-                integration_file="$PWD/$package/coverage/integration/lcov.info"
-                flag="${package/-/_}"
-                $codecov_file -f $unit_file -F $flag -v -t $CODECOV_TOKEN
-              fi
-          done
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./packages/clients/coverage/integration/lcov.info,./packages/clients/coverage/unit/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   check_copyright_header:
     runs-on: ubuntu-latest
