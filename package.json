@@ -15,7 +15,6 @@
     "test": "npm run test --workspaces --if-present",
     "integration": "npm run integration --workspaces --if-present",
     "coverage": "npm run coverage --workspaces --if-present",
-    "upload": "npm run upload --workspaces --if-present",
     "format": "prettier --write ."
   },
   "devDependencies": {
