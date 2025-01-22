@@ -3,11 +3,13 @@
 
 coverage:
   status:
-    project: true
-# comment:
-#   layout: "diff, flags, files"
-#   behavior: default
-#   require_changes: false
-#   require_base: yes
-#   require_head: yes
-#   branches: null
+    project:
+      default:
+        target: auto
+        threshold: 5
+        base: auto
+        only_pulls: true
+comment:
+  layout: "diff, files"
+  behavior: default
+  require_changes: false
