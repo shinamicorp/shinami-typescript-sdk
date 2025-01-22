@@ -5,8 +5,6 @@
 
 import { createDefaultEsmPreset } from "ts-jest";
 
-const testType = process.argv[2] || "unit";
-
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
   ...createDefaultEsmPreset(),
@@ -14,5 +12,4 @@ export default {
     "^(\\.{1,2}/.+)\\.js$": "$1",
   },
   collectCoverageFrom: ["src/**/*.{js,ts}"],
-  coverageDirectory: `coverage/${testType}`,
 };
