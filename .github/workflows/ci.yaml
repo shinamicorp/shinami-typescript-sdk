@@ -22,7 +22,7 @@ jobs:
       - run: npm ci
       - uses: actions/setup-python@v5 # needed by pre-commit
       - uses: pre-commit/action@v3.0.1
-      - run: npm run coverage
+      - name: Client Tests
         env:
           SUI_NODE_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
           SUI_GAS_ACCESS_KEY: ${{ secrets.SUI_SUPER_ACCESS_KEY }}
@@ -30,8 +30,13 @@ jobs:
           APTOS_NODE_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_WALLET_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
-
-      # TODO - coverage report
+        run: |
+          npm run coverage
+      - name: Upload reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./packages/clients/coverage/integration/lcov.info,./packages/clients/coverage/unit/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   check_copyright_header:
     runs-on: ubuntu-latest

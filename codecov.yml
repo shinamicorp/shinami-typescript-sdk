@@ -1,0 +1,15 @@
+# Copyright 2023-2024 Shinami Corp.
+# SPDX-License-Identifier: Apache-2.0
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 5
+        base: auto
+        only_pulls: true
+comment:
+  layout: "diff, files"
+  behavior: default
+  require_changes: false
