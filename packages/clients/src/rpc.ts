@@ -55,6 +55,7 @@ export class ShinamiRpcClient {
    * @returns OpenRPC spec implemented by the server.
    */
   rpcDiscover(): Promise<object> {
+    console.log("arbitrary line to force codecov to run");
     return this.request("rpc.discover");
   }
 }
