@@ -22,6 +22,9 @@ jobs:
           node-version: 18
       - run: npm update # Update to latest dep versions
       - run: npm ls --all # Print effective versions
+      # Delete all .ts files from iron-session because they're packaged incompletely, which fails
+      # TypeScript 5.8. It already packages .d.ts files which are sufficient for type checking.
+      - run: find node_modules/iron-session -name '*.ts' \! -name '*.d.ts' -print -delete
       - run: git add package-lock.json
       - uses: actions/setup-python@v5 # needed by pre-commit
       - uses: pre-commit/action@v3.0.1
