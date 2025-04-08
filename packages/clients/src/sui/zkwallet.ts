@@ -6,8 +6,8 @@
 import { Infer, integer, object, string } from "superstruct";
 import { ShinamiRpcClient } from "../rpc.js";
 import { base64ToBigInt } from "./utils.js";
-
-const ZKWALLET_RPC_URL = "https://api.shinami.com/sui/zkwallet/v1";
+import { Region } from "../region.js";
+import { ZkWalletRpcUrl } from "./endpoints.js";
 
 /**
  * Information that identifies a zkLogin user.
@@ -48,7 +48,7 @@ export class ZkWalletClient extends ShinamiRpcClient {
    * @param accessKey Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = ZKWALLET_RPC_URL) {
+  constructor(accessKey: string, url: string = ZkWalletRpcUrl[Region.US1]) {
     super(accessKey, url);
   }
 

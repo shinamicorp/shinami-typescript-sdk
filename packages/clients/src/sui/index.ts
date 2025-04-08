@@ -8,3 +8,4 @@ export * from "./sui.js";
 export * from "./wallet.js";
 export * from "./zkprover.js";
 export * from "./zkwallet.js";
+export * from "./endpoints.js";

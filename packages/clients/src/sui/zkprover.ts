@@ -7,8 +7,8 @@ import { PublicKey } from "@mysten/sui/cryptography";
 import { Infer, object, type } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { bigIntToBase64 } from "./utils.js";
-
-const ZKPROVER_RPC_URL = "https://api.shinami.com/sui/zkprover/v1";
+import { ZkProverRpcUrl } from "./endpoints.js";
+import { Region } from "../region.js";
 
 /**
  * Result schema for createZkLoginProof.
@@ -29,7 +29,7 @@ export class ZkProverClient extends ShinamiRpcClient {
    * @param accessKey Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = ZKPROVER_RPC_URL) {
+  constructor(accessKey: string, url: string = ZkProverRpcUrl[Region.US1]) {
     super(accessKey, url);
   }
 

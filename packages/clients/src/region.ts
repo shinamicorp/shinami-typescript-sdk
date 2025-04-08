@@ -3,5 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from "./rpc.js";
-export * from "./region.js";
+export enum Region {
+  US1 = "us1",
+  EU1 = "eu1",
+  APAC1 = "apac1",
+}

@@ -6,6 +6,8 @@
 import { expect, test, jest } from "@jest/globals";
 import { createSuiClient } from "./integration.env.js";
 import { SuiHTTPTransport } from "@mysten/sui/client";
+import { NodeRpcUrl } from "../../src/sui/index.js";
+import { Region } from "../../src/index.js";
 
 const sui = createSuiClient();
 
@@ -36,7 +38,7 @@ test("Sui client issues request with expected headers", async () => {
     );
   });
 
-  const nodeRpcUrl = "https://api.shinami.com/node/v1";
+  const nodeRpcUrl = NodeRpcUrl[Region.US1];
   const transport = new SuiHTTPTransport({
     url: nodeRpcUrl,
     rpc: {

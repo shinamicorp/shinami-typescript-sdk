@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-
-const NODE_REST_URL = "https://api.shinami.com/aptos/node/v1";
-const NODE_INDEXER_URL = "https://api.shinami.com/aptos/graphql/v1";
+import { NodeIndexerUrl, NodeRestUrl } from "./endpoints.js";
+import { Region } from "../region.js";
 
 /**
  * A private function which infers the network enum from a Shinami access key
@@ -38,8 +37,8 @@ function inferNetworkFromKey(accessKey: string): Network | undefined {
  */
 export function createAptosClient(
   accessKey: string,
-  url: string = NODE_REST_URL,
-  indexerUrl: string = NODE_INDEXER_URL,
+  url: string = NodeRestUrl[Region.US1],
+  indexerUrl: string = NodeIndexerUrl[Region.US1],
 ): Aptos {
   const network = inferNetworkFromKey(accessKey);
   return new Aptos(
