@@ -5,9 +5,9 @@
 
 import { Region, createRegionalApiUrl } from "../region.js";
 
-export const NodeIndexerUrls = {
+export const NodeIndexerUrls: Record<Extract<Region, "us1">, string> = {
   us1: createRegionalApiUrl("us1", "aptos", "graphql"),
-} as const satisfies Partial<Record<Region, string>>;
+};
 
 export const NodeRestUrls = {
   us1: createRegionalApiUrl("us1", "aptos", "node"),

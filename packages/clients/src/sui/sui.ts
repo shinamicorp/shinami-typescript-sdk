@@ -5,6 +5,7 @@
 
 import { SuiClient, SuiHTTPTransport } from "@mysten/sui/client";
 import { NodeRpcUrls, NodeWsUrls } from "./endpoints.js";
+import { inferUrlFromAccessKey } from "../region.js";
 
 /**
  * Creates a Sui RPC client using Shinami Node service.
@@ -16,8 +17,16 @@ import { NodeRpcUrls, NodeWsUrls } from "./endpoints.js";
  */
 export function createSuiClient(
   accessKey: string,
-  url: string = NodeRpcUrls.us1,
-  wsUrl: string = NodeWsUrls.us1,
+  url: string = inferUrlFromAccessKey(
+    accessKey,
+    NodeRpcUrls,
+    (nodeRpcUrls) => nodeRpcUrls.us1,
+  ),
+  wsUrl: string = inferUrlFromAccessKey(
+    accessKey,
+    NodeWsUrls,
+    (nodeWsUrls) => nodeWsUrls.us1,
+  ),
 ): SuiClient {
   return new SuiClient({
     transport: new SuiHTTPTransport({

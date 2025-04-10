@@ -4,6 +4,7 @@
  */
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import { NodeIndexerUrls, NodeRestUrls } from "./endpoints.js";
+import { inferUrlFromAccessKey } from "../region.js";
 
 /**
  * A private function which infers the network enum from a Shinami access key
@@ -11,13 +12,13 @@ import { NodeIndexerUrls, NodeRestUrls } from "./endpoints.js";
  * @returns a Network enum type or undefined
  */
 function inferNetworkFromKey(accessKey: string): Network | undefined {
-  if (accessKey.startsWith("aptos_devnet")) {
+  if (accessKey.includes("aptos_devnet")) {
     return Network.DEVNET;
-  } else if (accessKey.startsWith("aptos_testnet")) {
+  } else if (accessKey.includes("aptos_testnet")) {
     return Network.TESTNET;
-  } else if (accessKey.startsWith("aptos_mainnet")) {
+  } else if (accessKey.includes("aptos_mainnet")) {
     return Network.MAINNET;
-  } else if (accessKey.startsWith("aptos_local")) {
+  } else if (accessKey.includes("aptos_local")) {
     return Network.LOCAL;
   } else {
     console.warn(
@@ -36,8 +37,16 @@ function inferNetworkFromKey(accessKey: string): Network | undefined {
  */
 export function createAptosClient(
   accessKey: string,
-  url: string = NodeRestUrls.us1,
-  indexerUrl: string = NodeIndexerUrls.us1,
+  url: string = inferUrlFromAccessKey(
+    accessKey,
+    NodeRestUrls,
+    (nodeRestUrls) => nodeRestUrls.us1,
+  ),
+  indexerUrl: string = inferUrlFromAccessKey(
+    accessKey,
+    NodeIndexerUrls,
+    (nodeIndexerUrls) => nodeIndexerUrls.us1,
+  ),
 ): Aptos {
   const network = inferNetworkFromKey(accessKey);
   return new Aptos(

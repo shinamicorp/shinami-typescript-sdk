@@ -15,3 +15,15 @@ export function createRegionalApiUrl(
 ): string {
   return `${scheme}://api.${region}.shinami.com/${chain}/${service}/v1`;
 }
+
+export function inferUrlFromAccessKey<
+  R extends Partial<Record<Region, string>>,
+>(accessKey: string, urls: R, defaultUrl: (urls: R) => string): string {
+  const keys = Object.keys(urls) as Region[];
+  for (const key of keys) {
+    if (accessKey.startsWith(key)) {
+      return urls[key] ?? defaultUrl(urls);
+    }
+  }
+  return defaultUrl(urls);
+}

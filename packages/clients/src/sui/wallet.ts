@@ -14,6 +14,7 @@ import { Infer, nullable, object, string } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { GaslessTransaction } from "./gas.js";
 import { KeyRpcUrls, WalletRpcUrls } from "./endpoints.js";
+import { inferUrlFromAccessKey } from "../region.js";
 
 /**
  * Shinami Key RPC client.
@@ -55,7 +56,14 @@ export class WalletClient extends ShinamiRpcClient {
    * @param accessKey Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = WalletRpcUrls.us1) {
+  constructor(
+    accessKey: string,
+    url: string = inferUrlFromAccessKey(
+      accessKey,
+      WalletRpcUrls,
+      (walletRpcUrls) => walletRpcUrls.us1,
+    ),
+  ) {
     super(accessKey, url);
   }
 
