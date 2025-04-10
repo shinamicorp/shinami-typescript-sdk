@@ -38,7 +38,7 @@ test("Sui client issues request with expected headers", async () => {
     );
   });
 
-  const nodeRpcUrl = NodeRpcUrl[Region.US1];
+  const nodeRpcUrl = NodeRpcUrl.us1;
   const transport = new SuiHTTPTransport({
     url: nodeRpcUrl,
     rpc: {
