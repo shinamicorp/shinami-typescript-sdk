@@ -40,10 +40,10 @@ npm install @aptos-labs/ts-sdk
 To create a Sui RPC client:
 
 ```ts
-import { createSuiClient, NodeRpcUrls, NodeWsUrls } from "@shinami/clients/sui";
+import { createSuiClient } from "@shinami/clients/sui";
 
-// Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const sui = createSuiClient(NODE_ACCESS_KEY, NodeRpcUrls.us1, NodeWsUrls.us1);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const sui = createSuiClient(NODE_ACCESS_KEY);
 ```
 
 The returned `sui` object is a [SuiClient](https://github.com/MystenLabs/sui/blob/3dacfa02ab67469f5d5a42aa6146b34bffbf7008/sdk/typescript/src/client/client.ts#L91) configured to use Shinami's node service.
@@ -63,17 +63,14 @@ import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { fromB64 } from "@mysten/sui/utils";
 import {
   GasStationClient,
-  GasStationRpcUrls,
-  NodeRpcUrls,
-  NodeWsUrls,
   buildGaslessTransaction,
   createSuiClient,
 } from "@shinami/clients/sui";
 
-// Obtain NODE_ACCESS_KEY and GAS_ACCESS_KEY from your Shinami web portal, select the URLs matching the access keys.
+// Obtain NODE_ACCESS_KEY and GAS_ACCESS_KEY from your Shinami web portal.
 // They MUST be associated with the same network.
-const sui = createSuiClient(NODE_ACCESS_KEY, NodeRpcUrls.us1, NodeWsUrls.us1);
-const gas = new GasStationClient(GAS_ACCESS_KEY, GasStationRpcUrls.us1);
+const sui = createSuiClient(NODE_ACCESS_KEY);
+const gas = new GasStationClient(GAS_ACCESS_KEY);
 
 // You'll want to persist the key pair instead of always creating new ones.
 const keypair = new Ed25519Keypair();
@@ -112,19 +109,15 @@ To use the invisible wallet as a signer for a regular (non-sponsored) transactio
 import { Transaction } from "@mysten/sui/transactions";
 import {
   KeyClient,
-  KeyRpcUrls,
-  NodeRpcUrls,
-  NodeWsUrls,
   ShinamiWalletSigner,
   WalletClient,
-  WalletRpcUrls,
   createSuiClient,
 } from "@shinami/clients/sui";
 
-// Obtain NODE_ACCESS_KEY and WALLET_ACCESS_KEY from your Shinami web portal, select the URLs matching the access keys.
-const sui = createSuiClient(NODE_ACCESS_KEY, NodeRpcUrls.us1, NodeWsUrls.us1);
-const key = new KeyClient(WALLET_ACCESS_KEY, KeyRpcUrls.us1);
-const wal = new WalletClient(WALLET_ACCESS_KEY, WalletRpcUrls.us1);
+// Obtain NODE_ACCESS_KEY and WALLET_ACCESS_KEY from your Shinami web portal.
+const sui = createSuiClient(NODE_ACCESS_KEY);
+const key = new KeyClient(WALLET_ACCESS_KEY);
+const wal = new WalletClient(WALLET_ACCESS_KEY);
 
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
@@ -157,25 +150,20 @@ To use the invisible wallet to execute a gasless transaction, which seamlessly i
 ```ts
 import {
   KeyClient,
-  NodeRpcUrls,
-  NodeWsUrls,
-  KeyClient,
-  KeyRpcUrls,
   ShinamiWalletSigner,
   WalletClient,
-  WalletRpcUrls,
   buildGaslessTransaction,
   createSuiClient,
 } from "@shinami/clients/sui";
 
-// Obtain SUPER_ACCESS_KEY from your Shinami web portal, select the URLs matching the access keys.
+// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
 // - Node service
 // - Gas station
 // - Wallet service
-const sui = createSuiClient(SUPER_ACCESS_KEY, NodeRpcUrls.us1, NodeWsUrls.us1);
-const key = new KeyClient(SUPER_ACCESS_KEY, KeyRpcUrls.us1);
-const wal = new WalletClient(SUPER_ACCESS_KEY, WalletRpcUrls.us1);
+const sui = createSuiClient(SUPER_ACCESS_KEY);
+const key = new KeyClient(SUPER_ACCESS_KEY);
+const wal = new WalletClient(SUPER_ACCESS_KEY);
 
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
@@ -206,19 +194,17 @@ Apps using Shinami invisible wallets can participate in [Bullshark Quests](https
 import {
   EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
   KeyClient,
-  KeyRpcUrls,
   ShinamiWalletSigner,
   WalletClient,
-  WalletRpcUrls,
 } from "@shinami/clients/sui";
 
-// Obtain SUPER_ACCESS_KEY from your Shinami web portal, select the URLs matching the access keys.
+// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
 // - Node service
 // - Gas station
 // - Wallet service
-const key = new KeyClient(SUPER_ACCESS_KEY, KeyRpcUrls.us1);
-const wal = new WalletClient(SUPER_ACCESS_KEY, WalletRpcUrls.us1);
+const key = new KeyClient(SUPER_ACCESS_KEY);
+const wal = new WalletClient(SUPER_ACCESS_KEY);
 
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
@@ -246,16 +232,11 @@ const beneficiary = await signer.getBeneficiary(graphId);
 You can use Shinami's zkLogin wallet services as the salt provider and zkProver in your [zkLogin](https://docs.sui.io/concepts/cryptography/zklogin) implementation.
 
 ```ts
-import {
-  ZkProverClient,
-  ZkProverRpcUrls,
-  ZkWalletClient,
-  ZkWalletRpcUrls,
-} from "@shinami/clients/sui";
+import { ZkProverClient, ZkWalletClient } from "@shinami/clients/sui";
 
-// Obtain WALLET_ACCESS_KEY from your Shinami web portal, select the URLs matching the access keys.
-const zkw = new ZkWalletClient(WALLET_ACCESS_KEY, ZkWalletRpcUrls.us1);
-const zkp = new ZkProverClient(WALLET_ACCESS_KEY, ZkProverRpcUrls.us1);
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
+const zkw = new ZkWalletClient(WALLET_ACCESS_KEY);
+const zkp = new ZkProverClient(WALLET_ACCESS_KEY);
 
 // Prepare a nonce according to the zkLogin requirements.
 // Obtain a valid jwt with that nonce from a supported OpenID provider.
@@ -281,18 +262,10 @@ const { zkProof } = await zkp.createZkLoginProof(
 To create an Aptos client:
 
 ```ts
-import {
-  NodeIndexerUrls,
-  NodeRestUrls,
-  createAptosClient,
-} from "@shinami/clients/aptos";
+import { createAptosClient } from "@shinami/clients/aptos";
 
-// Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const aptos = createAptosClient(
-  NODE_ACCESS_KEY,
-  NodeRestUrls.us1,
-  NodeIndexerUrls.us1,
-);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
 const state = await aptos.getLedgerInfo();
 ```
@@ -306,24 +279,14 @@ To use gas station with a local signer:
 
 ```ts
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import {
-  GasStationClient,
-  GasStationRpcUrls,
-  NodeIndexerUrls,
-  NodeRestUrls,
-  createAptosClient,
-} from "@shinami/clients/aptos";
+import { createAptosClient, GasStationClient } from "@shinami/clients/aptos";
 
-// Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const aptos = createAptosClient(
-  NODE_ACCESS_KEY,
-  NodeRestUrls.us1,
-  NodeIndexerUrls.us1,
-);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
-// Obtain GAS_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
+// Obtain GAS_ACCESS_KEY from your Shinami web portal.
 // It MUST be associated with the same Aptos network as above.
-const gas = new GasStationClient(GAS_ACCESS_KEY, GasStationRpcUrls.us1);
+const gas = new GasStationClient(GAS_ACCESS_KEY);
 
 // Because we are using sponsored transaction, this account doesn't have to
 // exist on-chain beforehand. It'll be created as part of the first transaction.
@@ -378,26 +341,17 @@ import {
 } from "@aptos-labs/ts-sdk";
 import {
   createAptosClient,
-  GasStationRpcUrls,
   KeyClient,
-  KeyRpcUrls,
-  NodeIndexerUrls,
-  NodeRestUrls,
   ShinamiWalletSigner,
   WalletClient,
-  WalletRpcUrls,
 } from "@shinami/clients/aptos";
 
-// Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const aptos = createAptosClient(
-  NODE_ACCESS_KEY,
-  NodeRestUrls.us1,
-  NodeIndexerUrls.us1,
-);
+// Obtain NODE_ACCESS_KEY from your Shinami web portal.
+const aptos = createAptosClient(NODE_ACCESS_KEY);
 
-// Obtain WALLET_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const key = new KeyClient(WALLET_ACCESS_KEY, KeyRpcUrls.us1);
-const wal = new WalletClient(WALLET_ACCESS_KEY, WalletRpcUrls.us1);
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
+const key = new KeyClient(WALLET_ACCESS_KEY);
+const wal = new WalletClient(WALLET_ACCESS_KEY);
 
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
@@ -443,24 +397,18 @@ import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import {
   createAptosClient,
   KeyClient,
-  NodeIndexerUrls,
-  NodeRestUrls,
   ShinamiWalletSigner,
   WalletClient,
 } from "@shinami/clients/aptos";
 
-// Obtain SUPER_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
+// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these Aptos services:
 // - Node service
 // - Gas station (The fund your key is tied to must have funds in it)
 // - Wallet service
-const aptos = createAptosClient(
-  SUPER_ACCESS_KEY,
-  NodeRestUrls.us1,
-  NodeIndexerUrls.us1,
-);
-const key = new KeyClient(SUPER_ACCESS_KEY, KeyRpcUrls.us1);
-const wal = new WalletClient(SUPER_ACCESS_KEY, WalletRpcUrls.us1);
+const aptos = createAptosClient(SUPER_ACCESS_KEY);
+const key = new KeyClient(SUPER_ACCESS_KEY);
+const wal = new WalletClient(SUPER_ACCESS_KEY);
 
 // WALLET_SECRET MUST be used consistently with this wallet id.
 // You are responsible for safe-keeping the (walletId, secret) pair.
