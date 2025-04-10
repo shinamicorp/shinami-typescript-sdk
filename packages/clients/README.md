@@ -246,7 +246,12 @@ const beneficiary = await signer.getBeneficiary(graphId);
 You can use Shinami's zkLogin wallet services as the salt provider and zkProver in your [zkLogin](https://docs.sui.io/concepts/cryptography/zklogin) implementation.
 
 ```ts
-import { ZkProverClient, ZkProverRpcUrls, ZkWalletClient, ZkWalletRpcUrls } from "@shinami/clients/sui";
+import {
+  ZkProverClient,
+  ZkProverRpcUrls,
+  ZkWalletClient,
+  ZkWalletRpcUrls,
+} from "@shinami/clients/sui";
 
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal, select the URLs matching the access keys.
 const zkw = new ZkWalletClient(WALLET_ACCESS_KEY, ZkWalletRpcUrls.us1);
@@ -276,10 +281,18 @@ const { zkProof } = await zkp.createZkLoginProof(
 To create an Aptos client:
 
 ```ts
-import { NodeIndexerUrls, NodeRestUrls, createAptosClient } from "@shinami/clients/aptos";
+import {
+  NodeIndexerUrls,
+  NodeRestUrls,
+  createAptosClient,
+} from "@shinami/clients/aptos";
 
 // Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const aptos = createAptosClient(NODE_ACCESS_KEY, NodeRestUrls.us1, NodeIndexerUrls.us1);
+const aptos = createAptosClient(
+  NODE_ACCESS_KEY,
+  NodeRestUrls.us1,
+  NodeIndexerUrls.us1,
+);
 
 const state = await aptos.getLedgerInfo();
 ```
@@ -302,7 +315,11 @@ import {
 } from "@shinami/clients/aptos";
 
 // Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const aptos = createAptosClient(NODE_ACCESS_KEY, NodeRestUrls.us1, NodeIndexerUrls.us1);
+const aptos = createAptosClient(
+  NODE_ACCESS_KEY,
+  NodeRestUrls.us1,
+  NodeIndexerUrls.us1,
+);
 
 // Obtain GAS_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
 // It MUST be associated with the same Aptos network as above.
@@ -372,7 +389,11 @@ import {
 } from "@shinami/clients/aptos";
 
 // Obtain NODE_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
-const aptos = createAptosClient(NODE_ACCESS_KEY, NodeRestUrls.us1, NodeIndexerUrls.us1);
+const aptos = createAptosClient(
+  NODE_ACCESS_KEY,
+  NodeRestUrls.us1,
+  NodeIndexerUrls.us1,
+);
 
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal, select the URLs matching the access key.
 const key = new KeyClient(WALLET_ACCESS_KEY, KeyRpcUrls.us1);
@@ -433,7 +454,11 @@ import {
 // - Node service
 // - Gas station (The fund your key is tied to must have funds in it)
 // - Wallet service
-const aptos = createAptosClient(SUPER_ACCESS_KEY, NodeRestUrls.us1, NodeIndexerUrls.us1);
+const aptos = createAptosClient(
+  SUPER_ACCESS_KEY,
+  NodeRestUrls.us1,
+  NodeIndexerUrls.us1,
+);
 const key = new KeyClient(SUPER_ACCESS_KEY, KeyRpcUrls.us1);
 const wal = new WalletClient(SUPER_ACCESS_KEY, WalletRpcUrls.us1);
 
