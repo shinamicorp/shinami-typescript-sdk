@@ -24,7 +24,14 @@ export class KeyClient extends ShinamiRpcClient {
    * @param accessKey Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = KeyRpcUrls.us1) {
+  constructor(
+    accessKey: string,
+    url: string = inferUrlFromAccessKey(
+      accessKey,
+      KeyRpcUrls,
+      (keyRpcUrls) => keyRpcUrls.us1,
+    ),
+  ) {
     super(accessKey, url);
   }
 
