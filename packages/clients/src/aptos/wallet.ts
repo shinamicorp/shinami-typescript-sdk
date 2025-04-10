@@ -15,8 +15,7 @@ import {
 import { Infer, array, integer, object, string, unknown } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { JSONRPCError } from "@open-rpc/client-js";
-import { KeyRpcUrl, WalletRpcUrl } from "./endpoints.js";
-import { Region } from "../region.js";
+import { KeyRpcUrls, WalletRpcUrls } from "./endpoints.js";
 
 /**
  * Shinami Key RPC client for Aptos.
@@ -26,7 +25,7 @@ export class KeyClient extends ShinamiRpcClient {
    * @param accessKey Aptos Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = KeyRpcUrl[Region.US1]) {
+  constructor(accessKey: string, url: string = KeyRpcUrls.us1) {
     super(accessKey, url);
   }
 
@@ -75,7 +74,7 @@ export class WalletClient extends ShinamiRpcClient {
    * @param accessKey Aptos Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = WalletRpcUrl[Region.US1]) {
+  constructor(accessKey: string, url: string = WalletRpcUrls.us1) {
     super(accessKey, url);
   }
 

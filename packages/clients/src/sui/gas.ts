@@ -9,8 +9,7 @@ import { toB64 } from "@mysten/sui/utils";
 import { Infer, enums, number, object, optional, string } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { throwExpression } from "../utils.js";
-import { Region } from "../region.js";
-import { GasStationRpcUrl } from "./endpoints.js";
+import { GasStationRpcUrls } from "./endpoints.js";
 
 /**
  * A gasless transaction to be sponsored.
@@ -107,7 +106,7 @@ export class GasStationClient extends ShinamiRpcClient {
    *    transactions are targeting.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = GasStationRpcUrl[Region.US1]) {
+  constructor(accessKey: string, url: string = GasStationRpcUrls.us1) {
     super(accessKey, url);
   }
 

@@ -22,8 +22,7 @@ import {
   unknown,
 } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
-import { Region } from "../region.js";
-import { GasStationRpcUrl } from "./endpoints.js";
+import { GasStationRpcUrls } from "./endpoints.js";
 
 const RpcAccountSignature = object({
   address: string(),
@@ -61,7 +60,7 @@ export class GasStationClient extends ShinamiRpcClient {
    *    transactions are targeting.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = GasStationRpcUrl[Region.US1]) {
+  constructor(accessKey: string, url: string = GasStationRpcUrls.us1) {
     super(accessKey, url);
   }
 

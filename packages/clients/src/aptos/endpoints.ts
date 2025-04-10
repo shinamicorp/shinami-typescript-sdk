@@ -3,28 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Region } from "../region.js";
+import { Region, createRegionalApiUrl } from "../region.js";
 
-function createUrl(region: Region, type: string): string {
-  return `https://api.${region}.shinami.com/aptos/${type}/v1`;
-}
+export const NodeIndexerUrls = {
+  us1: createRegionalApiUrl("us1", "aptos", "graphql"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const NodeIndexerUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "graphql"),
-};
+export const NodeRestUrls = {
+  us1: createRegionalApiUrl("us1", "aptos", "node"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const NodeRestUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "node"),
-};
+export const GasStationRpcUrls = {
+  us1: createRegionalApiUrl("us1", "aptos", "gas"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const GasStationRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "gas"),
-};
+export const WalletRpcUrls = {
+  us1: createRegionalApiUrl("us1", "aptos", "wallet"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const WalletRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "wallet"),
-};
-
-export const KeyRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "key"),
-};
+export const KeyRpcUrls = {
+  us1: createRegionalApiUrl("us1", "aptos", "key"),
+} as const satisfies Partial<Record<Region, string>>;

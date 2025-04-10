@@ -3,34 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Region } from "../region.js";
+import { createRegionalApiUrl, Region } from "../region.js";
 
-function createUrl(region: Region, service: string): string {
-  return `https://api.${region}.shinami.com/sui/${service}/v1`;
-}
+export const NodeRpcUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "node"),
+  eu1: createRegionalApiUrl("eu1", "sui", "node"),
+  apac1: createRegionalApiUrl("apac1", "sui", "node"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const NodeRpcUrl: Record<Region, string> = {
-  [Region.US1]: createUrl(Region.US1, "node"),
-  [Region.EU1]: createUrl(Region.EU1, "node"),
-  [Region.APAC1]: createUrl(Region.APAC1, "node"),
-};
+export const NodeWsUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "node", "wss"),
+  eu1: createRegionalApiUrl("eu1", "sui", "node", "wss"),
+  apac1: createRegionalApiUrl("apac1", "sui", "node", "wss"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const GasStationRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "gas"),
-};
+export const GasStationRpcUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "gas"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const WalletRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "wallet"),
-};
+export const WalletRpcUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "wallet"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const KeyRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "key"),
-};
+export const KeyRpcUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "key"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const ZkWalletRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "zkwallet"),
-};
+export const ZkWalletRpcUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "zkwallet"),
+} as const satisfies Partial<Record<Region, string>>;
 
-export const ZkProverRpcUrl: Record<Extract<Region, Region.US1>, string> = {
-  [Region.US1]: createUrl(Region.US1, "zkprover"),
-};
+export const ZkProverRpcUrls = {
+  us1: createRegionalApiUrl("us1", "sui", "zkprover"),
+} as const satisfies Partial<Record<Region, string>>;
