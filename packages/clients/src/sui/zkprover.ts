@@ -8,7 +8,7 @@ import { Infer, object, type } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { bigIntToBase64 } from "./utils.js";
 import { ZkProverRpcUrls } from "./endpoints.js";
-import { inferUrlFromAccessKey } from "../region.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * Result schema for createZkLoginProof.
@@ -31,7 +31,7 @@ export class ZkProverClient extends ShinamiRpcClient {
    */
   constructor(
     accessKey: string,
-    url: string = inferUrlFromAccessKey(
+    url: string = inferRegionalValueFromAccessKey(
       accessKey,
       ZkProverRpcUrls,
       (zkProverRpcUrls) => zkProverRpcUrls.us1,

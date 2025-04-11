@@ -4,7 +4,7 @@
  */
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import { NodeIndexerUrls, NodeRestUrls } from "./endpoints.js";
-import { inferUrlFromAccessKey } from "../region.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * A private function which infers the network enum from a Shinami access key
@@ -37,12 +37,12 @@ function inferNetworkFromKey(accessKey: string): Network | undefined {
  */
 export function createAptosClient(
   accessKey: string,
-  url: string = inferUrlFromAccessKey(
+  url: string = inferRegionalValueFromAccessKey(
     accessKey,
     NodeRestUrls,
     (nodeRestUrls) => nodeRestUrls.us1,
   ),
-  indexerUrl: string = inferUrlFromAccessKey(
+  indexerUrl: string = inferRegionalValueFromAccessKey(
     accessKey,
     NodeIndexerUrls,
     (nodeIndexerUrls) => nodeIndexerUrls.us1,

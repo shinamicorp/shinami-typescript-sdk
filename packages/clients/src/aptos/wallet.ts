@@ -16,7 +16,7 @@ import { Infer, array, integer, object, string, unknown } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { JSONRPCError } from "@open-rpc/client-js";
 import { KeyRpcUrls, WalletRpcUrls } from "./endpoints.js";
-import { inferUrlFromAccessKey } from "../region.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * Shinami Key RPC client for Aptos.
@@ -28,7 +28,7 @@ export class KeyClient extends ShinamiRpcClient {
    */
   constructor(
     accessKey: string,
-    url: string = inferUrlFromAccessKey(
+    url: string = inferRegionalValueFromAccessKey(
       accessKey,
       KeyRpcUrls,
       (keyRpcUrls) => keyRpcUrls.us1,
@@ -84,7 +84,7 @@ export class WalletClient extends ShinamiRpcClient {
    */
   constructor(
     accessKey: string,
-    url: string = inferUrlFromAccessKey(
+    url: string = inferRegionalValueFromAccessKey(
       accessKey,
       WalletRpcUrls,
       (walletRpcUrls) => walletRpcUrls.us1,

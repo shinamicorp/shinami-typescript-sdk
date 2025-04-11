@@ -10,7 +10,7 @@ import { Infer, enums, number, object, optional, string } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { throwExpression } from "../utils.js";
 import { GasStationRpcUrls } from "./endpoints.js";
-import { inferUrlFromAccessKey } from "../region.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * A gasless transaction to be sponsored.
@@ -109,7 +109,7 @@ export class GasStationClient extends ShinamiRpcClient {
    */
   constructor(
     accessKey: string,
-    url: string = inferUrlFromAccessKey(
+    url: string = inferRegionalValueFromAccessKey(
       accessKey,
       GasStationRpcUrls,
       (gasStationRpcUrls) => gasStationRpcUrls.us1,
