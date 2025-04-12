@@ -13,9 +13,8 @@ import { JSONRPCError } from "@open-rpc/client-js";
 import { Infer, nullable, object, string } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { GaslessTransaction } from "./gas.js";
-
-const KEY_RPC_URL = "https://api.shinami.com/sui/key/v1";
-const WALLET_RPC_URL = "https://api.shinami.com/sui/wallet/v1";
+import { KeyRpcUrls, WalletRpcUrls } from "./endpoints.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * Shinami Key RPC client.
@@ -25,7 +24,14 @@ export class KeyClient extends ShinamiRpcClient {
    * @param accessKey Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = KEY_RPC_URL) {
+  constructor(
+    accessKey: string,
+    url: string = inferRegionalValueFromAccessKey(
+      accessKey,
+      KeyRpcUrls,
+      (keyRpcUrls) => keyRpcUrls.us1,
+    ),
+  ) {
     super(accessKey, url);
   }
 
@@ -57,7 +63,14 @@ export class WalletClient extends ShinamiRpcClient {
    * @param accessKey Wallet access key.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = WALLET_RPC_URL) {
+  constructor(
+    accessKey: string,
+    url: string = inferRegionalValueFromAccessKey(
+      accessKey,
+      WalletRpcUrls,
+      (walletRpcUrls) => walletRpcUrls.us1,
+    ),
+  ) {
     super(accessKey, url);
   }
 

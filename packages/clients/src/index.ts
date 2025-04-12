@@ -4,3 +4,4 @@
  */
 
 export * from "./rpc.js";
+export * from "./region.js";

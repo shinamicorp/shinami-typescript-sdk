@@ -9,8 +9,8 @@ import { toB64 } from "@mysten/sui/utils";
 import { Infer, enums, number, object, optional, string } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { throwExpression } from "../utils.js";
-
-const GAS_STATION_RPC_URL = "https://api.shinami.com/sui/gas/v1";
+import { GasStationRpcUrls } from "./endpoints.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * A gasless transaction to be sponsored.
@@ -107,7 +107,14 @@ export class GasStationClient extends ShinamiRpcClient {
    *    transactions are targeting.
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url: string = GAS_STATION_RPC_URL) {
+  constructor(
+    accessKey: string,
+    url: string = inferRegionalValueFromAccessKey(
+      accessKey,
+      GasStationRpcUrls,
+      (gasStationRpcUrls) => gasStationRpcUrls.us1,
+    ),
+  ) {
     super(accessKey, url);
   }
 

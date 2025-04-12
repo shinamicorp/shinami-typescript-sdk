@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-
-const NODE_REST_URL = "https://api.shinami.com/aptos/node/v1";
-const NODE_INDEXER_URL = "https://api.shinami.com/aptos/graphql/v1";
+import { NodeIndexerUrls, NodeRestUrls } from "./endpoints.js";
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
  * A private function which infers the network enum from a Shinami access key
@@ -13,13 +12,13 @@ const NODE_INDEXER_URL = "https://api.shinami.com/aptos/graphql/v1";
  * @returns a Network enum type or undefined
  */
 function inferNetworkFromKey(accessKey: string): Network | undefined {
-  if (accessKey.startsWith("aptos_devnet")) {
+  if (accessKey.includes("aptos_devnet")) {
     return Network.DEVNET;
-  } else if (accessKey.startsWith("aptos_testnet")) {
+  } else if (accessKey.includes("aptos_testnet")) {
     return Network.TESTNET;
-  } else if (accessKey.startsWith("aptos_mainnet")) {
+  } else if (accessKey.includes("aptos_mainnet")) {
     return Network.MAINNET;
-  } else if (accessKey.startsWith("aptos_local")) {
+  } else if (accessKey.includes("aptos_local")) {
     return Network.LOCAL;
   } else {
     console.warn(
@@ -38,8 +37,16 @@ function inferNetworkFromKey(accessKey: string): Network | undefined {
  */
 export function createAptosClient(
   accessKey: string,
-  url: string = NODE_REST_URL,
-  indexerUrl: string = NODE_INDEXER_URL,
+  url: string = inferRegionalValueFromAccessKey(
+    accessKey,
+    NodeRestUrls,
+    (nodeRestUrls) => nodeRestUrls.us1,
+  ),
+  indexerUrl: string = inferRegionalValueFromAccessKey(
+    accessKey,
+    NodeIndexerUrls,
+    (nodeIndexerUrls) => nodeIndexerUrls.us1,
+  ),
 ): Aptos {
   const network = inferNetworkFromKey(accessKey);
   return new Aptos(
