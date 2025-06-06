@@ -475,7 +475,9 @@ The integration tests for Aptos make use of the [Aptos Move example](../../examp
 Obtain `<your_aptos_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
 The key must be authorized for all of these services, targeting _Aptos Testnet_:
 
+- Node service
 - Gas station - you must also have some available balance in your gas fund.
+- Wallet service
 
 Once you have the super keys for both chains,
 
