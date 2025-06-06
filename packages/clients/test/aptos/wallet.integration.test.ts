@@ -1,24 +1,24 @@
 /**
- * Copyright 2023-2024 Shinami Corp.
+ * Copyright 2023-2025 Shinami Corp.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from "@jest/globals";
-import { v4 as uuidv4 } from "uuid";
-import { KeySession, ShinamiWalletSigner } from "../../src/aptos/index.js";
-import {
-  EXAMPLE_PACKAGE_ID,
-  createAptos,
-  createWalletClient,
-  createKeyClient,
-} from "./integration.env.js";
 import {
   AccountAddress,
   AccountAuthenticatorEd25519,
   AptosApiError,
   isUserTransactionResponse,
 } from "@aptos-labs/ts-sdk";
+import { describe, expect, it } from "@jest/globals";
 import { JSONRPCError } from "@open-rpc/client-js";
+import { v4 as uuidv4 } from "uuid";
+import { KeySession, ShinamiWalletSigner } from "../../src/aptos/index.js";
+import {
+  EXAMPLE_PACKAGE_ID,
+  createAptos,
+  createKeyClient,
+  createWalletClient,
+} from "./integration.env.js";
 
 const aptos = createAptos();
 const key = createKeyClient();
@@ -29,7 +29,7 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function getAccountInfoWithRetry(
+async function getAccountResourceWithRetry(
   accountAddress: AccountAddress,
   maxRetries: number = 6,
   delayMs: number = 500,
@@ -37,7 +37,10 @@ async function getAccountInfoWithRetry(
   let attempt = 0;
   while (attempt < maxRetries) {
     try {
-      return await aptos.account.getAccountInfo({ accountAddress });
+      return await aptos.account.getAccountResource({
+        accountAddress,
+        resourceType: "0x1::account::Account",
+      });
     } catch (error) {
       if (error instanceof AptosApiError && attempt < maxRetries - 1) {
         await delay(delayMs);
@@ -85,17 +88,13 @@ describe("ShinamiAptosWallet", () => {
 
   console.log("walletId1", walletId1); // will be initialized on chain
   console.log("walletId2", walletId2);
+  console.log("walletId3", walletId3);
 
   it("creates and retrieves an initialized wallet address", async () => {
     const createdAddress = await signer1.getAddress(true, true);
     expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
-    let accountInfo;
-    try {
-      accountInfo = await getAccountInfoWithRetry(createdAddress);
-    } catch (error) {
-      console.error("Failed to get account info:", error);
-    }
-    expect(accountInfo.authentication_key).toBe(createdAddress.toString());
+    const account = await getAccountResourceWithRetry(createdAddress);
+    expect(account.authentication_key).toBe(createdAddress.toString());
   }, 20_000);
 
   it("creates and retrieves an uninitialized wallet address", async () => {
@@ -123,15 +122,11 @@ describe("ShinamiAptosWallet", () => {
     async () => {
       let createdAddress = await signer3.getAddress(true, false);
       expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
-      let accountInfo;
-      try {
-        accountInfo = await getAccountInfoWithRetry(createdAddress);
-        throw new Error("Error should have been thrown");
-      } catch (error) {
-        // Only created in Shinami. Should not be on chain.
-        expect(error).toBeInstanceOf(AptosApiError);
-        expect((error as AptosApiError).message).toContain("Account not found");
-      }
+
+      // Only created in Shinami. Should not be on chain.
+      await expect(getAccountResourceWithRetry(createdAddress)).rejects.toThrow(
+        AptosApiError,
+      );
 
       // Should still correctly fetch address from Shinami if off chain.
       createdAddress = await signer3.getAddress(false, false);
@@ -139,13 +134,10 @@ describe("ShinamiAptosWallet", () => {
 
       createdAddress = await signer3.getAddress(false, true);
       expect(createdAddress.toString()).toMatch(/0x[0-9a-f]+/);
-      try {
-        accountInfo = await getAccountInfoWithRetry(createdAddress);
-      } catch (error) {
-        throw new Error("Blah");
-      }
+
+      const account = await getAccountResourceWithRetry(createdAddress);
       // Should now be initialized on chain.
-      expect(accountInfo.authentication_key).toBe(createdAddress.toString());
+      expect(account.authentication_key).toBe(createdAddress.toString());
     },
     longTimeoutMs,
   );
@@ -187,12 +179,7 @@ describe("ShinamiAptosWallet", () => {
     async () => {
       // Sender must be on chain since it will also be the fee payer
       const senderAcct = await signer1.getAddress(true, true);
-      try {
-        await getAccountInfoWithRetry(senderAcct);
-      } catch (error) {
-        console.error("Failed to get account info:", error);
-      }
-
+      await getAccountResourceWithRetry(senderAcct);
       const receiverAcct = await signer2.getAddress(true, false);
 
       const transaction = await aptos.transaction.build.simple({
@@ -225,11 +212,7 @@ describe("ShinamiAptosWallet", () => {
     "signs multi-agent transaction correctly",
     async () => {
       const senderAcct = await signer1.getAddress(true, true);
-      try {
-        await getAccountInfoWithRetry(senderAcct);
-      } catch (error) {
-        console.error("Failed to get account info:", error);
-      }
+      await getAccountResourceWithRetry(senderAcct);
       const receiverAcct = await signer2.getAddress(true, false);
 
       const transaction = await aptos.transaction.build.multiAgent({
