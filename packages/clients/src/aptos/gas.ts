@@ -22,8 +22,33 @@ import {
   unknown,
 } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
-import { GasStationRpcUrls } from "./endpoints.js";
-import { inferRegionalValueFromAccessKey } from "../region.js";
+import { GasStationRpcUrls, MovementGasStationRpcUrls } from "./endpoints.js";
+import { inferRegionalValueFromAccessKey, type Chain } from "../region.js";
+
+const MOVEMENT_CHAIN: Chain = "movement";
+
+function getUrlFromAccessKey(accessKey: string): string {
+  // Parse access key format: region_chain_network_identifier
+  const parts = accessKey.split('_');
+  if (parts.length >= 2) {
+    const chain = parts[1] as Chain;
+    
+    if (chain === MOVEMENT_CHAIN) {
+      return inferRegionalValueFromAccessKey(
+        accessKey,
+        MovementGasStationRpcUrls,
+        (urls) => urls.us1,
+      );
+    }
+  }
+  
+  // Default to Aptos
+  return inferRegionalValueFromAccessKey(
+    accessKey,
+    GasStationRpcUrls,
+    (urls) => urls.us1,
+  );
+}
 
 const RpcAccountSignature = object({
   address: string(),
@@ -53,23 +78,21 @@ const Fund = object({
 type Fund = Infer<typeof Fund>;
 
 /**
- * Aptos gas station RPC client.
+ * Gas station RPC client for Aptos and Movement blockchains.
+ * Automatically detects the blockchain from the access key format.
  */
 export class GasStationClient extends ShinamiRpcClient {
   /**
-   * @param accessKey Gas access key. Note that the access key also determines which network your
-   *    transactions are targeting.
+   * @param accessKey Gas access key. The format determines which blockchain and network your
+   *    transactions are targeting (e.g., "us1_aptos_mainnet_xxx" or "us1_movement_testnet_xxx").
    * @param url Optional URL override.
    */
   constructor(
     accessKey: string,
-    url: string = inferRegionalValueFromAccessKey(
-      accessKey,
-      GasStationRpcUrls,
-      (gasStationRpcUrls) => gasStationRpcUrls.us1,
-    ),
+    url?: string,
   ) {
-    super(accessKey, url);
+    const finalUrl = url ?? getUrlFromAccessKey(accessKey);
+    super(accessKey, finalUrl);
   }
 
   /**
@@ -99,7 +122,7 @@ export class GasStationClient extends ShinamiRpcClient {
   }
 
   /**
-   * Sponsors a simple transaction by filling in fee payer info and submits it to Aptos network for
+   * Sponsors a simple transaction by filling in fee payer info and submits it to the network for
    * execution.
    *
    * @param transaction The simple transaction to request sponsorship for.
@@ -112,7 +135,7 @@ export class GasStationClient extends ShinamiRpcClient {
   ): Promise<PendingTransactionResponse>;
 
   /**
-   * Sponsors a multi-agent transaction by filling in fee payer info and submits it to Aptos network
+   * Sponsors a multi-agent transaction by filling in fee payer info and submits it to the network
    * for execution.
    *
    * @param transaction The multi-agent transaction to request sponsorship for.

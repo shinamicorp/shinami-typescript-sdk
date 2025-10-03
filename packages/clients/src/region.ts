@@ -5,7 +5,7 @@
 
 export type Region = "us1" | "eu1" | "apac1";
 
-export type Chain = "aptos" | "sui";
+export type Chain = "aptos" | "sui" | "movement";
 
 export function createRegionalApiUrl(
   region: Region,
