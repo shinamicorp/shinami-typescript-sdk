@@ -29,10 +29,10 @@ const MOVEMENT_CHAIN: Chain = "movement";
 
 function getUrlFromAccessKey(accessKey: string): string {
   // Parse access key format: region_chain_network_identifier
-  const parts = accessKey.split('_');
+  const parts = accessKey.split("_");
   if (parts.length >= 2) {
     const chain = parts[1] as Chain;
-    
+
     if (chain === MOVEMENT_CHAIN) {
       return inferRegionalValueFromAccessKey(
         accessKey,
@@ -41,7 +41,7 @@ function getUrlFromAccessKey(accessKey: string): string {
       );
     }
   }
-  
+
   // Default to Aptos
   return inferRegionalValueFromAccessKey(
     accessKey,
@@ -87,10 +87,7 @@ export class GasStationClient extends ShinamiRpcClient {
    *    transactions are targeting (e.g., "us1_aptos_mainnet_xxx" or "us1_movement_testnet_xxx").
    * @param url Optional URL override.
    */
-  constructor(
-    accessKey: string,
-    url?: string,
-  ) {
+  constructor(accessKey: string, url?: string) {
     const finalUrl = url ?? getUrlFromAccessKey(accessKey);
     super(accessKey, finalUrl);
   }

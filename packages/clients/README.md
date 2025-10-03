@@ -457,8 +457,8 @@ import { GasStationClient } from "@shinami/clients/aptos";
 
 // We use the public testnet endpoint here, but you can plug in any Movement endpoint.
 const config = new AptosConfig({
-    network: Network.CUSTOM,
-    fullnode: 'https://testnet.movementnetwork.xyz/v1',
+  network: Network.CUSTOM,
+  fullnode: "https://testnet.movementnetwork.xyz/v1",
 });
 // Initialize the Aptos client connecting to Movement
 const aptos = new Aptos(config);
@@ -507,7 +507,6 @@ const committed = await aptos.transaction.waitForTransaction({
 });
 ```
 
-
 ## Development
 
 ### Build
@@ -547,7 +546,7 @@ The key must be authorized for all of these services, targeting _Aptos Testnet_:
 - Wallet service
 
 The integration tests for Movement make use of the [Movement example](../../examples/movement-move/) package, which has been deployed to [Movement Testnet](https://explorer.movementnetwork.xyz/account/0x5f2312867bcfcefec959f2cedaed49ca670db2a56fcca99623c74bbc67408647/modules/code/math?network=bardock+testnet).
-Obtain `<your_movement_gas_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
+Obtain `<your_movement_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
 The key must be authorized for the Gas station, targeting _Movement Testnet_ and it must hae some available balance in the gas fund.
 
 Once you have the keys for all chains,
@@ -559,7 +558,7 @@ export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
-export MOVEMENT_GAS_ACCESS_KEY=<your_movement_gas_access_key>
+export MOVEMENT_SUPER_ACCESS_KEY=<your_movement_super_access_key>
 
 npm run integration
 ```
@@ -578,7 +577,7 @@ export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
-export MOVEMENT_GAS_ACCESS_KEY=<your_movement_gas_access_key>
+export MOVEMENT_SUPER_ACCESS_KEY=<your_movement_super_access_key>
 
 npm run coverage
 ```

@@ -30,6 +30,7 @@ jobs:
           APTOS_NODE_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_GAS_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
           APTOS_WALLET_ACCESS_KEY: ${{ secrets.APTOS_SUPER_ACCESS_KEY }}
+          MOVEMENT_SUPER_ACCESS_KEY: ${{ secrets.MOVEMENT_SUPER_ACCESS_KEY }}
         run: |
           npm run coverage
       - name: Upload reports to Codecov

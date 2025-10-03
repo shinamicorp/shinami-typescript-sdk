@@ -19,14 +19,11 @@ import {
 } from "@aptos-labs/ts-sdk";
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { JSONRPCError } from "@open-rpc/client-js";
-import {
-  createGasClient,
-  EXAMPLE_PACKAGE_ID,
-} from "./integration.env.js";
+import { createGasClient, EXAMPLE_PACKAGE_ID } from "./integration.env.js";
 
 const config = new AptosConfig({
-    network: Network.CUSTOM,
-    fullnode: 'https://testnet.movementnetwork.xyz/v1',
+  network: Network.CUSTOM,
+  fullnode: "https://testnet.movementnetwork.xyz/v1",
 });
 const aptos = new Aptos(config);
 const gas = createGasClient();
