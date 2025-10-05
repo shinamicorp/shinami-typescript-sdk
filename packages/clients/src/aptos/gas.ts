@@ -23,32 +23,7 @@ import {
 } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { GasStationRpcUrls, MovementGasStationRpcUrls } from "./endpoints.js";
-import { inferRegionalValueFromAccessKey, type Chain } from "../region.js";
-
-const MOVEMENT_CHAIN: Chain = "movement";
-
-function getUrlFromAccessKey(accessKey: string): string {
-  // Parse access key format: region_chain_network_identifier
-  const parts = accessKey.split("_");
-  if (parts.length >= 2) {
-    const chain = parts[1] as Chain;
-
-    if (chain === MOVEMENT_CHAIN) {
-      return inferRegionalValueFromAccessKey(
-        accessKey,
-        MovementGasStationRpcUrls,
-        (urls) => urls.us1,
-      );
-    }
-  }
-
-  // Default to Aptos
-  return inferRegionalValueFromAccessKey(
-    accessKey,
-    GasStationRpcUrls,
-    (urls) => urls.us1,
-  );
-}
+import { inferRegionalValueFromAccessKey } from "../region.js";
 
 const RpcAccountSignature = object({
   address: string(),
@@ -87,9 +62,15 @@ export class GasStationClient extends ShinamiRpcClient {
    *    transactions are targeting (e.g., "us1_aptos_mainnet_xxx" or "us1_movement_testnet_xxx").
    * @param url Optional URL override.
    */
-  constructor(accessKey: string, url?: string) {
-    const finalUrl = url ?? getUrlFromAccessKey(accessKey);
-    super(accessKey, finalUrl);
+  constructor(
+    accessKey: string,
+    url: string = inferRegionalValueFromAccessKey(
+      accessKey,
+      accessKey.includes("movement") ? MovementGasStationRpcUrls : GasStationRpcUrls,
+      (gasStationRpcUrls) => gasStationRpcUrls.us1,
+    ),
+  ) {
+    super(accessKey, url);
   }
 
   /**

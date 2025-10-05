@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import {
   GasStationClient,
   KeyClient,
@@ -11,15 +12,31 @@ import {
 } from "../../src/aptos/index.js";
 
 // https://explorer.aptoslabs.com/account/0x08f91c1523658608e41e628b9a36790a19ec272a2c27084cf2acacbb45fc1643/modules/code/math?network=testnet
-export const EXAMPLE_PACKAGE_ID =
+export const APTOS_EXAMPLE_PACKAGE_ID =
   "0x8f91c1523658608e41e628b9a36790a19ec272a2c27084cf2acacbb45fc1643";
+
+// https://explorer.movementnetwork.xyz/account/0x5f2312867bcfcefec959f2cedaed49ca670db2a56fcca99623c74bbc67408647/modules/code/math?network=bardock+testnet
+export const MOVEMENT_EXAMPLE_PACKAGE_ID =
+  "0x5f2312867bcfcefec959f2cedaed49ca670db2a56fcca99623c74bbc67408647";
 
 export function createAptos() {
   return createAptosClient(requireEnv("APTOS_NODE_ACCESS_KEY"));
 }
 
-export function createGasClient() {
+export function createMovement() {
+  const config = new AptosConfig({
+    network: Network.CUSTOM,
+    fullnode: "https://testnet.movementnetwork.xyz/v1",
+  });
+  return new Aptos(config);
+}
+
+export function createAptosGasClient() {
   return new GasStationClient(requireEnv("APTOS_GAS_ACCESS_KEY"));
+}
+
+export function createMovementGasClient() {
+  return new GasStationClient(requireEnv("MOVEMENT_GAS_ACCESS_KEY"));
 }
 
 export function createKeyClient() {

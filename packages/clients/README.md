@@ -558,7 +558,7 @@ export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
-export MOVEMENT_SUPER_ACCESS_KEY=<your_movement_super_access_key>
+export MOVEMENT_GAS_ACCESS_KEY=<your_movement_super_access_key>
 
 npm run integration
 ```
@@ -577,7 +577,7 @@ export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
-export MOVEMENT_SUPER_ACCESS_KEY=<your_movement_super_access_key>
+export MOVEMENT_GAS_ACCESS_KEY=<your_movement_super_access_key>
 
 npm run coverage
 ```

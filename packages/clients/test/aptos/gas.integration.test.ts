@@ -18,19 +18,36 @@ import { beforeAll, describe, expect, it } from "@jest/globals";
 import { JSONRPCError } from "@open-rpc/client-js";
 import {
   createAptos,
-  createGasClient,
-  EXAMPLE_PACKAGE_ID,
+  createAptosGasClient,
+  createMovement,
+  createMovementGasClient,
+  APTOS_EXAMPLE_PACKAGE_ID,
+  MOVEMENT_EXAMPLE_PACKAGE_ID,
 } from "./integration.env.js";
-
-const aptos = createAptos();
-const gas = createGasClient();
 
 const account = Account.generate({
   scheme: SigningSchemeInput.Ed25519,
   legacy: true,
 });
 
-describe("GasStationClient", () => {
+const testConfigs = [
+  {
+    name: "Aptos",
+    node: createAptos(),
+    gas: createAptosGasClient(),
+    packageId: APTOS_EXAMPLE_PACKAGE_ID,
+    network: "APTOS_TESTNET",
+  },
+  {
+    name: "Movement",
+    node: createMovement(),
+    gas: createMovementGasClient(),
+    packageId: MOVEMENT_EXAMPLE_PACKAGE_ID,
+    network: "MOVEMENT_TESTNET",
+  },
+];
+
+describe.each(testConfigs)("GasStationClient ($name)", ({ name, node, gas, packageId, network }) => {
   beforeAll(async () => {
     console.log("account address", account.accountAddress.toString());
     console.log(
@@ -43,17 +60,17 @@ describe("GasStationClient", () => {
     expect(await gas.rpcDiscover()).toMatchObject({
       openrpc: "1.2.6",
       info: {
-        title: "Shinami gas station RPC for Aptos",
+        title: `Shinami gas station RPC for ${name}`,
         version: /\d+\.\d+\.\d+/,
       },
     });
   });
 
   const happyTest = (options?: InputGenerateTransactionOptions) => async () => {
-    const transaction = await aptos.transaction.build.simple({
+    const transaction = await node.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        function: `${packageId}::math::add_entry`,
         functionArguments: [1, 2],
       },
       withFeePayer: true,
@@ -71,19 +88,19 @@ describe("GasStationClient", () => {
       throw e;
     }
 
-    const senderSig = aptos.transaction.sign({
+    const senderSig = node.transaction.sign({
       signer: account,
       transaction,
     });
 
-    const pending = await aptos.transaction.submit.simple({
+    const pending = await node.transaction.submit.simple({
       transaction,
       senderAuthenticator: senderSig,
       feePayerAuthenticator: feePayerSig,
     });
     console.log("pending", pending);
 
-    const committed = await aptos.transaction.waitForTransaction({
+    const committed = await node.transaction.waitForTransaction({
       transactionHash: pending.hash,
       options: {
         checkSuccess: true,
@@ -96,7 +113,7 @@ describe("GasStationClient", () => {
 
     expect(
       committed.events.find(
-        (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
+        (x) => x.type == `${packageId}::math::Result`,
       ),
     ).toMatchObject({
       data: {
@@ -120,10 +137,10 @@ describe("GasStationClient", () => {
   );
 
   it("fails to request gas sponsorship with 70min expiration", async () => {
-    const transaction = await aptos.transaction.build.simple({
+    const transaction = await node.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        function: `${packageId}::math::add_entry`,
         functionArguments: [1, 2],
       },
       withFeePayer: true,
@@ -138,16 +155,16 @@ describe("GasStationClient", () => {
   }, 30_000);
 
   it("successfully sponsors and submits transaction", async () => {
-    const transaction = await aptos.transaction.build.simple({
+    const transaction = await node.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        function: `${packageId}::math::add_entry`,
         functionArguments: [1, 2],
       },
       withFeePayer: true,
     });
 
-    const senderSig = aptos.transaction.sign({
+    const senderSig = node.transaction.sign({
       signer: account,
       transaction,
     });
@@ -158,7 +175,7 @@ describe("GasStationClient", () => {
     );
     console.log("pending", pending);
 
-    const committed = await aptos.transaction.waitForTransaction({
+    const committed = await node.transaction.waitForTransaction({
       transactionHash: pending.hash,
       options: {
         checkSuccess: true,
@@ -171,7 +188,7 @@ describe("GasStationClient", () => {
 
     expect(
       committed.events.find(
-        (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
+        (x) => x.type == `${packageId}::math::Result`,
       ),
     ).toMatchObject({
       data: {
@@ -181,16 +198,16 @@ describe("GasStationClient", () => {
   }, 30_000);
 
   it("fails to sponsor and submit transaction with bad signature", async () => {
-    const transaction = await aptos.transaction.build.simple({
+    const transaction = await node.transaction.build.simple({
       sender: account.accountAddress,
       data: {
-        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        function: `${packageId}::math::add_entry`,
         functionArguments: [1, 2],
       },
       withFeePayer: true,
     });
 
-    const badSig = aptos.transaction.sign({
+    const badSig = node.transaction.sign({
       signer: Account.generate(),
       transaction,
     });
@@ -205,7 +222,7 @@ describe("GasStationClient", () => {
     let sequence_number: string;
     try {
       sequence_number = (
-        await aptos.account.getAccountInfo({
+        await node.account.getAccountInfo({
           accountAddress: account.accountAddress,
         })
       ).sequence_number;
@@ -217,7 +234,7 @@ describe("GasStationClient", () => {
         sequence_number = "0";
       else throw e;
     }
-    const { gas_estimate } = await aptos.getGasPriceEstimation();
+    const { gas_estimate } = await node.getGasPriceEstimation();
 
     const submission = {
       sender: account.accountAddress.toString(),
@@ -229,7 +246,7 @@ describe("GasStationClient", () => {
       ).toString(),
       payload: {
         type: "entry_function_payload",
-        function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+        function: `${packageId}::math::add_entry`,
         type_arguments: [],
         arguments: ["1", "2"],
       },
@@ -257,7 +274,7 @@ describe("GasStationClient", () => {
       object,
       PendingTransactionResponse
     >({
-      aptosConfig: aptos.config,
+      aptosConfig: node.config,
       originMethod: "submitTransaction",
       path: "transactions",
       contentType: MimeType.JSON,
@@ -280,7 +297,7 @@ describe("GasStationClient", () => {
     });
     console.log("pending", pending);
 
-    const committed = await aptos.transaction.waitForTransaction({
+    const committed = await node.transaction.waitForTransaction({
       transactionHash: pending.hash,
       options: {
         checkSuccess: true,
@@ -293,7 +310,7 @@ describe("GasStationClient", () => {
 
     expect(
       committed.events.find(
-        (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
+        (x) => x.type == `${packageId}::math::Result`,
       ),
     ).toMatchObject({
       data: {
@@ -304,7 +321,7 @@ describe("GasStationClient", () => {
 
   it("successfully gets fund info", async () => {
     const fund = await gas.getFund();
-    expect(fund.network).toBe("APTOS_TESTNET");
+    expect(fund.network).toBe(network);
     expect(fund.name).toBe("SDK CI");
     expect(fund.balance).toBeGreaterThan(0);
     expect(fund.inFlight).toBeGreaterThanOrEqual(0);
