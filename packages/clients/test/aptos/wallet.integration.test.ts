@@ -14,7 +14,7 @@ import { JSONRPCError } from "@open-rpc/client-js";
 import { v4 as uuidv4 } from "uuid";
 import { KeySession, ShinamiWalletSigner } from "../../src/aptos/index.js";
 import {
-  EXAMPLE_PACKAGE_ID,
+  APTOS_EXAMPLE_PACKAGE_ID,
   createAptos,
   createKeyClient,
   createWalletClient,
@@ -250,7 +250,7 @@ describe("ShinamiAptosWallet", () => {
       const transaction = await aptos.transaction.build.simple({
         sender: senderAcct,
         data: {
-          function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+          function: `${APTOS_EXAMPLE_PACKAGE_ID}::math::add_entry`,
           functionArguments: [1, 2],
         },
         withFeePayer: true,
@@ -271,7 +271,7 @@ describe("ShinamiAptosWallet", () => {
       }
       expect(
         committed.events.find(
-          (x) => x.type == `${EXAMPLE_PACKAGE_ID}::math::Result`,
+          (x) => x.type == `${APTOS_EXAMPLE_PACKAGE_ID}::math::Result`,
         ),
       ).toMatchObject({
         data: {
