@@ -66,7 +66,9 @@ export class GasStationClient extends ShinamiRpcClient {
     accessKey: string,
     url: string = inferRegionalValueFromAccessKey(
       accessKey,
-      accessKey.includes("movement") ? MovementGasStationRpcUrls : GasStationRpcUrls,
+      accessKey.includes("movement")
+        ? MovementGasStationRpcUrls
+        : GasStationRpcUrls,
       (gasStationRpcUrls) => gasStationRpcUrls.us1,
     ),
   ) {
