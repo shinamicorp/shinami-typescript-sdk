@@ -15,22 +15,28 @@ import {
 import { Infer, array, integer, object, string, unknown } from "superstruct";
 import { ShinamiRpcClient, errorDetails, trimTrailingParams } from "../rpc.js";
 import { JSONRPCError } from "@open-rpc/client-js";
-import { KeyRpcUrls, WalletRpcUrls } from "./endpoints.js";
+import {
+  KeyRpcUrls,
+  MovementKeyRpcUrls,
+  WalletRpcUrls,
+  MovementWalletRpcUrls,
+} from "./endpoints.js";
 import { inferRegionalValueFromAccessKey } from "../region.js";
 
 /**
- * Shinami Key RPC client for Aptos.
+ * Shinami Key RPC client for Aptos and Movement.
  */
 export class KeyClient extends ShinamiRpcClient {
   /**
-   * @param accessKey Aptos Wallet access key.
+   * @param accessKey Wallet access key. The format determines which blockchain and network your
+   *    transactions are targeting (e.g., "us1_aptos_mainnet_xxx" or "us1_movement_testnet_xxx").
    * @param url Optional URL override.
    */
   constructor(
     accessKey: string,
     url: string = inferRegionalValueFromAccessKey(
       accessKey,
-      KeyRpcUrls,
+      accessKey.includes("movement") ? MovementKeyRpcUrls : KeyRpcUrls,
       (keyRpcUrls) => keyRpcUrls.us1,
     ),
   ) {
@@ -75,18 +81,19 @@ type ExecuteGaslessTransactionResult = Infer<
 >;
 
 /**
- * Shinami Wallet RPC client for Aptos.
+ * Shinami Wallet RPC client for Aptos and Movement.
  */
 export class WalletClient extends ShinamiRpcClient {
   /**
-   * @param accessKey Aptos Wallet access key.
+   * @param accessKey Wallet access key. The format determines which blockchain and network your
+   *    transactions are targeting (e.g., "us1_aptos_mainnet_xxx" or "us1_movement_testnet_xxx").
    * @param url Optional URL override.
    */
   constructor(
     accessKey: string,
     url: string = inferRegionalValueFromAccessKey(
       accessKey,
-      WalletRpcUrls,
+      accessKey.includes("movement") ? MovementWalletRpcUrls : WalletRpcUrls,
       (walletRpcUrls) => walletRpcUrls.us1,
     ),
   ) {
@@ -97,7 +104,7 @@ export class WalletClient extends ShinamiRpcClient {
    * Creates a new wallet that is not initialized on chain.
    * @param walletId Wallet id. Must not have been previously used, or an error will be returned.
    * @param sessionToken Session token. Obtained by `KeyClient.createSession`.
-   * @returns Aptos address of the created wallet.
+   * @returns Address of the created wallet.
    */
   async createWallet(
     walletId: string,
@@ -112,10 +119,10 @@ export class WalletClient extends ShinamiRpcClient {
   }
 
   /**
-   * Initializes a wallet that was created with `createWallet` onto the Aptos chain. Network is dictated by the access key used.
+   * Initializes a wallet that was created with `createWallet` onto the target chain. Network is dictated by the access key used.
    * @param walletId Wallet id used previously in `createWallet`
    * @param sessionToken Session token. Obtained by `KeyClient.createSession`.
-   * @returns Aptos address of the created wallet that is now initialized on chain.
+   * @returns Address of the created wallet that is now initialized on chain.
    */
   async initializeWalletOnChain(
     walletId: string,
@@ -130,10 +137,10 @@ export class WalletClient extends ShinamiRpcClient {
   }
 
   /**
-   * Creates a new wallet and initializes it on the Aptos chain. Network is dictated by the access key used.
+   * Creates a new wallet and initializes it on the target chain. Network is dictated by the access key used.
    * @param walletId Wallet id. Must not have been previously used, or an error will be returned.
    * @param sessionToken Session token. Obtained by `KeyClient.createSession`.
-   * @returns Aptos address of the created wallet that is also initialized on chain.
+   * @returns Address of the created wallet that is also initialized on chain.
    */
   async createWalletOnChain(
     walletId: string,
@@ -191,7 +198,7 @@ export class WalletClient extends ShinamiRpcClient {
 
   /**
    * Sponsors, signs, and executes a SimpleTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the Aptos Wallet Service and Aptos Gas Station.
+   * To call this method, your access key must be authorized for both the Wallet Service and Gas Station.
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param transaction Transaction of type SimpleTransaction.
@@ -205,7 +212,7 @@ export class WalletClient extends ShinamiRpcClient {
 
   /**
    * Executes a MultiAgentTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the Aptos Wallet Service and Aptos Gas Station.
+   * To call this method, your access key must be authorized for both the Wallet Service and Gas Station.
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param transaction Transaction of type MultiAgentTransaction.
@@ -255,7 +262,7 @@ export class WalletClient extends ShinamiRpcClient {
 }
 
 /**
- * A secret session with Shinami Aptos key service.
+ * A secret session with Shinami Aptos or Movement key service.
  */
 export class KeySession {
   private readonly secret: string;
@@ -302,7 +309,7 @@ export class KeySession {
 }
 
 /**
- * A signer based on Shinami's invisible wallet for Aptos.
+ * A signer based on Shinami's invisible wallet for Aptos or Movement.
  *
  * It transparently manages session token refreshes.
  */
@@ -401,7 +408,7 @@ export class ShinamiWalletSigner {
   /**
    * Tries to create this wallet if it doesn't exist.
    * @param onChain If set, it will try to create the wallet and initialize it on chain as well.
-   *    The access key used must be authorized for Aptos gas station. On chain initialization costs
+   *    The access key used must be authorized for target chain's gas station. On chain initialization costs
    *    will be drawn from the attached gas station fund.
    * @returns The wallet address if it was just created. `undefined` if pre-existing, in which case
    *  you can call `getAddfress` to retrieve the said info.
@@ -437,7 +444,7 @@ export class ShinamiWalletSigner {
 
   /**
    * Sponsors, signs, and executes a SimpleTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the Aptos Wallet Service and Aptos Gas Station.
+   * To call this method, your access key must be authorized for both the target chain's wallet service and gas station.
    * @param transaction Transaction of type SimpleTransaction.
    * @returns The submitted transaction in mempool.
    */
@@ -447,7 +454,7 @@ export class ShinamiWalletSigner {
 
   /**
    * Sponsors, signs, and executes a MultiAgentTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the Aptos Wallet Service and Aptos Gas Station.
+   * To call this method, your access key must be authorized for both the target chain's wallet service and gas station.
    * @param transaction Transaction of type MultiAgentTransaction.
    * @param secondarySignatures: Other signers for this MultiAgentTransaction.
    * @returns The submitted transaction in mempool.

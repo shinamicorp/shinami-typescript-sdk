@@ -20,6 +20,7 @@ For [Aptos](https://aptos.dev/):
 For [Movement](https://https://www.movementnetwork.xyz/)
 
 - [Gas station](#gas-station-movement)
+- [Invisible wallet](#invisible-wallet-movement)
 
 ## Install
 
@@ -507,6 +508,131 @@ const committed = await aptos.transaction.waitForTransaction({
 });
 ```
 
+### Invisible wallet (Movement)
+
+The Movement Network builds on Aptos Move, and like the [recommendation](https://docs.movementnetwork.xyz/devs/interactonchain/tsSdk) from Movement to use the Aptos Typescript SDK for interacting with the chain, Shinami makes the same recommendation with our Aptos SDK.
+
+To use the invisible wallet as a signer for a regular (non-sponsored) transaction:
+
+```ts
+import {
+  Aptos,
+  AptosConfig,
+  Network,
+  AccountAuthenticatorEd25519,
+} from "@aptos-labs/ts-sdk";
+import {
+  KeyClient,
+  ShinamiWalletSigner,
+  WalletClient,
+} from "@shinami/clients/aptos";
+
+// We use the public testnet endpoint here, but you can plug in any Movement endpoint.
+const config = new AptosConfig({
+  network: Network.CUSTOM,
+  fullnode: "https://testnet.movementnetwork.xyz/v1",
+});
+// Initialize the Aptos client connecting to Movement
+const aptos = new Aptos(config);
+
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
+// It MUST be associated with the same Movement network as above.
+const key = new KeyClient(WALLET_ACCESS_KEY);
+const wal = new WalletClient(WALLET_ACCESS_KEY);
+
+// WALLET_SECRET MUST be used consistently with this wallet id.
+// You are responsible for safe-keeping the (walletId, secret) pair.
+// Shinami cannot recover it for you.
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
+
+// Get or create the sender account on chain. Since this is a non-sponsored transaction,
+// your account MUST have MOVE in it in order to execute a transaction.
+const senderAccount = await signer.getAddress(true, true);
+
+// Create a transaction with no feePayer set. This is an example of a SimpleTransaction
+const transaction = await aptos.transaction.build.simple({
+  sender: senderAccount,
+  data: {
+    function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+    functionArguments: [1, 2],
+  },
+  withFeePayer: false,
+  options: {
+    expireTimestamp: Math.floor(Date.now() / 1000) + 5 * 60,
+  },
+});
+
+// Sign tx with invisible wallet.
+const accountAuthenticator = await signer.signTransaction(transaction);
+
+// Submit the tx for execution
+const pending = aptos.transaction.submit.simple({
+  transaction,
+  senderAuthenticator: accountAuthenticator as AccountAuthenticatorEd25519,
+});
+
+// Wait for it to be committed on-chain.
+const committed = await aptos.transaction.waitForTransaction({
+  transactionHash: pending.hash,
+});
+```
+
+To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami's Movement gas station:
+
+```ts
+import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import {
+  KeyClient,
+  ShinamiWalletSigner,
+  WalletClient,
+} from "@shinami/clients/aptos";
+
+// We use the public testnet endpoint here, but you can plug in any Movement endpoint.
+const config = new AptosConfig({
+  network: Network.CUSTOM,
+  fullnode: "https://testnet.movementnetwork.xyz/v1",
+});
+// Initialize the Aptos client connecting to Movement
+const aptos = new Aptos(config);
+
+// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
+// It MUST be authorized for all of these Movement services:
+// - Gas station (The fund your key is tied to must have funds in it)
+// - Wallet service
+const key = new KeyClient(SUPER_ACCESS_KEY);
+const wal = new WalletClient(SUPER_ACCESS_KEY);
+
+// WALLET_SECRET MUST be used consistently with this wallet id.
+// You are responsible for safe-keeping the (walletId, secret) pair.
+// Shinami cannot recover it for you.
+const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
+
+// Get or create the sender account on chain. You do not need MOVE in this account since
+// we'll be using Shinami's gas station to sponsor the transaction.
+const senderAccount = await signer.getAddress(true, true);
+
+// Create a transaction with feePayer set. This is an example of a SimpleTransaction
+const transaction = await aptos.transaction.build.simple({
+  sender: senderAccount,
+  data: {
+    function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
+    functionArguments: [1, 2],
+  },
+  withFeePayer: true,
+  options: {
+    expireTimestamp: Math.floor(Date.now() / 1000) + 5 * 60,
+  },
+});
+
+// Execute the gasless tx using your invisible wallet.
+const pending = signer.executeGaslessTransaction(transaction);
+
+// Wait for it to be committed on-chain.
+const committed = await aptos.transaction.waitForTransaction({
+  transactionHash: pending.hash,
+});
+```
+
 ## Development
 
 ### Build
@@ -547,7 +673,7 @@ The key must be authorized for all of these services, targeting _Aptos Testnet_:
 
 The integration tests for Movement make use of the [Movement example](../../examples/movement-move/) package, which has been deployed to [Movement Testnet](https://explorer.movementnetwork.xyz/account/0x5f2312867bcfcefec959f2cedaed49ca670db2a56fcca99623c74bbc67408647/modules/code/math?network=bardock+testnet).
 Obtain `<your_movement_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
-The key must be authorized for the Gas station, targeting _Movement Testnet_ and it must hae some available balance in the gas fund.
+The key must be authorized for the Gas station and Invisible wallet, targeting _Movement Testnet_ and it must hae some available balance in the gas fund.
 
 Once you have the keys for all chains,
 
@@ -559,6 +685,7 @@ export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 export MOVEMENT_GAS_ACCESS_KEY=<your_movement_super_access_key>
+export MOVEMENT_WALLET_ACCESS_KEY=<your_movement_super_access_key>
 
 npm run integration
 ```
@@ -578,6 +705,7 @@ export APTOS_NODE_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
 export APTOS_WALLET_ACCESS_KEY=<your_aptos_super_access_key>
 export MOVEMENT_GAS_ACCESS_KEY=<your_movement_super_access_key>
+export MOVEMENT_WALLET_ACCESS_KEY=<your_movement_super_access_key>
 
 npm run coverage
 ```
