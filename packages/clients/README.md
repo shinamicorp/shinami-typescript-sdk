@@ -462,7 +462,7 @@ const config = new AptosConfig({
   fullnode: "https://testnet.movementnetwork.xyz/v1",
 });
 // Initialize the Aptos client connecting to Movement
-const aptos = new Aptos(config);
+const movementClient = new Aptos(config);
 
 // Obtain GAS_ACCESS_KEY from your Shinami web portal.
 // It MUST be associated with the same Movement network as above.
@@ -477,7 +477,7 @@ const account = Account.generate({
 });
 
 // Build a transaction as you normally would, but with fee payer placeholder.
-const transaction = await aptos.transaction.build.simple({
+const transaction = await movementClient.transaction.build.simple({
   sender: account.accountAddress,
   data: {
     function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
@@ -490,20 +490,20 @@ const transaction = await aptos.transaction.build.simple({
 const feePayerSig = await gas.sponsorTransaction(transaction);
 
 // Sign the sponsored transaction as usual.
-const senderSig = aptos.transaction.sign({
+const senderSig = movementClient.transaction.sign({
   signer: account,
   transaction,
 });
 
 // Submit the signed transaction with fee payer signature.
-const pending = await aptos.transaction.submit.simple({
+const pending = await movementClient.transaction.submit.simple({
   transaction,
   senderAuthenticator: senderSig,
   feePayerAuthenticator: feePayerSig,
 });
 
 // Wait for it to be committed on-chain.
-const committed = await aptos.transaction.waitForTransaction({
+const committed = await movementClient.transaction.waitForTransaction({
   transactionHash: pending.hash,
 });
 ```
@@ -533,7 +533,7 @@ const config = new AptosConfig({
   fullnode: "https://testnet.movementnetwork.xyz/v1",
 });
 // Initialize the Aptos client connecting to Movement
-const aptos = new Aptos(config);
+const movementClient = new Aptos(config);
 
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal.
 // It MUST be associated with the same Movement network as above.
@@ -550,7 +550,7 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 const senderAccount = await signer.getAddress(true, true);
 
 // Create a transaction with no feePayer set. This is an example of a SimpleTransaction
-const transaction = await aptos.transaction.build.simple({
+const transaction = await movementClient.transaction.build.simple({
   sender: senderAccount,
   data: {
     function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
@@ -566,13 +566,13 @@ const transaction = await aptos.transaction.build.simple({
 const accountAuthenticator = await signer.signTransaction(transaction);
 
 // Submit the tx for execution
-const pending = aptos.transaction.submit.simple({
+const pending = movementClient.transaction.submit.simple({
   transaction,
   senderAuthenticator: accountAuthenticator as AccountAuthenticatorEd25519,
 });
 
 // Wait for it to be committed on-chain.
-const committed = await aptos.transaction.waitForTransaction({
+const committed = await movementClient.transaction.waitForTransaction({
   transactionHash: pending.hash,
 });
 ```
@@ -593,7 +593,7 @@ const config = new AptosConfig({
   fullnode: "https://testnet.movementnetwork.xyz/v1",
 });
 // Initialize the Aptos client connecting to Movement
-const aptos = new Aptos(config);
+const movementClient = new Aptos(config);
 
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these Movement services:
@@ -612,7 +612,7 @@ const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
 const senderAccount = await signer.getAddress(true, true);
 
 // Create a transaction with feePayer set. This is an example of a SimpleTransaction
-const transaction = await aptos.transaction.build.simple({
+const transaction = await movementClient.transaction.build.simple({
   sender: senderAccount,
   data: {
     function: `${EXAMPLE_PACKAGE_ID}::math::add_entry`,
@@ -628,7 +628,7 @@ const transaction = await aptos.transaction.build.simple({
 const pending = signer.executeGaslessTransaction(transaction);
 
 // Wait for it to be committed on-chain.
-const committed = await aptos.transaction.waitForTransaction({
+const committed = await movementClient.transaction.waitForTransaction({
   transactionHash: pending.hash,
 });
 ```
@@ -673,7 +673,7 @@ The key must be authorized for all of these services, targeting _Aptos Testnet_:
 
 The integration tests for Movement make use of the [Movement example](../../examples/movement-move/) package, which has been deployed to [Movement Testnet](https://explorer.movementnetwork.xyz/account/0x5f2312867bcfcefec959f2cedaed49ca670db2a56fcca99623c74bbc67408647/modules/code/math?network=bardock+testnet).
 Obtain `<your_movement_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
-The key must be authorized for the Gas station and Invisible wallet, targeting _Movement Testnet_ and it must hae some available balance in the gas fund.
+The key must be authorized for the Gas station and Invisible wallet, targeting _Movement Testnet_ and it must have some available balance in the gas fund.
 
 Once you have the keys for all chains,
 

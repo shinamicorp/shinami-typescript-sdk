@@ -198,7 +198,7 @@ export class WalletClient extends ShinamiRpcClient {
 
   /**
    * Sponsors, signs, and executes a SimpleTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the Wallet Service and Gas Station.
+   * To call this method, your access key must be authorized for both the target chain's Wallet Service and Gas Station, and node service as well for Aptos.
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param transaction Transaction of type SimpleTransaction.
@@ -212,7 +212,7 @@ export class WalletClient extends ShinamiRpcClient {
 
   /**
    * Executes a MultiAgentTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the Wallet Service and Gas Station.
+   * To call this method, your access key must be authorized for both the target chain's Wallet Service and Gas Station, and node service as well for Aptos.
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param transaction Transaction of type MultiAgentTransaction.
@@ -444,7 +444,7 @@ export class ShinamiWalletSigner {
 
   /**
    * Sponsors, signs, and executes a SimpleTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the target chain's wallet service and gas station.
+   * To call this method, your access key must be authorized for both the target chain's wallet service and gas station, and node service as well for Aptos.
    * @param transaction Transaction of type SimpleTransaction.
    * @returns The submitted transaction in mempool.
    */
@@ -454,7 +454,7 @@ export class ShinamiWalletSigner {
 
   /**
    * Sponsors, signs, and executes a MultiAgentTransaction gaslessly with the specified wallet as the sender.
-   * To call this method, your access key must be authorized for both the target chain's wallet service and gas station.
+   * To call this method, your access key must be authorized for both the target chain's wallet service and gas station, and node service as well for Aptos.
    * @param transaction Transaction of type MultiAgentTransaction.
    * @param secondarySignatures: Other signers for this MultiAgentTransaction.
    * @returns The submitted transaction in mempool.
