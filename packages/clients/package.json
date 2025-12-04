@@ -4,7 +4,7 @@
   "description": "TypeScript clients for Shinami services",
   "sideEffects": false,
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "files": [
     "dist",

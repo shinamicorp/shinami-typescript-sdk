@@ -5,10 +5,7 @@
 
 import { Keypair } from "@mysten/sui/cryptography";
 import { fromB64 } from "@mysten/sui/utils";
-import {
-  MutationFunction,
-  MutationFunctionContext,
-} from "@tanstack/react-query";
+import { MutationFunction } from "@tanstack/react-query";
 import { Struct } from "superstruct";
 import { PreparedTransactionBytes, SignedTransactionBytes } from "../../tx.js";
 import { apiMutationFn } from "./api.js";
@@ -38,19 +35,19 @@ export function apiTxExecMutationFn<
 }): MutationFunction<T, P> {
   const _body = body ?? (({ keyPair, ...params }) => params);
 
-  return async (params: P) => {
+  return async (params: P, ...rest) => {
     const uri = baseUri(params);
     const tx = await apiMutationFn({
       uri: () => `${uri}/tx`,
       body: _body,
       resultSchema: PreparedTransactionBytes,
-    })(params, {} as MutationFunctionContext);
+    })(params, ...rest);
     const { signature } = await params.keyPair.signTransaction(
       fromB64(tx.txBytes),
     );
     return await apiMutationFn<T, SignedTransactionBytes>({
       uri: () => `${uri}/exec`,
       resultSchema,
-    })({ ...tx, signature }, {} as MutationFunctionContext);
+    })({ ...tx, signature }, ...rest);
   };
 }
