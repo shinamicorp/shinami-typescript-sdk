@@ -39,12 +39,20 @@ export function createMovementGasClient() {
   return new GasStationClient(requireEnv("MOVEMENT_GAS_ACCESS_KEY"));
 }
 
-export function createKeyClient() {
+export function createAptosKeyClient() {
   return new KeyClient(requireEnv("APTOS_WALLET_ACCESS_KEY"));
 }
 
-export function createWalletClient() {
+export function createMovementKeyClient() {
+  return new KeyClient(requireEnv("MOVEMENT_WALLET_ACCESS_KEY"));
+}
+
+export function createAptosWalletClient() {
   return new WalletClient(requireEnv("APTOS_WALLET_ACCESS_KEY"));
+}
+
+export function createMovementWalletClient() {
+  return new WalletClient(requireEnv("MOVEMENT_WALLET_ACCESS_KEY"));
 }
 
 function requireEnv(env: string): string {

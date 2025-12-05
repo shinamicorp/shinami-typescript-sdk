@@ -25,6 +25,14 @@ export const WalletRpcUrls = {
   us1: createRegionalApiUrl("us1", "aptos", "wallet"),
 } as const satisfies Partial<Record<Region, string>>;
 
+export const MovementWalletRpcUrls = {
+  us1: createRegionalApiUrl("us1", "movement", "wallet"),
+} as const satisfies Partial<Record<Region, string>>;
+
 export const KeyRpcUrls = {
   us1: createRegionalApiUrl("us1", "aptos", "key"),
+} as const satisfies Partial<Record<Region, string>>;
+
+export const MovementKeyRpcUrls = {
+  us1: createRegionalApiUrl("us1", "movement", "key"),
 } as const satisfies Partial<Record<Region, string>>;
