@@ -35,19 +35,19 @@ export function apiTxExecMutationFn<
 }): MutationFunction<T, P> {
   const _body = body ?? (({ keyPair, ...params }) => params);
 
-  return async (params: P) => {
+  return async (params: P, ...rest) => {
     const uri = baseUri(params);
     const tx = await apiMutationFn({
       uri: () => `${uri}/tx`,
       body: _body,
       resultSchema: PreparedTransactionBytes,
-    })(params);
+    })(params, ...rest);
     const { signature } = await params.keyPair.signTransaction(
       fromB64(tx.txBytes),
     );
     return await apiMutationFn<T, SignedTransactionBytes>({
       uri: () => `${uri}/exec`,
       resultSchema,
-    })({ ...tx, signature });
+    })({ ...tx, signature }, ...rest);
   };
 }

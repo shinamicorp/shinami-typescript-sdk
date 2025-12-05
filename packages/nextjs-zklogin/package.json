@@ -4,7 +4,7 @@
   "description": "Next.js SDK for integrating with Sui zkLogin",
   "sideEffects": false,
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "files": [
     "dist",
