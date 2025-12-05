@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - run: npm update # Update to latest dep versions
       - run: npm ls --all # Print effective versions
       # Delete all .ts files from iron-session because they're packaged incompletely, which fails
