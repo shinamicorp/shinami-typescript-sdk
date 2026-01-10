@@ -5,5 +5,4 @@
 
 export * from "./gas.js";
 export * from "./wallet.js";
-export * from "./aptos.js";
 export * from "./endpoints.js";
