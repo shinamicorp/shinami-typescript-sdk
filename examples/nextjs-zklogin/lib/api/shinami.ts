@@ -1,8 +1,8 @@
+import { SuiClient } from "@mysten/sui/client";
 import {
   GasStationClient,
   ZkProverClient,
   ZkWalletClient,
-  createSuiClient,
 } from "@shinami/clients/sui";
 import { throwExpression } from "../shared/utils";
 
@@ -13,12 +13,16 @@ const SHINAMI_SUPER_ACCESS_KEY =
 
 /**
  * A sui client for backend use only.
+ *
+ * Configure SUI_RPC_URL with your Sui RPC endpoint of choice.
+ * This can be the same value as NEXT_PUBLIC_SUI_RPC_URL if you are comfortable
+ * exposing the endpoint publicly.
  */
-export const sui = createSuiClient(
-  SHINAMI_SUPER_ACCESS_KEY,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_RPC_URL_OVERRIDE,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE,
-);
+export const sui = new SuiClient({
+  url:
+    process.env.SUI_RPC_URL ??
+    throwExpression(new Error("SUI_RPC_URL not configured")),
+});
 
 /**
  * Shinami gas station client.

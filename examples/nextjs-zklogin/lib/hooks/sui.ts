@@ -1,4 +1,4 @@
-import { createSuiClient } from "@shinami/clients/sui";
+import { SuiClient } from "@mysten/sui/client";
 import { SUI_NETWORK } from "../shared/sui";
 import { throwExpression } from "../shared/utils";
 
@@ -21,13 +21,12 @@ export function getSuiVisionTransactionUrl(digest: string) {
 /**
  * A sui client for frontend use.
  *
- * Alternatively, you can also construct a SuiClient using any provider of your choice.
+ * Configure NEXT_PUBLIC_SUI_RPC_URL with your Sui RPC endpoint of choice.
+ * This can be the same value as SUI_RPC_URL if you are comfortable exposing
+ * the endpoint publicly.
  */
-export const sui = createSuiClient(
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY ??
-    throwExpression(
-      new Error("NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY not configured"),
-    ),
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_RPC_URL_OVERRIDE,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE,
-);
+export const sui = new SuiClient({
+  url:
+    process.env.NEXT_PUBLIC_SUI_RPC_URL ??
+    throwExpression(new Error("NEXT_PUBLIC_SUI_RPC_URL not configured")),
+});

@@ -11,9 +11,8 @@ export function createRegionalApiUrl(
   region: Region,
   chain: Chain,
   service: string,
-  scheme: "https" | "wss" = "https",
 ): string {
-  return `${scheme}://api.${region}.shinami.com/${chain}/${service}/v1`;
+  return `https://api.${region}.shinami.com/${chain}/${service}/v1`;
 }
 
 export function inferRegionalValueFromAccessKey<

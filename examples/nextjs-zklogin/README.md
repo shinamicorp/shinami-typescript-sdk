@@ -73,20 +73,26 @@ You can use this command to generate it:
 openssl rand -hex 32
 ```
 
+### Configure Sui RPC endpoint
+
+This example requires a Sui RPC endpoint for both the backend and frontend.
+Set these env variables with your RPC provider of choice:
+
+- `SUI_RPC_URL` - Sui RPC endpoint for backend use.
+- `NEXT_PUBLIC_SUI_RPC_URL` - Sui RPC endpoint for frontend use.
+
+These can be set to the same value if you are comfortable exposing the endpoint publicly.
+Make sure the endpoint targets `Testnet`, because that's where the example Move package is deployed.
+
 ### Obtain Shinami access keys
 
-By default, this example uses Shinami's node, gas station, and wallet services, to provide the most seamless experience.
-For security best practice, you should create two separate access keys and set these env variables:
+This example uses Shinami's gas station and wallet services.
+Set this env variable:
 
 - `SHINAMI_SUPER_ACCESS_KEY` -
-  Super key with access to Shinami node, gas station, and wallet services.
+  Super key with access to Shinami gas station and wallet services.
   Make sure your gas fund has some available balance, because this example uses sponsored transactions.
   This key is only used by the API routes on the backend.
-- `NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY` -
-  Shinami node only access key.
-  This key is used on the frontend.
-
-Also make sure both access keys are for `Testnet`, because that's where the example Move package is deployed.
 
 ## Run dev server
 

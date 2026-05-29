@@ -6,7 +6,6 @@ TypeScript clients for [Shinami](https://www.shinami.com/) services.
 
 For [Sui](https://sui.io/):
 
-- [Node service](#node-service-sui)
 - [Gas station](#gas-station-sui)
 - [Invisible wallet](#invisible-wallet-sui)
 - [zkLogin wallet](#zklogin-wallet-sui)
@@ -39,22 +38,6 @@ npm install @aptos-labs/ts-sdk
 
 ## Usage
 
-### Node service (Sui)
-
-To create a Sui RPC client:
-
-```ts
-import { createSuiClient } from "@shinami/clients/sui";
-
-// Obtain NODE_ACCESS_KEY from your Shinami web portal.
-const sui = createSuiClient(NODE_ACCESS_KEY);
-```
-
-The returned `sui` object is a [SuiClient](https://github.com/MystenLabs/sui/blob/3dacfa02ab67469f5d5a42aa6146b34bffbf7008/sdk/typescript/src/client/client.ts#L91) configured to use Shinami's node service.
-It supports both HTTP JSON RPC requests as well as WebSocket subscriptions.
-
-**Note that `NODE_ACCESS_KEY` determines which Sui network later operations are targeting.**
-
 ### Gas station (Sui)
 
 **Note that gas station should be integrated from your service backend.**
@@ -63,17 +46,17 @@ This is so you don't leak your `GAS_ACCESS_KEY` to your end users, and to allow 
 To use gas station with a local signer:
 
 ```ts
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { fromB64 } from "@mysten/sui/utils";
 import {
   GasStationClient,
   buildGaslessTransaction,
-  createSuiClient,
 } from "@shinami/clients/sui";
 
-// Obtain NODE_ACCESS_KEY and GAS_ACCESS_KEY from your Shinami web portal.
-// They MUST be associated with the same network.
-const sui = createSuiClient(NODE_ACCESS_KEY);
+// Use any Sui RPC provider of your choice. It MUST target the same network as GAS_ACCESS_KEY.
+const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
+// Obtain GAS_ACCESS_KEY from your Shinami web portal.
 const gas = new GasStationClient(GAS_ACCESS_KEY);
 
 // You'll want to persist the key pair instead of always creating new ones.
@@ -110,16 +93,17 @@ const txResp = await sui.executeTransactionBlock({
 To use the invisible wallet as a signer for a regular (non-sponsored) transaction:
 
 ```ts
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import {
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
-  createSuiClient,
 } from "@shinami/clients/sui";
 
-// Obtain NODE_ACCESS_KEY and WALLET_ACCESS_KEY from your Shinami web portal.
-const sui = createSuiClient(NODE_ACCESS_KEY);
+// Use any Sui RPC provider of your choice.
+const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
+// Obtain WALLET_ACCESS_KEY from your Shinami web portal.
 const key = new KeyClient(WALLET_ACCESS_KEY);
 const wal = new WalletClient(WALLET_ACCESS_KEY);
 
@@ -149,23 +133,23 @@ const txResp = await sui.executeTransactionBlock({
 });
 ```
 
-To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami node service and gas station:
+To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami gas station:
 
 ```ts
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import {
   KeyClient,
   ShinamiWalletSigner,
   WalletClient,
   buildGaslessTransaction,
-  createSuiClient,
 } from "@shinami/clients/sui";
 
+// Use any Sui RPC provider of your choice.
+const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
-// - Node service
 // - Gas station
 // - Wallet service
-const sui = createSuiClient(SUPER_ACCESS_KEY);
 const key = new KeyClient(SUPER_ACCESS_KEY);
 const wal = new WalletClient(SUPER_ACCESS_KEY);
 
@@ -204,7 +188,6 @@ import {
 
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
-// - Node service
 // - Gas station
 // - Wallet service
 const key = new KeyClient(SUPER_ACCESS_KEY);
@@ -659,7 +642,6 @@ The integration tests for Sui make use of the [Sui Move example](../../examples/
 Obtain `<your_sui_super_access_key>` from [Shinami web portal](https://app.shinami.com/access-keys).
 The key must be authorized for all of these services, targeting _Sui Testnet_:
 
-- Node service
 - Gas station - you must also have some available balance in your gas fund.
 - Wallet service
 
@@ -677,7 +659,6 @@ The key must be authorized for the Gas station and Invisible wallet, targeting _
 Once you have the keys for all chains,
 
 ```shell
-export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
@@ -696,7 +677,6 @@ You can also make it talk to alternative endpoints by modifying [sui/integration
 Similar to [integration test](#integration-test):
 
 ```shell
-export SUI_NODE_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_GAS_ACCESS_KEY=<your_sui_super_access_key>
 export SUI_WALLET_ACCESS_KEY=<your_sui_super_access_key>
 export APTOS_GAS_ACCESS_KEY=<your_aptos_super_access_key>
