@@ -1,9 +1,10 @@
-import { SuiClient } from "@mysten/sui/client";
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import {
   GasStationClient,
   ZkProverClient,
   ZkWalletClient,
 } from "@shinami/clients/sui";
+import { SUI_NETWORK } from "../shared/sui";
 import { throwExpression } from "../shared/utils";
 
 // This key is only used on the backend / api. It's not exposed to the frontend.
@@ -14,14 +15,11 @@ const SHINAMI_SUPER_ACCESS_KEY =
 /**
  * A sui client for backend use only.
  *
- * Configure SUI_RPC_URL with your Sui RPC endpoint of choice.
- * This can be the same value as NEXT_PUBLIC_SUI_RPC_URL if you are comfortable
- * exposing the endpoint publicly.
+ * Defaults to the Mysten public fullnode for the configured network.
+ * Override by setting SUI_RPC_URL.
  */
 export const sui = new SuiClient({
-  url:
-    process.env.SUI_RPC_URL ??
-    throwExpression(new Error("SUI_RPC_URL not configured")),
+  url: process.env.SUI_RPC_URL ?? getFullnodeUrl(SUI_NETWORK),
 });
 
 /**

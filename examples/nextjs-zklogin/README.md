@@ -73,16 +73,16 @@ You can use this command to generate it:
 openssl rand -hex 32
 ```
 
-### Configure Sui RPC endpoint
+### Configure Sui RPC endpoint (optional)
 
-This example requires a Sui RPC endpoint for both the backend and frontend.
-Set these env variables with your RPC provider of choice:
+By default, this example uses the Mysten public fullnode for the network configured in `NEXT_PUBLIC_SUI_NETWORK`.
+Note: the Mysten public fullnode endpoints should NOT be used for any production level deployments.
+You can override the RPC endpoint by setting these env variables:
 
-- `SUI_RPC_URL` - Sui RPC endpoint for backend use.
-- `NEXT_PUBLIC_SUI_RPC_URL` - Sui RPC endpoint for frontend use.
+- `SUI_RPC_URL` - Sui RPC endpoint override for backend use.
+- `NEXT_PUBLIC_SUI_RPC_URL` - Sui RPC endpoint override for frontend use.
 
 These can be set to the same value if you are comfortable exposing the endpoint publicly.
-Make sure the endpoint targets `Testnet`, because that's where the example Move package is deployed.
 
 ### Obtain Shinami access keys
 
