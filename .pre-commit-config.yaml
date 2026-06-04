@@ -9,7 +9,8 @@ repos:
         language: system
         entry: >-
           env
-          NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY=fake_key
+          SUI_RPC_URL=fake_url
+          NEXT_PUBLIC_SUI_RPC_URL=fake_url
           NEXT_PUBLIC_GOOGLE_CLIENT_ID=fake_id
           NEXT_PUBLIC_FACEBOOK_CLIENT_ID=fake_id
           NEXT_PUBLIC_TWITCH_CLIENT_ID=fake_id

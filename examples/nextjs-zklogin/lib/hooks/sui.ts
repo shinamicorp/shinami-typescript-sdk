@@ -1,6 +1,5 @@
-import { createSuiClient } from "@shinami/clients/sui";
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { SUI_NETWORK } from "../shared/sui";
-import { throwExpression } from "../shared/utils";
 
 const SUI_VISION_BASE_URL = `https://${
   SUI_NETWORK === "mainnet" ? "" : `${SUI_NETWORK}.`
@@ -21,13 +20,9 @@ export function getSuiVisionTransactionUrl(digest: string) {
 /**
  * A sui client for frontend use.
  *
- * Alternatively, you can also construct a SuiClient using any provider of your choice.
+ * Defaults to the Mysten public fullnode for the configured network.
+ * Override by setting NEXT_PUBLIC_SUI_RPC_URL.
  */
-export const sui = createSuiClient(
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY ??
-    throwExpression(
-      new Error("NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY not configured"),
-    ),
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_RPC_URL_OVERRIDE,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE,
-);
+export const sui = new SuiClient({
+  url: process.env.NEXT_PUBLIC_SUI_RPC_URL ?? getFullnodeUrl(SUI_NETWORK),
+});

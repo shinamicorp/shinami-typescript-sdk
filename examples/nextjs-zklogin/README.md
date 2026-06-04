@@ -73,20 +73,28 @@ You can use this command to generate it:
 openssl rand -hex 32
 ```
 
+### Configure Sui RPC endpoint (optional)
+
+By default, this example connects to the Mysten public fullnode for the network set in
+`NEXT_PUBLIC_SUI_NETWORK`. The public fullnode is rate limited and should NOT be used for
+production deployments.
+
+To use your own RPC provider, set either or both of:
+
+- `SUI_RPC_URL` — used only by the backend API routes. It stays on the server, so it's safe to
+  use an endpoint that embeds a secret or API key.
+- `NEXT_PUBLIC_SUI_RPC_URL` — used by the frontend. This value is bundled into the browser, so
+  only use an endpoint you're comfortable exposing publicly.
+
 ### Obtain Shinami access keys
 
-By default, this example uses Shinami's node, gas station, and wallet services, to provide the most seamless experience.
-For security best practice, you should create two separate access keys and set these env variables:
+This example uses Shinami's gas station and wallet services.
+Set this env variable:
 
 - `SHINAMI_SUPER_ACCESS_KEY` -
-  Super key with access to Shinami node, gas station, and wallet services.
+  Super key with access to Shinami gas station and wallet services.
   Make sure your gas fund has some available balance, because this example uses sponsored transactions.
   This key is only used by the API routes on the backend.
-- `NEXT_PUBLIC_SHINAMI_NODE_ACCESS_KEY` -
-  Shinami node only access key.
-  This key is used on the frontend.
-
-Also make sure both access keys are for `Testnet`, because that's where the example Move package is deployed.
 
 ## Run dev server
 

@@ -1,9 +1,10 @@
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import {
   GasStationClient,
   ZkProverClient,
   ZkWalletClient,
-  createSuiClient,
 } from "@shinami/clients/sui";
+import { SUI_NETWORK } from "../shared/sui";
 import { throwExpression } from "../shared/utils";
 
 // This key is only used on the backend / api. It's not exposed to the frontend.
@@ -13,12 +14,13 @@ const SHINAMI_SUPER_ACCESS_KEY =
 
 /**
  * A sui client for backend use only.
+ *
+ * Defaults to the Mysten public fullnode for the configured network.
+ * Override by setting SUI_RPC_URL.
  */
-export const sui = createSuiClient(
-  SHINAMI_SUPER_ACCESS_KEY,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_RPC_URL_OVERRIDE,
-  process.env.NEXT_PUBLIC_SHINAMI_NODE_WS_URL_OVERRIDE,
-);
+export const sui = new SuiClient({
+  url: process.env.SUI_RPC_URL ?? getFullnodeUrl(SUI_NETWORK),
+});
 
 /**
  * Shinami gas station client.

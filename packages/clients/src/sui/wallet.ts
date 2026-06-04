@@ -145,7 +145,6 @@ export class WalletClient extends ShinamiRpcClient {
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
    * - Gas Station
-   * - Node Service
    *
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
@@ -187,7 +186,6 @@ export class WalletClient extends ShinamiRpcClient {
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
    * - Gas Station
-   * - Node Service
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param beneficiaryGraphId Id of the beneficiary graph instance.
@@ -214,7 +212,6 @@ export class WalletClient extends ShinamiRpcClient {
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
    * - Gas Station
-   * - Node Service
    * @param walletId Wallet id.
    * @param sessionToken Session token, obtained by `KeyClient.createSession`.
    * @param beneficiaryGraphId Id of the beneficiary graph instance.
@@ -239,7 +236,6 @@ export class WalletClient extends ShinamiRpcClient {
    *
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
-   * - Node Service
    * @param walletId Wallet id.
    * @param beneficiaryGraphId Id of the beneficiary graph instance.
    * @returns Beneficiary address, or null if no beneficiary is designated.
@@ -425,7 +421,6 @@ export class ShinamiWalletSigner {
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
    * - Gas Station
-   * - Node Service
    *
    * @param tx Gasless transaction.
    * @param options Transaction execution response options.
@@ -459,7 +454,6 @@ export class ShinamiWalletSigner {
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
    * - Gas Station
-   * - Node Service
    * @param beneficiaryGraphId Id of the beneficiary graph instance.
    * @param beneficiaryAddress Beneficiary address.
    * @returns Transaction digest for this operation.
@@ -485,7 +479,6 @@ export class ShinamiWalletSigner {
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
    * - Gas Station
-   * - Node Service
    * @param beneficiaryGraphId Id of the beneficiary graph instance.
    * @returns Transaction digest for this operation.
    */
@@ -506,7 +499,6 @@ export class ShinamiWalletSigner {
    *
    * To call this method, your access key must be authorized for all of these Shinami services:
    * - Wallet Service
-   * - Node Service
    * @param beneficiaryGraphId Id of the beneficiary graph instance.
    * @returns Beneficiary address, or null if no beneficiary is designated.
    */

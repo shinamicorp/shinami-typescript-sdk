@@ -18,13 +18,11 @@ import {
 import {
   EXAMPLE_PACKAGE_ID,
   createKeyClient,
-  createSuiClient,
   createWalletClient,
 } from "./integration.env.js";
 
 const key = createKeyClient();
 const wal = createWalletClient();
-const sui = createSuiClient();
 
 describe("KeyClient", () => {
   it("discovers OpenRPC spec", async () => {

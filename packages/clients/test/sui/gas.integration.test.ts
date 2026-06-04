@@ -6,15 +6,13 @@
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { fromB64 } from "@mysten/sui/utils";
+import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import { buildGaslessTransaction } from "../../src/sui/index.js";
-import {
-  EXAMPLE_PACKAGE_ID,
-  createGasClient,
-  createSuiClient,
-} from "./integration.env.js";
+import { EXAMPLE_PACKAGE_ID, createGasClient } from "./integration.env.js";
 import { Transaction } from "@mysten/sui/transactions";
 
-const sui = createSuiClient();
+// Integration tests by default target Sui Testnet.
+const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
 const gas = createGasClient();
 
 const keypair = new Ed25519Keypair();
