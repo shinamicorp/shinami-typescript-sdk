@@ -75,14 +75,16 @@ openssl rand -hex 32
 
 ### Configure Sui RPC endpoint (optional)
 
-By default, this example uses the Mysten public fullnode for the network configured in `NEXT_PUBLIC_SUI_NETWORK`.
-Note: the Mysten public fullnode endpoints should NOT be used for any production level deployments.
-You can override the RPC endpoint by setting these env variables:
+By default, this example connects to the Mysten public fullnode for the network set in
+`NEXT_PUBLIC_SUI_NETWORK`. The public fullnode is rate limited and should NOT be used for
+production deployments.
 
-- `SUI_RPC_URL` - Sui RPC endpoint override for backend use.
-- `NEXT_PUBLIC_SUI_RPC_URL` - Sui RPC endpoint override for frontend use.
+To use your own RPC provider, set either or both of:
 
-These can be set to the same value if you are comfortable exposing the endpoint publicly.
+- `SUI_RPC_URL` — used only by the backend API routes. It stays on the server, so it's safe to
+  use an endpoint that embeds a secret or API key.
+- `NEXT_PUBLIC_SUI_RPC_URL` — used by the frontend. This value is bundled into the browser, so
+  only use an endpoint you're comfortable exposing publicly.
 
 ### Obtain Shinami access keys
 
