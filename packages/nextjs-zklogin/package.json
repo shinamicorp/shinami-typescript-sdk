@@ -4,7 +4,7 @@
   "description": "Next.js SDK for integrating with Sui zkLogin",
   "sideEffects": false,
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "files": [
     "dist"
@@ -54,7 +54,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@shinami/clients": "^0.11.0",
+    "@shinami/clients": "^0.12.0",
     "@tanstack/react-query": "^5.0.5",
     "iron-session": "^6.3.1",
     "jose": "^6.2.3",
