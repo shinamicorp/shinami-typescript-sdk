@@ -11,8 +11,9 @@ export function createRegionalApiUrl(
   region: Region,
   chain: Chain,
   service: string,
+  version = "v1",
 ): string {
-  return `https://api.${region}.shinami.com/${chain}/${service}/v1`;
+  return `https://api.${region}.shinami.com/${chain}/${service}/${version}`;
 }
 
 export function inferRegionalValueFromAccessKey<

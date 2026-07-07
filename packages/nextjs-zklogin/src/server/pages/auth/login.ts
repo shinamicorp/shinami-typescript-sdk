@@ -4,10 +4,10 @@
  */
 
 import {
-  computeZkLoginAddress,
+  computeZkLoginAddressFromSeed,
   genAddressSeed,
   generateNonce,
-} from "@mysten/zklogin";
+} from "@mysten/sui/zklogin";
 import { withIronSessionApiRoute } from "iron-session/next";
 import { jwtVerify } from "jose";
 import { NextApiHandler, NextApiRequest } from "next";
@@ -116,19 +116,17 @@ async function getZkLoginUser<T>(
     keyClaimName: body.keyClaimName,
     subWallet: 0, // TODO - expose additional sub-wallets.
   });
-  const wallet = computeZkLoginAddress({
-    claimName: body.keyClaimName,
-    claimValue: keyClaimValue,
-    iss,
-    aud,
-    userSalt: salt,
-  });
-  const addressSeed = genAddressSeed(
+  const addressSeedBigInt = genAddressSeed(
     salt,
     body.keyClaimName,
     keyClaimValue,
     aud,
-  ).toString();
+  );
+
+  // Using computeZkLoginAddressFromSeed from `@mysten/sui/zklogin` requires `legacyAddress: true`
+  // to generate consistent addresses from the prior version.
+  const wallet = computeZkLoginAddressFromSeed(addressSeedBigInt, iss, true);
+  const addressSeed = addressSeedBigInt.toString();
   const partialProof = await getZkProof(zkProofProvider, {
     jwt: body.jwt,
     ephemeralPublicKey: publicKeyFromBase64(body.extendedEphemeralPublicKey),

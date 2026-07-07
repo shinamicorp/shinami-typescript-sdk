@@ -24,7 +24,7 @@ import { me } from "./me.js";
  * API routes at `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/auth/apple`. If you
  * wish to install this under another API route, you must set env `NEXT_PUBLIC_AUTH_API_BASE`.
  *
- * @param epochProvider Function to fetch the current epoch number. Can also use a `SuiClient`.
+ * @param epochProvider Function to fetch the current epoch number. Can also use a `ClientWithCoreApi`.
  * @param saltProvider Function to fetch the wallet salt. Can also use a `ZkWalletClient`.
  * @param zkProofProvider Function to generate a zkProof. Can also use a `ZkProverClient`.
  * @param allowedApps OAuth application ids allowed for login.

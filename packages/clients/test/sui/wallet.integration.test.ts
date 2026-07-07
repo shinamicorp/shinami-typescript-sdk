@@ -10,7 +10,6 @@ import {
 } from "@mysten/sui/verify";
 import { v4 as uuidv4 } from "uuid";
 import {
-  EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
   KeySession,
   ShinamiWalletSigner,
   buildGaslessTransaction,
@@ -90,25 +89,41 @@ describe("ShinamiWallet", () => {
         },
         { gasBudget, gasPrice },
       );
-      const txResp = await signer3.executeGaslessTransaction(gaslessTx, {
-        showEffects: true,
-        showEvents: true,
-      });
+      const txResp = await signer3.executeGaslessTransaction(gaslessTx, [
+        "effects",
+        "events",
+      ]);
       console.log("txResp", txResp);
       expect(txResp).toMatchObject({
-        effects: {
-          status: {
-            status: "success",
-          },
-        },
-        events: [
-          {
-            type: `${EXAMPLE_PACKAGE_ID}::math::AddResult`,
-            parsedJson: {
-              result: (x + y).toString(),
+        transaction: {
+          effects: {
+            status: {
+              success: true,
             },
           },
-        ],
+          events: {
+            events: [
+              {
+                eventType: `${EXAMPLE_PACKAGE_ID}::math::AddResult`,
+                json: {
+                  kind: {
+                    oneofKind: "structValue",
+                    structValue: {
+                      fields: {
+                        result: {
+                          kind: {
+                            oneofKind: "stringValue",
+                            stringValue: (x + y).toString(),
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
       });
     };
 
@@ -123,43 +138,4 @@ describe("ShinamiWallet", () => {
     executeAddTx(3, 4),
     30_000,
   );
-
-  it("sets a beneficiary address and gets it back", async () => {
-    const beneficiary =
-      "0x0000000000000000000000000000000000000000000000000000000000001111";
-    const txDigest = await signer.setBeneficiary(
-      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
-      beneficiary,
-    );
-    console.log("txDigest", txDigest);
-
-    await expect(
-      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
-    ).resolves.toBe(beneficiary);
-  }, 30_000);
-
-  it("sets another beneficiary address and gets it back", async () => {
-    const beneficiary =
-      "0x0000000000000000000000000000000000000000000000000000000000002222";
-    const txDigest = await signer.setBeneficiary(
-      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
-      beneficiary,
-    );
-    console.log("txDigest", txDigest);
-
-    await expect(
-      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
-    ).resolves.toBe(beneficiary);
-  }, 30_000);
-
-  it("unsets beneficiary address", async () => {
-    const txDigest = await signer.unsetBeneficiary(
-      EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
-    );
-    console.log("txDigest", txDigest);
-
-    await expect(
-      signer.getBeneficiary(EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET),
-    ).resolves.toBe(null);
-  }, 30_000);
 });

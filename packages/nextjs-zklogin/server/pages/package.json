@@ -1,5 +1,0 @@
-{
-  "private": true,
-  "sideEffects": false,
-  "main": "../../dist/cjs/server/pages/index.js"
-}

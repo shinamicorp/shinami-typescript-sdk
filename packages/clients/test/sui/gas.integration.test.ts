@@ -5,14 +5,17 @@
 
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
-import { fromB64 } from "@mysten/sui/utils";
-import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
+import { fromBase64 } from "@mysten/sui/utils";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import { buildGaslessTransaction } from "../../src/sui/index.js";
 import { EXAMPLE_PACKAGE_ID, createGasClient } from "./integration.env.js";
 import { Transaction } from "@mysten/sui/transactions";
 
 // Integration tests by default target Sui Testnet.
-const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
+const sui = new SuiGrpcClient({
+  baseUrl: "https://fullnode.testnet.sui.io:443",
+  network: "testnet",
+});
 const gas = createGasClient();
 
 const keypair = new Ed25519Keypair();
@@ -50,31 +53,23 @@ describe("GasStationClient", () => {
     );
 
     const signedTx = await keypair.signTransaction(
-      fromB64(sponsoredTx.txBytes),
+      fromBase64(sponsoredTx.txBytes),
     );
     expect(signedTx.bytes).toBe(sponsoredTx.txBytes);
 
-    const txResp = await sui.executeTransactionBlock({
-      transactionBlock: signedTx.bytes,
-      signature: [signedTx.signature, sponsoredTx.signature],
-      options: {
-        showEffects: true,
-        showEvents: true,
-      },
+    const txResp = await sui.core.executeTransaction({
+      transaction: fromBase64(signedTx.bytes),
+      signatures: [signedTx.signature, sponsoredTx.signature],
+      include: { effects: true, events: true },
     });
-    console.log("txResp", txResp);
-    expect(txResp).toMatchObject({
-      effects: {
-        status: {
-          status: "success",
-        },
-      },
+    const tx = txResp.Transaction ?? txResp.FailedTransaction;
+    console.log("tx", tx);
+    expect(tx).toMatchObject({
+      status: { success: true },
       events: [
         {
-          type: `${EXAMPLE_PACKAGE_ID}::math::AddResult`,
-          parsedJson: {
-            result: "3",
-          },
+          eventType: `${EXAMPLE_PACKAGE_ID}::math::AddResult`,
+          json: { result: "3" },
         },
       ],
     });

@@ -1,4 +1,4 @@
-import { SuiClient } from "@mysten/sui/client";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import { SaltProvider, ZkProofProvider } from "@shinami/nextjs-zklogin/server";
 import { SUI_NETWORK } from "../shared/sui";
 
@@ -10,9 +10,12 @@ const MYSTEN_PROVER_URL =
     : "https://prover-dev.mystenlabs.com/v1";
 
 /**
- * Mysten-operated Sui fullnode.
+ * Mysten-operated Sui fullnode, over gRPC.
  */
-export const mystenSui = new SuiClient({ url: MYSTEN_SUI_NODE_URL });
+export const mystenSui = new SuiGrpcClient({
+  baseUrl: MYSTEN_SUI_NODE_URL,
+  network: SUI_NETWORK,
+});
 
 /**
  * Mysten-operated salt server.

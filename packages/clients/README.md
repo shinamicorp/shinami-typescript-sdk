@@ -46,16 +46,20 @@ This is so you don't leak your `GAS_ACCESS_KEY` to your end users, and to allow 
 To use gas station with a local signer:
 
 ```ts
-import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
-import { fromB64 } from "@mysten/sui/utils";
+import { fromBase64 } from "@mysten/sui/utils";
 import {
   GasStationClient,
   buildGaslessTransaction,
 } from "@shinami/clients/sui";
 
 // Use any Sui RPC provider of your choice. It MUST target the same network as GAS_ACCESS_KEY.
-const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
+// SuiGrpcClient, SuiJsonRpcClient, and SuiGraphQLClient are all supported here.
+const sui = new SuiGrpcClient({
+  baseUrl: "https://fullnode.testnet.sui.io:443",
+  network: "testnet",
+});
 // Obtain GAS_ACCESS_KEY from your Shinami web portal.
 const gas = new GasStationClient(GAS_ACCESS_KEY);
 
@@ -79,12 +83,12 @@ const { txBytes, signature: gasSignature } =
   await gas.sponsorTransaction(gaslessTx);
 
 // Sign the sponsored tx.
-const { signature } = await keypair.signTransaction(fromB64(txBytes));
+const { signature } = await keypair.signTransaction(fromBase64(txBytes));
 
 // Execute the sponsored & signed tx.
-const txResp = await sui.executeTransactionBlock({
-  transactionBlock: txBytes,
-  signature: [signature, gasSignature],
+const txResp = await sui.core.executeTransaction({
+  transaction: fromBase64(txBytes),
+  signatures: [signature, gasSignature],
 });
 ```
 
@@ -93,7 +97,7 @@ const txResp = await sui.executeTransactionBlock({
 To use the invisible wallet as a signer for a regular (non-sponsored) transaction:
 
 ```ts
-import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import { Transaction } from "@mysten/sui/transactions";
 import {
   KeyClient,
@@ -102,7 +106,10 @@ import {
 } from "@shinami/clients/sui";
 
 // Use any Sui RPC provider of your choice.
-const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
+const sui = new SuiGrpcClient({
+  baseUrl: "https://fullnode.testnet.sui.io:443",
+  network: "testnet",
+});
 // Obtain WALLET_ACCESS_KEY from your Shinami web portal.
 const key = new KeyClient(WALLET_ACCESS_KEY);
 const wal = new WalletClient(WALLET_ACCESS_KEY);
@@ -127,16 +134,15 @@ const txBytes = await txb.build({ client: sui });
 const { signature } = await signer.signTransaction(txBytes);
 
 // Execute the signed tx.
-const txResp = await sui.executeTransactionBlock({
-  transactionBlock: txBytes,
-  signature,
+const txResp = await sui.core.executeTransaction({
+  transaction: txBytes,
+  signatures: [signature],
 });
 ```
 
 To use the invisible wallet to execute a gasless transaction, which seamlessly integrates with Shinami gas station:
 
 ```ts
-import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import {
   KeyClient,
   ShinamiWalletSigner,
@@ -144,8 +150,6 @@ import {
   buildGaslessTransaction,
 } from "@shinami/clients/sui";
 
-// Use any Sui RPC provider of your choice.
-const sui = new SuiClient({ url: getFullnodeUrl("testnet") });
 // Obtain SUPER_ACCESS_KEY from your Shinami web portal.
 // It MUST be authorized for all of these services:
 // - Gas station
@@ -171,47 +175,14 @@ const gaslessTx = await buildGaslessTransaction((txb) => {
 });
 
 // Execute the gasless tx using your invisible wallet.
-const txResp = await signer.executeGaslessTransaction(gaslessTx);
-```
-
-#### Beneficiary graph API
-
-Apps using Shinami invisible wallets can participate in [Bullshark Quests](https://quests.mystenlabs.com/) by allowing users to link their invisible wallets with self-custody wallets that own Bullshark NFTs, through the use of [beneficiary graph](https://github.com/shinamicorp/account-graph).
-
-```ts
-import {
-  EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET,
-  KeyClient,
-  ShinamiWalletSigner,
-  WalletClient,
-} from "@shinami/clients/sui";
-
-// Obtain SUPER_ACCESS_KEY from your Shinami web portal.
-// It MUST be authorized for all of these services:
-// - Gas station
-// - Wallet service
-const key = new KeyClient(SUPER_ACCESS_KEY);
-const wal = new WalletClient(SUPER_ACCESS_KEY);
-
-// WALLET_SECRET MUST be used consistently with this wallet id.
-// You are responsible for safe-keeping the (walletId, secret) pair.
-// Shinami cannot recover it for you.
-const signer = new ShinamiWalletSigner("my_wallet_id", wal, WALLET_SECRET, key);
-
-// Safe to do if unsure about the wallet's existence.
-await signer.tryCreate();
-
-// Use BULLSHARK_QUEST_BENEFICIARY_GRAPH_ID_MAINNET for Mainnet.
-const graphId = EXAMPLE_BENEFICIARY_GRAPH_ID_TESTNET;
-
-const txDigest = await signer.setBeneficiary(
-  graphId,
-  // Replace with user's actual wallet address that owns the Bullshark.
-  "0x1234",
-);
-
-// This should return the address we just set.
-const beneficiary = await signer.getBeneficiary(graphId);
+// Optionally pass a readMask (e.g. ["effects", "events"]) to control which fields are populated
+// in the response. Defaults to `["effects.status", "checkpoint"]` if omitted.
+const txResp = await signer.executeGaslessTransaction(gaslessTx, [
+  "effects",
+  "events",
+]);
+// txResp is shaped like the Sui gRPC `ExecuteTransactionResponse`:
+// txResp.transaction.effects.status.success, txResp.transaction.events.events[], etc.
 ```
 
 ### zkLogin wallet (Sui)

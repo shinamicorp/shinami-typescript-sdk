@@ -37,12 +37,16 @@ const buildTx: GaslessTransactionBuilder = async (req, { wallet }) => {
 /**
  * Parses the transaction response.
  */
-const parseTxRes: TransactionResponseParser<AddResponse> = (_, txRes) => {
-  // Requires "showEvents: true" in tx response options.
+const parseTxRes: TransactionResponseParser<
+  unknown,
+  AddResponse,
+  { events: true }
+> = (_, txRes) => {
+  // Requires "events: true" in tx response include options.
   const event = first(txRes.events);
   if (!event) throw new Error("Event missing from tx response");
 
-  const result = mask(event.parsedJson, AddResult);
+  const result = mask(event.json, AddResult);
   return { ...result, txDigest: txRes.digest };
 };
 
@@ -57,5 +61,5 @@ const parseTxRes: TransactionResponseParser<AddResponse> = (_, txRes) => {
  * user to have a live session.
  */
 export default zkLoginSponsoredTxExecHandler(sui, gas, buildTx, parseTxRes, {
-  showEvents: true,
+  events: true,
 });

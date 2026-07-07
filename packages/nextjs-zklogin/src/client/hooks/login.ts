@@ -4,7 +4,7 @@
  */
 
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
-import { generateNonce, generateRandomness } from "@mysten/zklogin";
+import { generateNonce, generateRandomness } from "@mysten/sui/zklogin";
 import { UseMutationResult, useMutation } from "@tanstack/react-query";
 import { useLogout } from "./api.js";
 import { ZkLoginLocalSession, useSaveZkLoginLocalSession } from "./session.js";

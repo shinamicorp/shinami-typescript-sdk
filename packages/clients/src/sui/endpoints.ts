@@ -10,7 +10,7 @@ export const GasStationRpcUrls = {
 } as const satisfies Partial<Record<Region, string>>;
 
 export const WalletRpcUrls = {
-  us1: createRegionalApiUrl("us1", "sui", "wallet"),
+  us1: createRegionalApiUrl("us1", "sui", "wallet", "v2"),
 } as const satisfies Partial<Record<Region, string>>;
 
 export const KeyRpcUrls = {
