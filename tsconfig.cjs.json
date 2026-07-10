@@ -5,5 +5,5 @@
     "module": "commonjs",
     "moduleResolution": "node"
   },
-  "exclude": ["./src/sui"]
+  "exclude": ["./src/sui", "./src/aptos"]
 }

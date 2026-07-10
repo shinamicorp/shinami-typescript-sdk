@@ -333,7 +333,7 @@ const transaction = await aptos.transaction.build.simple({
 const accountAuthenticator = await signer.signTransaction(transaction);
 
 // Submit the tx for execution
-const pending = aptos.transaction.submit.simple({
+const pending = await aptos.transaction.submit.simple({
   transaction,
   senderAuthenticator: accountAuthenticator as AccountAuthenticatorEd25519,
 });
@@ -392,7 +392,7 @@ const transaction = await aptos.transaction.build.simple({
 });
 
 // Execute the gasless tx using your invisible wallet.
-const pending = signer.executeGaslessTransaction(transaction);
+const pending = await signer.executeGaslessTransaction(transaction);
 
 // Wait for it to be committed on-chain.
 const committed = await aptos.transaction.waitForTransaction({
@@ -520,7 +520,7 @@ const transaction = await movementClient.transaction.build.simple({
 const accountAuthenticator = await signer.signTransaction(transaction);
 
 // Submit the tx for execution
-const pending = movementClient.transaction.submit.simple({
+const pending = await movementClient.transaction.submit.simple({
   transaction,
   senderAuthenticator: accountAuthenticator as AccountAuthenticatorEd25519,
 });
@@ -579,7 +579,7 @@ const transaction = await movementClient.transaction.build.simple({
 });
 
 // Execute the gasless tx using your invisible wallet.
-const pending = signer.executeGaslessTransaction(transaction);
+const pending = await signer.executeGaslessTransaction(transaction);
 
 // Wait for it to be committed on-chain.
 const committed = await movementClient.transaction.waitForTransaction({
