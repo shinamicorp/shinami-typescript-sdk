@@ -38,8 +38,12 @@ export default withZkLoginUserRequired<RecentTxsResponse>(
       );
     }
 
+    if (!data) {
+      throw new Error("GraphQL query returned no data");
+    }
+
     res.json({
-      txDigests: data!.transactions.nodes.map((x) => x.digest).reverse(),
+      txDigests: data.transactions.nodes.map((x) => x.digest).reverse(),
     });
   },
 );

@@ -49,8 +49,8 @@ export function withNewZkLoginSession<P extends object>(
 /**
  * Helper function to calculate a epoch relative to the current one.
  *
- * The current epoch is retrieved using a `ClientWithCoreApi` (e.g. `SuiJsonRpcClient`,
- * `SuiGrpcClient`, or `SuiGraphQLClient`).
+ * The current epoch is retrieved using a transport-agnostic `ClientWithCoreApi`
+ * (e.g. `SuiJsonRpcClient`, `SuiGrpcClient`, or `SuiGraphQLClient`).
  *
  * @param sui The `ClientWithCoreApi`.
  * @param epochsBeyondCurrent The number of epochs beyond the current one.
