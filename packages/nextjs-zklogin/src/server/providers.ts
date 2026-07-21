@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient } from "@mysten/sui/client";
+import { ClientWithCoreApi } from "@mysten/sui/client";
 import { PublicKey } from "@mysten/sui/cryptography";
 import { ZkProverClient, ZkWalletClient } from "@shinami/clients/sui";
 import { JWTVerifyGetKey, createRemoteJWKSet } from "jose";
@@ -22,21 +22,20 @@ export interface EpochInfo {
 
 export type CurrentEpochProvider =
   | (() => Promise<EpochInfo> | EpochInfo)
-  | SuiClient;
+  | ClientWithCoreApi;
 
 export async function getCurrentEpoch(
   provider: CurrentEpochProvider,
 ): Promise<EpochInfo> {
-  if (provider instanceof SuiClient) {
-    const { epoch, epochStartTimestampMs, epochDurationMs } =
-      await provider.getLatestSuiSystemState();
-    return {
-      epoch: Number(epoch),
-      epochStartTimestampMs: Number(epochStartTimestampMs),
-      epochDurationMs: Number(epochDurationMs),
-    };
+  if (typeof provider === "function") {
+    return await provider();
   }
-  return await provider();
+  const { systemState } = await provider.core.getCurrentSystemState();
+  return {
+    epoch: Number(systemState.epoch),
+    epochStartTimestampMs: Number(systemState.epochStartTimestampMs),
+    epochDurationMs: Number(systemState.parameters.epochDurationMs),
+  };
 }
 
 export interface SaltRequest {

@@ -4,5 +4,6 @@
     "outDir": "./dist/cjs",
     "module": "commonjs",
     "moduleResolution": "node"
-  }
+  },
+  "exclude": ["./src/sui", "./src/aptos"]
 }

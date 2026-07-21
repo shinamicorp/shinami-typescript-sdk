@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient } from "@mysten/sui/client";
+import { ClientWithCoreApi } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
-import { toB64 } from "@mysten/sui/utils";
+import { toBase64 } from "@mysten/sui/utils";
 import { Infer, enums, number, object, optional, string } from "superstruct";
 import { ShinamiRpcClient, trimTrailingParams } from "../rpc.js";
 import { throwExpression } from "../utils.js";
@@ -170,7 +170,7 @@ export class GasStationClient extends ShinamiRpcClient {
  *    - sender - Optional sender address. Can also be set in the transaction data.
  *    - gasBudget - Optional gas budget. Can also be set in the transaction data.
  *    - gasPrice - Optional gas price. Can also be set in the transaction data.
- *    - sui - `SuiClient`. Required if the transaction uses non fully resolved inputs.
+ *    - sui - `ClientWithCoreApi`. Required if the transaction uses non fully resolved inputs.
  * @returns A gasless transaction to be sponsored.
  */
 export async function buildGaslessTransaction(
@@ -179,7 +179,7 @@ export async function buildGaslessTransaction(
     sender?: string;
     gasBudget?: number | string;
     gasPrice?: number | string;
-    sui?: SuiClient;
+    sui?: ClientWithCoreApi;
   },
 ): Promise<GaslessTransaction> {
   let tx: Transaction;
@@ -192,7 +192,7 @@ export async function buildGaslessTransaction(
   const txData = tx.getData();
 
   return {
-    txKind: toB64(
+    txKind: toBase64(
       await tx.build({ client: options?.sui, onlyTransactionKind: true }),
     ),
     sender: options?.sender ?? txData.sender ?? undefined,

@@ -1,4 +1,4 @@
-import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import { SUI_NETWORK } from "../shared/sui";
 
 const SUI_VISION_BASE_URL = `https://${
@@ -18,11 +18,16 @@ export function getSuiVisionTransactionUrl(digest: string) {
 }
 
 /**
- * A sui client for frontend use.
+ * A sui client for frontend use, over gRPC.
  *
  * Defaults to the Mysten public fullnode for the configured network.
  * Override by setting NEXT_PUBLIC_SUI_RPC_URL.
+ *
+ * For an authenticated endpoint, use GrpcWebFetchTransport with SuiGrpcClient
  */
-export const sui = new SuiClient({
-  url: process.env.NEXT_PUBLIC_SUI_RPC_URL ?? getFullnodeUrl(SUI_NETWORK),
+export const sui = new SuiGrpcClient({
+  baseUrl:
+    process.env.NEXT_PUBLIC_SUI_RPC_URL ??
+    `https://fullnode.${SUI_NETWORK}.sui.io:443`,
+  network: SUI_NETWORK,
 });

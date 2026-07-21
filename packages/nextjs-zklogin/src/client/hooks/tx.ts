@@ -4,7 +4,7 @@
  */
 
 import { Keypair } from "@mysten/sui/cryptography";
-import { fromB64 } from "@mysten/sui/utils";
+import { fromBase64 } from "@mysten/sui/utils";
 import { MutationFunction } from "@tanstack/react-query";
 import { Struct } from "superstruct";
 import { PreparedTransactionBytes, SignedTransactionBytes } from "../../tx.js";
@@ -43,7 +43,7 @@ export function apiTxExecMutationFn<
       resultSchema: PreparedTransactionBytes,
     })(params, ...rest);
     const { signature } = await params.keyPair.signTransaction(
-      fromB64(tx.txBytes),
+      fromBase64(tx.txBytes),
     );
     return await apiMutationFn<T, SignedTransactionBytes>({
       uri: () => `${uri}/exec`,

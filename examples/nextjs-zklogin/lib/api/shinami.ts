@@ -1,4 +1,5 @@
-import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
+import { SuiGraphQLClient } from "@mysten/sui/graphql";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import {
   GasStationClient,
   ZkProverClient,
@@ -13,13 +14,33 @@ const SHINAMI_SUPER_ACCESS_KEY =
   throwExpression(new Error("SHINAMI_SUPER_ACCESS_KEY not configured"));
 
 /**
- * A sui client for backend use only.
+ * A sui client for backend use only, over gRPC.
  *
  * Defaults to the Mysten public fullnode for the configured network.
  * Override by setting SUI_RPC_URL.
+ *
+ * For an authenticated endpoint, use GrpcWebFetchTransport with SuiGrpcClient
  */
-export const sui = new SuiClient({
-  url: process.env.SUI_RPC_URL ?? getFullnodeUrl(SUI_NETWORK),
+export const sui = new SuiGrpcClient({
+  baseUrl:
+    process.env.SUI_RPC_URL ?? `https://fullnode.${SUI_NETWORK}.sui.io:443`,
+  network: SUI_NETWORK,
+});
+
+/**
+ * A sui GraphQL client for backend use only.
+ *
+ * Used only for queries with no gRPC equivalent yet, e.g. listing recent transactions by sender.
+ * See: https://docs.sui.io/references/sui-api/graphql
+ *
+ * Defaults to the Mysten public GraphQL endpoint for the configured network.
+ * Override by setting SUI_GRAPHQL_URL.
+ */
+export const suiGraphql = new SuiGraphQLClient({
+  url:
+    process.env.SUI_GRAPHQL_URL ??
+    `https://graphql.${SUI_NETWORK}.sui.io/graphql`,
+  network: SUI_NETWORK,
 });
 
 /**

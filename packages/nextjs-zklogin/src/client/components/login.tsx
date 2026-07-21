@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SuiClient } from "@mysten/sui/client";
+import { ClientWithCoreApi } from "@mysten/sui/client";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { AUTH_API_BASE } from "../../env.js";
 import { useNewZkLoginSession } from "../hooks/login.js";
@@ -49,19 +49,20 @@ export function withNewZkLoginSession<P extends object>(
 /**
  * Helper function to calculate a epoch relative to the current one.
  *
- * The current epoch is retrieved using `SuiClient`.
+ * The current epoch is retrieved using a transport-agnostic `ClientWithCoreApi`
+ * (e.g. `SuiJsonRpcClient`, `SuiGrpcClient`, or `SuiGraphQLClient`).
  *
- * @param sui The `SuiClient`.
+ * @param sui The `ClientWithCoreApi`.
  * @param epochsBeyondCurrent The number of epochs beyond the current one.
  *    Defaults to 1, i.e. the next epoch.
  * @returns Epoch number.
  */
 export async function relativeToCurrentEpoch(
-  sui: SuiClient,
+  sui: ClientWithCoreApi,
   epochsBeyondCurrent = 1,
 ): Promise<number> {
-  const { epoch } = await sui.getLatestSuiSystemState();
-  return Number(epoch) + epochsBeyondCurrent;
+  const { systemState } = await sui.core.getCurrentSystemState();
+  return Number(systemState.epoch) + epochsBeyondCurrent;
 }
 
 /**

@@ -3,11 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  SuiClient,
-  SuiTransactionBlockResponse,
-  SuiTransactionBlockResponseOptions,
-} from "@mysten/sui/client";
+import { ClientWithCoreApi, SuiClientTypes } from "@mysten/sui/client";
+import { fromBase64 } from "@mysten/sui/utils";
 import { GasStationClient, GaslessTransaction } from "@shinami/clients/sui";
 import { NextApiHandler, NextApiRequest } from "next";
 import { validate } from "superstruct";
@@ -29,9 +26,13 @@ export type TransactionBytesBuilder<TAuth = unknown> = (
   user: ZkLoginUser<TAuth>,
 ) => Promise<string> | string;
 
-export type TransactionResponseParser<TAuth = unknown, TRes = unknown> = (
+export type TransactionResponseParser<
+  TAuth = unknown,
+  TRes = unknown,
+  Include extends SuiClientTypes.TransactionInclude = object,
+> = (
   req: NextApiRequest,
-  txRes: SuiTransactionBlockResponse,
+  txRes: SuiClientTypes.Transaction<Include>,
   user: ZkLoginUser<TAuth>,
 ) => Promise<TRes> | TRes;
 
@@ -79,10 +80,14 @@ function sponsoredTxHandler<TAuth = unknown>(
   });
 }
 
-function execHandler<TAuth = unknown, TRes = unknown>(
-  sui: SuiClient,
-  parseTxRes: TransactionResponseParser<TAuth, TRes>,
-  txOptions: SuiTransactionBlockResponseOptions = {},
+function execHandler<
+  TAuth = unknown,
+  TRes = unknown,
+  Include extends SuiClientTypes.TransactionInclude = object,
+>(
+  sui: ClientWithCoreApi,
+  parseTxRes: TransactionResponseParser<TAuth, TRes, Include>,
+  txInclude: Include = {} as Include,
 ): NextApiHandler<TRes | ApiErrorBody> {
   return methodDispatcher({
     POST: async (req, res) => {
@@ -94,22 +99,23 @@ function execHandler<TAuth = unknown, TRes = unknown>(
       const user = req.session.user! as ZkLoginUser<TAuth>;
       const zkSignature = assembleZkLoginSignature(user, body.signature);
 
-      const txRes = await sui.executeTransactionBlock({
-        transactionBlock: body.txBytes,
-        signature: body.gasSignature
+      const txRes = await sui.core.executeTransaction({
+        transaction: fromBase64(body.txBytes),
+        signatures: body.gasSignature
           ? [zkSignature, body.gasSignature]
-          : zkSignature,
-        options: { ...txOptions, showEffects: true },
+          : [zkSignature],
+        include: txInclude,
       });
+      const tx = txRes.Transaction ?? txRes.FailedTransaction;
 
-      if (txRes.effects?.status.status !== "success") {
+      if (!tx.status.success) {
         console.error("Tx execution failed", txRes);
         return res.status(500).json({
-          error: `Tx execution failed: ${txRes.effects?.status.error}`,
+          error: `Tx execution failed: ${tx.status.error.message}`,
         });
       }
 
-      res.json(await parseTxRes(req, txRes, user));
+      res.json(await parseTxRes(req, tx, user));
     },
   });
 }
@@ -122,23 +128,27 @@ function execHandler<TAuth = unknown, TRes = unknown>(
  * - [base_route]/exec for executing the transaction after signed by frontend, and parsing the
  *   transaction response.
  *
- * @param sui `SuiClient` for transaction building and execution.
+ * @param sui `ClientWithCoreApi` for transaction building and execution.
  * @param buildTxBytes Function to build a transaction (encoded in Base64).
  * @param parseTxRes Function to parse the transaction response.
- * @param txOptions Transaction response options.
+ * @param txInclude Fields to include in the transaction response.
  * @returns A Next.js API route handler.
  */
-export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
-  sui: SuiClient,
+export function zkLoginTxExecHandler<
+  TAuth = unknown,
+  TRes = unknown,
+  Include extends SuiClientTypes.TransactionInclude = object,
+>(
+  sui: ClientWithCoreApi,
   buildTxBytes: TransactionBytesBuilder<TAuth>,
-  parseTxRes: TransactionResponseParser<TAuth, TRes>,
-  txOptions: SuiTransactionBlockResponseOptions = {},
+  parseTxRes: TransactionResponseParser<TAuth, TRes, Include>,
+  txInclude: Include = {} as Include,
 ): NextApiHandler {
   return withZkLoginUserRequired(
     sui,
     catchAllDispatcher({
       tx: txHandler(buildTxBytes),
-      exec: execHandler(sui, parseTxRes, txOptions),
+      exec: execHandler(sui, parseTxRes, txInclude),
     }),
   );
 }
@@ -151,25 +161,29 @@ export function zkLoginTxExecHandler<TAuth = unknown, TRes = unknown>(
  * - [base_route]/exec for executing the transaction after signed by frontend, and parsing the
  *   transaction response.
  *
- * @param sui `SuiClient` for transaction building and execution.
+ * @param sui `ClientWithCoreApi` for transaction building and execution.
  * @param gas `GasStationClient` for sponsoring transaction.
  * @param buildGaslessTx Function to build a gasless transaction.
  * @param parseTxRes Function to parse the transaction response.
- * @param txOptions Transaction response options.
+ * @param txInclude Fields to include in the transaction response.
  * @returns A Next.js API route handler.
  */
-export function zkLoginSponsoredTxExecHandler<TAuth = unknown, TRes = unknown>(
-  sui: SuiClient,
+export function zkLoginSponsoredTxExecHandler<
+  TAuth = unknown,
+  TRes = unknown,
+  Include extends SuiClientTypes.TransactionInclude = object,
+>(
+  sui: ClientWithCoreApi,
   gas: GasStationClient,
   buildGaslessTx: GaslessTransactionBuilder<TAuth>,
-  parseTxRes: TransactionResponseParser<TAuth, TRes>,
-  txOptions: SuiTransactionBlockResponseOptions = {},
+  parseTxRes: TransactionResponseParser<TAuth, TRes, Include>,
+  txInclude: Include = {} as Include,
 ): NextApiHandler {
   return withZkLoginUserRequired(
     sui,
     catchAllDispatcher({
       tx: sponsoredTxHandler(gas, buildGaslessTx),
-      exec: execHandler(sui, parseTxRes, txOptions),
+      exec: execHandler(sui, parseTxRes, txInclude),
     }),
   );
 }

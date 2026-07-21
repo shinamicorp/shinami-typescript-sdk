@@ -60,7 +60,7 @@ jobs:
           echo "PACKAGE=$package" >> "$GITHUB_OUTPUT"
           echo "VERSION=$version" >> "$GITHUB_OUTPUT"
           echo "TAG=$tag" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - run: |
           source_version="$(jq -r .version < "packages/$PACKAGE/package.json")"
           if [ "$source_version" != "$VERSION" ]; then
@@ -73,9 +73,9 @@ jobs:
         env:
           PACKAGE: ${{ steps.determine-package.outputs.PACKAGE }}
           VERSION: ${{ steps.determine-package.outputs.VERSION }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
       - run: npm run build

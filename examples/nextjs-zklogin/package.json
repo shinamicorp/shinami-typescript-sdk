@@ -6,7 +6,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "@shinami/nextjs-zklogin": "^0.4.1",
+    "@mysten/sui": "^2.0.0",
+    "@shinami/clients": "^0.12.0",
+    "@shinami/nextjs-zklogin": "^0.5.0",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

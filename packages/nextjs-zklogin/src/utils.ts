@@ -7,7 +7,7 @@ import { PublicKey, SIGNATURE_SCHEME_TO_FLAG } from "@mysten/sui/cryptography";
 import { Ed25519PublicKey } from "@mysten/sui/keypairs/ed25519";
 import { Secp256k1PublicKey } from "@mysten/sui/keypairs/secp256k1";
 import { Secp256r1PublicKey } from "@mysten/sui/keypairs/secp256r1";
-import { fromB64 } from "@mysten/sui/utils";
+import { fromBase64 } from "@mysten/sui/utils";
 
 export type HttpMethod =
   | "GET"
@@ -30,7 +30,7 @@ export function throwExpression(error: unknown): never {
 
 // This is the inverse of PublicKey.toSuiPublicKey()
 export function publicKeyFromBase64(b64: string): PublicKey {
-  const bytes = fromB64(b64);
+  const bytes = fromBase64(b64);
   if (bytes.length === 0) throw new Error("Empty key bytes");
 
   switch (bytes[0]) {
